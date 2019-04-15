@@ -1,7 +1,11 @@
+#Generic Eclipse .gitignore
+
 .metadata
 bin/
 tmp/
 Debug/
+.project
+*.pc.in
 *.tmp
 *.bak
 *.swp
