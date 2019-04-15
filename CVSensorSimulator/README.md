@@ -1,3 +1,3 @@
 # CVSensorSimulator
 
-Desktop application to simulate onboard sensors using an overhead camera system and AprilTags.
+Desktop application to simulate a microUSV's onboard sensors using an overhead camera system and AprilTags.
