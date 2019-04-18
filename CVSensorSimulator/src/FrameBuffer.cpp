@@ -6,6 +6,7 @@
  */
 
 #include "FrameBuffer.h"
+using namespace cv;
 
 FrameBuffer::FrameBuffer() {
 	cap.open(0);

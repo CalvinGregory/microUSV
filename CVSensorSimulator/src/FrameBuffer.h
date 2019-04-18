@@ -12,7 +12,6 @@
 #include "pthread.h"
 #include "semaphore.h"
 #include "opencv2/opencv.hpp"
-using namespace cv;
 
 typedef struct {
 	int cameraID;
@@ -22,10 +21,10 @@ typedef struct {
 
 class FrameBuffer{
 private:
-	VideoCapture cap;
+	cv::VideoCapture cap;
 	int activeIndex;
 	sem_t index_lock;
-	Mat frames[2];
+	cv::Mat frames[2];
 	sem_t frame_lock[2];
 	int otherIndex();
 public:
@@ -33,7 +32,7 @@ public:
 	FrameBuffer(VidCapSettings settings);
 	~FrameBuffer();
 	void updateFrame();
-	Mat *getFrame();
+	cv::Mat *getFrame();
 };
 
 

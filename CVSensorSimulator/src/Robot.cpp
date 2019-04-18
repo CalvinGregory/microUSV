@@ -8,15 +8,13 @@
 
 #include "Robot.h"
 
-Robot::Robot(int tagID, double size_x, double size_y, string name) {
+using namespace std;
+
+Robot::Robot(int tagID, double size_x, double size_y, string label) {
 	this->tagID = tagID;
-	this->name = name;
+	this->label = label;
 	boundingBox[0] = size_x;
 	boundingBox[1] = size_y;
-}
-
-string Robot::getName() {
-	return name;
 }
 
 double* Robot::getBoundingBox() {

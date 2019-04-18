@@ -10,7 +10,6 @@
 
 
 #include <iostream>
-using namespace std;
 
 typedef struct{
 	double x;
@@ -22,10 +21,12 @@ class TaggedObject {
 protected:
 	int tagID;
 	pose2D pose;
+	std::string label;
 public:
 	int getTagID() { return tagID; }
 	void setPose(pose2D pose) { this->pose = pose; }
 	pose2D getPose() { return pose; }
+	std::string getLabel() { return label; }
 };
 
 

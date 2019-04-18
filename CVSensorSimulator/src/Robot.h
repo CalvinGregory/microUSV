@@ -11,13 +11,11 @@
 
 #include "TaggedObject.h"
 
-class Robot : TaggedObject {
+class Robot : public TaggedObject {
 protected:
 	double boundingBox[2];
-	string name;
 public:
-	Robot(int tagID, double size_x, double size_y, string name);
-	string getName();
+	Robot(int tagID, double size_x, double size_y, std::string label);
 	double* getBoundingBox();
 };
 
