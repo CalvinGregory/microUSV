@@ -9,10 +9,9 @@
 #include <iostream>
 #include "pthread.h"
 #include "opencv2/opencv.hpp"
-//#include "SensorSim.h"
-//#include "PoseDetector.h"
 #include "FrameBuffer.h"
-#include "RobotList.h"
+#include "PoseDetector.h"
+#include "Robot.h"
 
 extern "C" {
 #include "apriltag/apriltag.h"
@@ -53,7 +52,6 @@ void label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 struct detector_thread_args {
 	FrameBuffer* fb;
 	apriltag_detection_info_t info;
-
 };
 
 void* detector_thread(void* args) {
@@ -68,6 +66,10 @@ void* detector_thread(void* args) {
 	apriltag_detector_add_family(td, tf);
 
 	Mat frame, gray;
+
+	Mat temp_frame(100, 100, CV_8UC3, Scalar(0,0,0));
+	frame = temp_frame;
+	imshow("Tag Detections", frame);
 	while (running) {
 		frame = *fb->getFrame();
 		cvtColor(frame, gray, COLOR_BGR2GRAY);
@@ -123,10 +125,33 @@ void* detector_thread(void* args) {
 	return NULL;
 }
 
+void* detector_thread_OOP(void* args) {
+	PoseDetector* pd = (PoseDetector*)args; //FIXME
+
+	Mat temp_frame(100, 100, CV_8UC3, Scalar(0,0,0));
+	Mat* frame = &temp_frame;
+	imshow("RobotDetections", *frame);
+
+	while (running) {
+		pd->updatePoseEstimates();
+		if(visualize) {
+			frame = pd->getLabelledFrame();
+			imshow("Robot Detections", *frame);
+		}
+
+		if (waitKey(30) == 27) {
+			cout << "detector break" << endl;
+			running = false;
+		}
+	}
+	return NULL;
+}
+
 int main() {
 	running = true;
-
 	visualize = true;
+//	visualize = false;
+
 	apriltag_detection_info_t info;
 	info.tagsize = 48; //mm
 	// laptop camera
@@ -160,10 +185,32 @@ int main() {
 		exit(-1);
 	}
 
-	detector_thread_args dt_args;
-	dt_args.fb = &fb;
-	dt_args.info = info;
-	rc = pthread_create(&threads[1], NULL, detector_thread, &dt_args);
+//	detector_thread_args dt_args;
+//	dt_args.fb = &fb;
+//	dt_args.info = info;
+//	rc = pthread_create(&threads[1], NULL, detector_thread, &dt_args);
+//	if (rc) {
+//		cout << "Error:unable to create detector thread," << rc << endl;
+//		exit(-1);
+//	}
+
+	// detector thread attempt 2
+	vector<TaggedObject> robots = { Robot(0,0,0,"zero"),
+						Robot(5,0,0,"five"),
+						Robot(6,0,0,"six"),
+						Robot(12,0,0,"twelve") };
+
+//	int index = -1;
+//	for (int i = 0; i < 4; i++) {
+//		if (robots[i].getTagID() == 12) {
+//			index = i;
+//			break;
+//		}
+//	}
+//	cout << "index test index: " << index << endl;
+
+	PoseDetector pd(&fb, info, robots, 4);
+	rc = pthread_create(&threads[1], NULL, detector_thread_OOP, &pd);
 	if (rc) {
 		cout << "Error:unable to create detector thread," << rc << endl;
 		exit(-1);
