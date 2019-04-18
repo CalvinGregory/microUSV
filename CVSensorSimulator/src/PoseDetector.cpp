@@ -65,16 +65,13 @@ Mat* PoseDetector::getLabelledFrame() {
 }
 
 int PoseDetector::tagMatch(int tagID) {
-	cout << "tagID: " << tagID << ", ";
 	int index = -1;
 	for (int i = 0; i < numObjects; i++) {
-		cout << "object " << i << "'s tagID: " << objects[i].getTagID() << ", ";
 		if (objects[i].getTagID() == tagID) {
 			index = i;
 			break;
 		}
 	}
-	cout << "index: " << index << endl;
 	return index;
 }
 
@@ -93,11 +90,20 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 	line(*frame, Point(det->p[1][0], det->p[1][1]), Point(det->p[2][0], det->p[2][1]), Scalar(0xff, 0, 0), 2);
 	line(*frame, Point(det->p[2][0], det->p[2][1]), Point(det->p[3][0], det->p[3][1]), Scalar(0xff, 0, 0), 2);
 
-	//TODO change display tag ID to display TaggedObject label
-	std::stringstream ss;
-	ss << det->id;
-	String text = ss.str();
-	int fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
+	int index = tagMatch(det->id);
+	int fontface;
+	String text;
+	if (!(index < 0)) {
+		text = objects[index].getLabel();
+		fontface = FONT_HERSHEY_DUPLEX;
+	}
+	else {
+		std::stringstream ss;
+		ss << det->id;
+		text = ss.str();
+		fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
+	}
+
 	double fontscale = 1.0;
 	int baseline;
 	Size textsize = getTextSize(text, fontface, fontscale, 2, &baseline);

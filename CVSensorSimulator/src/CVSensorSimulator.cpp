@@ -126,7 +126,7 @@ void* detector_thread(void* args) {
 }
 
 void* detector_thread_OOP(void* args) {
-	PoseDetector* pd = (PoseDetector*)args; //FIXME
+	PoseDetector* pd = (PoseDetector*)args;
 
 	Mat temp_frame(100, 100, CV_8UC3, Scalar(0,0,0));
 	Mat* frame = &temp_frame;
@@ -140,7 +140,7 @@ void* detector_thread_OOP(void* args) {
 		}
 
 		if (waitKey(30) == 27) {
-			cout << "detector break" << endl;
+//			cout << "detector break" << endl;
 			running = false;
 		}
 	}
@@ -199,15 +199,6 @@ int main() {
 						Robot(5,0,0,"five"),
 						Robot(6,0,0,"six"),
 						Robot(12,0,0,"twelve") };
-
-//	int index = -1;
-//	for (int i = 0; i < 4; i++) {
-//		if (robots[i].getTagID() == 12) {
-//			index = i;
-//			break;
-//		}
-//	}
-//	cout << "index test index: " << index << endl;
 
 	PoseDetector pd(&fb, info, robots, 4);
 	rc = pthread_create(&threads[1], NULL, detector_thread_OOP, &pd);
