@@ -23,7 +23,7 @@ class PoseDetector {
 private:
 	FrameBuffer* fb;
 	apriltag_detection_info_t detInfo;
-	std::vector<TaggedObject> objects; //array
+	std::vector<TaggedObject>* objects;
 	int numObjects;
 
 	cv::Mat frame;
@@ -35,7 +35,7 @@ private:
 	pose2D pose3Dto2D(apriltag_pose_t pose);
 	void label_tag_detection(cv::Mat* frame, apriltag_detection_t* det);
 public:
-	PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, std::vector<TaggedObject> objects, int numObjects);
+	PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, std::vector<TaggedObject>* objects, int numObjects);
 	~PoseDetector();
 	void updatePoseEstimates();
 	cv::Mat* getLabelledFrame();

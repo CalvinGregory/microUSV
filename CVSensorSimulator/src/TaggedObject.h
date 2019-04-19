@@ -12,10 +12,10 @@
 #include <iostream>
 #include "semaphore.h"
 
-typedef struct{
-	double x;
-	double y;
-	double yaw;
+typedef struct {
+	double x = 0;
+	double y = 0;
+	double yaw = 0;
 } pose2D;
 
 class TaggedObject {

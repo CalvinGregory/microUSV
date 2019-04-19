@@ -9,7 +9,7 @@
 using namespace cv;
 using namespace std;
 
-PoseDetector::PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, vector<TaggedObject> objects, int numObjects) {
+PoseDetector::PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, vector<TaggedObject>* objects, int numObjects) {
 	this->fb = fb;
 	this->detInfo = detInfo;
 	this->objects = objects;
@@ -50,7 +50,22 @@ void PoseDetector::updatePoseEstimates() {
 			apriltag_pose_t pose;
 			detInfo.det = det;
 			estimate_tag_pose(&detInfo, &pose);
-			objects[index].setPose(pose3Dto2D(pose));
+
+//			cout << "R: ";
+//			for (uint j = 0; j < pose.R->ncols*pose.R->nrows; j++) {
+//				cout << pose.R->data[j] << " ";
+//			}
+//			cout << endl;
+//			cout << "t: ";
+//			for (uint j = 0; j < pose.t->ncols*pose.t->nrows; j++) {
+//				cout << pose.t->data[j] << " ";
+//			}
+//			cout << endl << endl;
+
+//			pose2D pose2 = pose3Dto2D(pose);
+//			cout << "x:" << pose2.x << " y:" << pose2.y << " yaw:" << pose2.yaw << endl;
+
+			objects->at(index).setPose(pose3Dto2D(pose));
 		}
 	}
 }
@@ -67,7 +82,7 @@ Mat* PoseDetector::getLabelledFrame() {
 int PoseDetector::tagMatch(int tagID) {
 	int index = -1;
 	for (int i = 0; i < numObjects; i++) {
-		if (objects[i].getTagID() == tagID) {
+		if (objects->at(i).getTagID() == tagID) {
 			index = i;
 			break;
 		}
@@ -94,7 +109,7 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 	int fontface;
 	String text;
 	if (!(index < 0)) {
-		text = objects[index].getLabel();
+		text = objects->at(index).getLabel();
 		fontface = FONT_HERSHEY_DUPLEX;
 	}
 	else {
