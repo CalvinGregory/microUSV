@@ -53,7 +53,7 @@ void initArgType() {
 	argType["cy"] = yCenter;
 	argType["tagsize"] = TagSize;
 	argType["Robot"] = Robot_;
-//	argType["Puck"] = Puck_;
+	argType["Puck"] = Puck_;
 }
 
 bool running;
@@ -138,6 +138,9 @@ int main(int argc, char* argv[]) {
 					case TagSize:
 						info.tagsize = stod(value);
 						break;
+					case Puck_:
+						// TODO add Puck parser
+						break;
 					case Robot_:
 						int delim1 = value.find(",");
 						string id = value.substr(0, delim1);
@@ -145,9 +148,6 @@ int main(int argc, char* argv[]) {
 						Robot robot(stoi(id), 0, 0, label);
 						robotList.push_back(robot);
 						break;
-//					case Puck_:
-//						//TODO add Puck parser
-//						break;
 				}
 			}
 		}
@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
 	//TODO replace with socket/server code
 	while (running) {
 		pose2D pose = robots[0].getPose();
-//		cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl;
+		cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl;
 	}
 
 	void* status;

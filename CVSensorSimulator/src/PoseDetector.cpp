@@ -50,22 +50,7 @@ void PoseDetector::updatePoseEstimates() {
 			apriltag_pose_t pose;
 			detInfo.det = det;
 			estimate_tag_pose(&detInfo, &pose);
-
-//			cout << "R: ";
-//			for (uint j = 0; j < pose.R->ncols*pose.R->nrows; j++) {
-//				cout << pose.R->data[j] << " ";
-//			}
-//			cout << endl;
-//			cout << "t: ";
-//			for (uint j = 0; j < pose.t->ncols*pose.t->nrows; j++) {
-//				cout << pose.t->data[j] << " ";
-//			}
-//			cout << endl << endl;
-
-//			pose2D pose2 = pose3Dto2D(pose);
-//			cout << "x:" << pose2.x << " y:" << pose2.y << " yaw:" << pose2.yaw << endl;
-
-			objects->at(index).setPose(pose3Dto2D(pose));
+			objects->at(index).setPose(pose3Dto2D(pose, true));
 		}
 	}
 }
@@ -90,10 +75,11 @@ int PoseDetector::tagMatch(int tagID) {
 	return index;
 }
 
-pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose) {
+pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, bool degrees) {
 	pose2D pose2D;
 	pose2D.yaw = atan2(pose.R->data[3], pose.R->data[0]); //radians
-	pose2D.yaw = pose2D.yaw * 180 / 3.14159; // DEBUG: degree conversion
+	if (degrees)
+		pose2D.yaw = pose2D.yaw * 180 / 3.14159;
 	pose2D.x = pose.t->data[0];
 	pose2D.y = pose.t->data[1];
 	return pose2D;
