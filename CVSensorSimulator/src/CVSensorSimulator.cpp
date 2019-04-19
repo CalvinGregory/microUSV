@@ -106,7 +106,6 @@ int main() {
 		exit(-1);
 	}
 
-	// spin main
 	//TODO replace with socket/server code
 	while (running) {
 		pose2D pose = robots[0].getPose();
