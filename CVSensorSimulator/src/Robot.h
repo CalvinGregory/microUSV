@@ -16,6 +16,7 @@ protected:
 	double boundingBox[2];
 public:
 	Robot(int tagID, double size_x, double size_y, std::string label);
+	~Robot();
 	double* getBoundingBox();
 };
 
