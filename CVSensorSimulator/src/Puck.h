@@ -11,11 +11,17 @@
 
 #include "TaggedObject.h"
 
+enum Color{	RED,
+			GREEN,
+			BLUE
+};
+
 class Puck : public TaggedObject {
 protected:
+	Color color;
 	double radius;
 public:
-	Puck(int tagID, double radius);
+	Puck(int tagID, double radius, Color color);
 	~Puck();
 	double getRadius();
 };

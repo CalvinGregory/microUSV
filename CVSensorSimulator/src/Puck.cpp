@@ -9,9 +9,10 @@
 
 using namespace std;
 
-Puck::Puck(int tagID, double radius) {
+Puck::Puck(int tagID, double radius, Color color) {
 	this->tagID = tagID;
 	this->radius = radius;
+	this->color = color;
 	sem_init(&mutex, 0, 1);
 }
 
