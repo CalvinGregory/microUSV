@@ -13,6 +13,7 @@
 
 class Robot : public TaggedObject {
 protected:
+	// TODO add sensor zone positions/sizes
 	double boundingBox[2];
 public:
 	Robot(int tagID, double size_x, double size_y, std::string label);

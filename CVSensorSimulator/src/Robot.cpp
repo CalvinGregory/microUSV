@@ -10,6 +10,8 @@
 
 using namespace std;
 
+// TODO add sensor zone positions/sizes
+
 Robot::Robot(int tagID, double size_x, double size_y, string label) {
 	this->tagID = tagID;
 	this->label = label;
