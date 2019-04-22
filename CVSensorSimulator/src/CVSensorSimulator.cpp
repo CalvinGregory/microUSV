@@ -7,17 +7,13 @@
 //============================================================================
 
 #include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <string>
-#include <map>
-#include <list>
-#include <iterator>
 #include "pthread.h"
 #include "opencv2/opencv.hpp"
+
 #include "FrameBuffer.h"
 #include "PoseDetector.h"
 #include "Robot.h"
+#include "ConfigParser.h"
 
 extern "C" {
 #include "apriltag/apriltag.h"
@@ -27,34 +23,6 @@ extern "C" {
 
 using namespace std;
 using namespace cv;
-
-enum ArgType { 	VisualizeFlag,
-				CameraID,
-				xResolution,
-				yResolution,
-				xFocalLength,
-				yFocalLength,
-				xCenter,
-				yCenter,
-				TagSize,
-				Robot_,
-				Puck_ };
-
-static std::map<std::string, ArgType> argType;
-
-void initArgType() {
-	argType["visualize"] = VisualizeFlag;
-	argType["cameraID"] = CameraID;
-	argType["res_x"] = xResolution;
-	argType["res_y"] = yResolution;
-	argType["fx"] = xFocalLength;
-	argType["fy"] = yFocalLength;
-	argType["cx"] = xCenter;
-	argType["cy"] = yCenter;
-	argType["tagsize"] = TagSize;
-	argType["Robot"] = Robot_;
-	argType["Puck"] = Puck_;
-}
 
 bool running;
 int visualize = 1;
@@ -89,80 +57,37 @@ void* detector_thread(void* args) {
 }
 
 int main(int argc, char* argv[]) {
-	initArgType();
 	running = true;
+
+	ConfigParser cp;
+	Config config;
+	if (argc > 1) {
+		config = cp.getConfigs(argv[1]);
+	}
+	else {
+		cerr << "No config file path provided." << endl;
+	}
+
 	apriltag_detection_info_t info;
+
+	info.tagsize = config.tagsize;
+	info.fx = config.fx;
+	info.fy = config.fy;
+	info.cx = config.cx;
+	info.cy = config.cy;
+
 	VidCapSettings settings;
 
-	list<Robot> robotList;
+	settings.cameraID = config.cameraID;
+	settings.x_res = config.x_res;
+	settings.y_res = config.y_res;
 
-	if (argc > 1) {
-		ifstream cFile (argv[1]);
-		if (cFile.is_open()) {
-			string line;
-			while(getline(cFile, line)) {
-				line.erase(remove_if(line.begin(), line.end(), ::isspace), line.end());
-				if(line[0] == '#' || line.empty()) {
-					continue;
-				}
-
-				int delimiterPos = line.find("=");
-				string name = line.substr(0, delimiterPos);
-				string value = line.substr(delimiterPos + 1);
-				switch(argType[name])
-				{
-					case VisualizeFlag:
-						visualize = stoi(value);
-						break;
-					case CameraID:
-						settings.cameraID = stoi(value);
-						break;
-					case xResolution:
-						settings.x_res = stoi(value);
-						break;
-					case yResolution:
-						settings.y_res = stoi(value);
-						break;
-					case xFocalLength:
-						info.fx = stod(value);
-						break;
-					case yFocalLength:
-						info.fy = stod(value);
-						break;
-					case xCenter:
-						info.cx = stod(value);
-						break;
-					case yCenter:
-						info.cy = stod(value);
-						break;
-					case TagSize:
-						info.tagsize = stod(value);
-						break;
-					case Puck_:
-						// TODO add Puck parser
-						break;
-					case Robot_:
-						int delim1 = value.find(",");
-						string id = value.substr(0, delim1);
-						string label = value.substr(delim1 + 1);
-						Robot robot(stoi(id), 0, 0, label);
-						robotList.push_back(robot);
-						break;
-				}
-			}
-		}
-		else {
-			cerr << "Could not open config file " << argv[1] << endl;
-		}
-
-		cFile.close();
-	}
-	int size = robotList.size();
+	int size = config.robots.size();
 	vector<TaggedObject> robots(size);
 	int i = 0;
-	while (robotList.size() > 0) {
-		robots[i] = robotList.front();
-		robotList.pop_front();
+	while (config.robots.size() > 0) {
+		robots[i] = config.robots.front();
+		config.robots.pop_front();
 		i++;
 	}
 
