@@ -1,0 +1,17 @@
+syntax = "proto3";
+package mUSV;
+
+import "google/protobuf/timestamp.proto";
+
+message RequestData {
+	int32 tag_id = 1;
+}
+
+message SensorData {
+	float pose_x = 1;
+	float pose_y = 2;
+	float pose_yaw = 3;
+	repeated int32 obstacle_sensors = 4 [packed=true];
+	repeated int32 puck_sensors = 5 [packed=true];
+	google.protobuf.Timestamp last_updated = 6;
+}
