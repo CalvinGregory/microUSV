@@ -1,0 +1,12 @@
+Debug/
+debug.config
+.settings/
+
+.project
+.cproject
+.pydevproject
+
+*.pc.in
+*.pnm
+*.ps
+*.pyc
