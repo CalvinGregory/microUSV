@@ -21,5 +21,4 @@ Keyboard Inputs:
 
 To launch the program, ssh into the microUSV's raspberry pi.  Navigate to the directory containing musv_teleop.py and launch the script using python.
 
-    $ cd py_ws
     $ python musv_teleop.py

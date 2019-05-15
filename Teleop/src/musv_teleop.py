@@ -1,23 +1,26 @@
 '''
 Created on May 14, 2019
 
-@author: calvin
+@author: CalvinGregory
+
+Based on a tutorial by Christopher Barnatt.
+https://www.explainingcomputers.com/rasp_pi_robotics.html
 '''
-# Based on a tutorial by Christopher Barnatt.
-# https://www.explainingcomputers.com/rasp_pi_robotics.html
 
 import serial
 import curses
 import time
 import struct
 
-'''
-Send formated motor speed message to Arduino 
-Messages are prepended by two '*' characters. 
-Motor speed values are assumed to be 16-bit integers.
-msg format: (*,*,starboardMotorSpeed,portMotorSpeed)
-'''
 def sendSpeeds( starboardSpeed, portSpeed ):
+    """ Send formated motor speed message to Arduino
+    
+    Args:
+        starboardSpeed (int16): Desired starboard motor speed (range -127 to 127)
+        portSpeed (int16):      Desired port motor speed (range -127 to 127)
+           
+    Messages are prepended by two '*' characters to indicate message start.     
+    """
     arduino.write(struct.pack('<cchh', '*', '*', starboardSpeed, portSpeed))
     return
 
