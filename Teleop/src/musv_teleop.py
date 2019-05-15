@@ -12,12 +12,12 @@ import curses
 import time
 import struct
 
-def sendSpeeds( starboardSpeed, portSpeed ):
+def sendSpeeds( portSpeed, starboardSpeed ):
     """ Send formated motor speed message to Arduino
     
     Args:
-        starboardSpeed (int16): Desired starboard motor speed (range -127 to 127)
         portSpeed (int16):      Desired port motor speed (range -127 to 127)
+        starboardSpeed (int16): Desired starboard motor speed (range -127 to 127)
            
     Messages are prepended by two '*' characters to indicate message start.     
     """
@@ -56,19 +56,19 @@ try:
         elif msg == ord('w'): 
             sendSpeeds(speed, speed)
         elif msg == ord('a'):
-            sendSpeeds(speed, -speed)
+            sendSpeeds(-speed, speed)
         elif msg == ord('s'):
             sendSpeeds(-speed, -speed)
         elif msg == ord('d'):
-            sendSpeeds(-speed, speed)
+            sendSpeeds(speed, -speed)
         elif msg == ord('q'):
-            sendSpeeds(speed, 0)
-        elif msg == ord('e'):
             sendSpeeds(0, speed)
+        elif msg == ord('e'):
+            sendSpeeds(speed, 0)
         elif msg == ord('z'):
-            sendSpeeds(-speed, 0)
-        elif msg == ord('c'):
             sendSpeeds(0, -speed)
+        elif msg == ord('c'):
+            sendSpeeds(-speed, 0)
         # If not a control character, set motor speeds to 0.
         else:
             sendSpeeds(0, 0)
