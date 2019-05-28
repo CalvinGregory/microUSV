@@ -9,8 +9,7 @@
 #define FRAMEBUFFER_H_
 
 
-#include "pthread.h"
-#include "semaphore.h"
+#include <mutex>
 #include "opencv2/opencv.hpp"
 
 typedef struct {
@@ -23,9 +22,9 @@ class FrameBuffer{
 private:
 	cv::VideoCapture cap;
 	int activeIndex;
-	sem_t index_lock;
+	std::mutex index_lock;
 	cv::Mat frames[2];
-	sem_t frame_lock[2];
+	std::mutex frame_lock[2];
 	int otherIndex();
 public:
 	FrameBuffer();
