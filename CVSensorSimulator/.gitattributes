@@ -1,1 +1,2 @@
 src/apriltag/* linguist-vendored
+src/json.hpp linguist-vendored
