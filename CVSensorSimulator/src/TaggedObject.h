@@ -10,6 +10,7 @@
 
 
 #include <iostream>
+#include <tuple>
 #include "semaphore.h"
 
 typedef struct {
@@ -24,6 +25,7 @@ protected:
 	pose2D pose;
 	std::string label;
 	sem_t mutex;
+	std::tuple<uint, uint, uint> tagRGB;
 public:
 	int getTagID() { return tagID; }
 	void setPose(pose2D pose) {
@@ -39,6 +41,7 @@ public:
 		return temp;
 	}
 	std::string getLabel() { return label; }
+	std::tuple<uint, uint, uint> getTagColor() { return tagRGB; }
 };
 
 

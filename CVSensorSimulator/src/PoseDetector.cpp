@@ -8,7 +8,6 @@
 #include "PoseDetector.h"
 #include "Robot.h"
 #include "Puck.h"
-#include <typeinfo>
 using namespace cv;
 using namespace std;
 
@@ -103,33 +102,17 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 		fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
 	}
 
-	uint r;
-	uint g;
-	uint b;
-
-	if (objects->at(index).getLabel() == "puck") {
-		r = 0;
-		g = 0xff;
-		b = 0;
-	}
-	else if (objects->at(index).getLabel() == "obstacle") {
-		r = 0xff;
-		g = 0;
-		b = 0;
-	}
-	else {
-		r = 0;
-		g = 0;
-		b = 0xff;
-
-		double fontscale = 1.0;
-		int baseline;
-		Size textsize = getTextSize(text, fontface, fontscale, 2, &baseline);
-		putText(*frame, text, Point(det->c[0]-textsize.width/2, det->c[1]+textsize.height/2), fontface, fontscale, Scalar(0, 0x8c, 0xf0), 2);
-	}
+	uint r = get<0>(objects->at(index).getTagColor());
+	uint g = get<1>(objects->at(index).getTagColor());
+	uint b = get<2>(objects->at(index).getTagColor());
 
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[1][0], det->p[1][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[1][0], det->p[1][1]), Point(det->p[2][0], det->p[2][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[2][0], det->p[2][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
+
+	double fontscale = 1.0;
+	int baseline;
+	Size textsize = getTextSize(text, fontface, fontscale, 2, &baseline);
+	putText(*frame, text, Point(det->c[0]-textsize.width/2, det->c[1]+textsize.height/2), fontface, fontscale, Scalar(0, 0x8c, 0xf0), 2);
 }

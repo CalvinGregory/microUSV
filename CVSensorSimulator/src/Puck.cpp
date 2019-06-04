@@ -15,6 +15,7 @@ Puck::Puck(int tagID, double radius, Color color) {
 	this->radius = radius;
 	this->color = color;
 	sem_init(&mutex, 0, 1);
+	tagRGB = make_tuple(0, 255, 0);
 }
 
 Puck::~Puck() {

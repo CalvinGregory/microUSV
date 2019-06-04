@@ -15,6 +15,7 @@ Obstacle::Obstacle(int tagID) {
 	this->tagID = tagID;
 	this->label = "obstacle";
 	sem_init(&mutex, 0, 1);
+	tagRGB = make_tuple(255, 0, 0);
 }
 
 Obstacle::~Obstacle() {
