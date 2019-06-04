@@ -35,7 +35,7 @@ using google::protobuf::util::TimeUtil;
 #define PORT 8078
 
 bool running;
-int visualize = 1;
+int visualize;
 
 void vid_cap_thread(FrameBuffer& fb) {
 	while(running) {
@@ -64,42 +64,46 @@ void detector_thread(PoseDetector& pd) {
 
 int main(int argc, char* argv[]) {
 	running = true;
-
-	ConfigParser cp;
-	Config config;
+	ConfigParser::Config config;
 	if (argc > 1) {
-		config = cp.getConfigs(argv[1]);
+		config = ConfigParser::getConfigs(argv[1]);
 	}
 	else {
 		cerr << "No config file path provided." << endl;
 		exit(-1);
 	}
+	visualize = config.visualize;
 
 	apriltag_detection_info_t info;
 
 	info.tagsize = config.tagsize;
-	info.fx = config.fx;
-	info.fy = config.fy;
-	info.cx = config.cx;
-	info.cy = config.cy;
+	info.fx = config.cInfo.fx;
+	info.fy = config.cInfo.fy;
+	info.cx = config.cInfo.cx;
+	info.cy = config.cInfo.cy;
 
 	VidCapSettings settings;
 
-	settings.cameraID = config.cameraID;
-	settings.x_res = config.x_res;
-	settings.y_res = config.y_res;
+	settings.cameraID = config.cInfo.cameraID;
+	settings.x_res = config.cInfo.x_res;
+	settings.y_res = config.cInfo.y_res;
 
-	int size = config.robots.size();
-	vector<TaggedObject> robots(size);
+	int size = config.robots.size() + config.pucks.size();
+	vector<TaggedObject> taggedObjects(size);
 	int i = 0;
 	while (config.robots.size() > 0) {
-		robots[i] = config.robots.front();
+		taggedObjects[i] = config.robots.front();
 		config.robots.pop_front();
+		i++;
+	}
+	while (config.pucks.size() > 0) {
+		taggedObjects[i] = config.pucks.front();
+		config.pucks.pop_front();
 		i++;
 	}
 
 	FrameBuffer fb(settings);
-	PoseDetector pd(&fb, info, &robots, size);
+	PoseDetector pd(&fb, info, &taggedObjects, size);
 
 	thread threads[2];
 	threads[0] = thread(vid_cap_thread, ref(fb));
@@ -111,7 +115,7 @@ int main(int argc, char* argv[]) {
 //--- Socket --- //
 	//TODO encapsulate socket code
 	//TODO wishlist: add threadpool & multiple ports to handle client requests in parallel
-	int server_fd, new_socket, valread;
+	int server_fd, new_socket;
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
@@ -124,7 +128,7 @@ int main(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	// Forcefully attaching socket to the port
+	// Forcefully attach socket to the port
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
 	{
 		perror("setsockopt");
@@ -137,7 +141,7 @@ int main(int argc, char* argv[]) {
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons( PORT );
 
-	// Forcefully attaching socket to the port
+	// Forcefully attach socket to the port
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
 		perror("bind failed");
@@ -161,17 +165,16 @@ int main(int argc, char* argv[]) {
 				perror("error accepting connection");
 				exit(EXIT_FAILURE);
 			}
-
 		}
 		else {
-			valread = read(new_socket, buffer, 128);
+			read(new_socket, buffer, 128);
 			if (!requestData.ParseFromString(buffer)) {
 				cerr << "Failed to parse Request Data message." << endl;
 				return -1;
 			}
 
 			//TODO find correct robot using requestData.tag_id()
-			pose2D pose = robots[0].getPose();
+			pose2D pose = taggedObjects[0].getPose();
 //			cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl;
 
 			sensorData.set_pose_x(pose.x);

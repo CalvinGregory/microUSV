@@ -1,5 +1,5 @@
 Debug/
-debug.config
+debugConfig.json
 .settings/
 
 .project

@@ -1,0 +1,30 @@
+{
+	"visualize": 1,
+	
+	"cameraInfo": {
+		"cameraID": 1,
+		"x_res": 1920,
+		"y_res": 1080,
+		"fx": 1419.9787511737059,
+		"fy": 1419.9787511737059,
+		"cx": 960,
+		"cy": 540
+	},
+	
+	"tagsize": 48.0,
+	
+	"Robots": [
+		{"tagID": 1, "label": "one"},
+		{"tagID": 2, "label": "two"},
+		{"tagID": 6, "label": "six"},
+		{"tagID": 10, "label": "ten"}
+	],
+	
+	"Pucks": [
+		{"tagID": 12}
+	],
+	
+	"Obstacles": [
+		
+	]
+}

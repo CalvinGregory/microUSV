@@ -11,6 +11,7 @@ using namespace std;
 
 Puck::Puck(int tagID, double radius, Color color) {
 	this->tagID = tagID;
+	this->label = "puck";
 	this->radius = radius;
 	this->color = color;
 	sem_init(&mutex, 0, 1);
