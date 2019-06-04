@@ -6,6 +6,9 @@
  */
 
 #include "PoseDetector.h"
+#include "Robot.h"
+#include "Puck.h"
+#include <typeinfo>
 using namespace cv;
 using namespace std;
 
@@ -86,11 +89,6 @@ pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, bool degrees) {
 }
 
 void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
-	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[1][0], det->p[1][1]), Scalar(0, 0xff, 0), 2);
-	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[3][0], det->p[3][1]), Scalar(0, 0, 0xff), 2);
-	line(*frame, Point(det->p[1][0], det->p[1][1]), Point(det->p[2][0], det->p[2][1]), Scalar(0xff, 0, 0), 2);
-	line(*frame, Point(det->p[2][0], det->p[2][1]), Point(det->p[3][0], det->p[3][1]), Scalar(0xff, 0, 0), 2);
-
 	int index = tagMatch(det->id);
 	int fontface;
 	String text;
@@ -105,8 +103,33 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 		fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
 	}
 
-	double fontscale = 1.0;
-	int baseline;
-	Size textsize = getTextSize(text, fontface, fontscale, 2, &baseline);
-	putText(*frame, text, Point(det->c[0]-textsize.width/2, det->c[1]+textsize.height/2), fontface, fontscale, Scalar(0xff, 0x99, 0), 2);
+	uint r;
+	uint g;
+	uint b;
+
+	if (objects->at(index).getLabel() == "puck") {
+		r = 0;
+		g = 0xff;
+		b = 0;
+	}
+	else if (objects->at(index).getLabel() == "obstacle") {
+		r = 0xff;
+		g = 0;
+		b = 0;
+	}
+	else {
+		r = 0;
+		g = 0;
+		b = 0xff;
+
+		double fontscale = 1.0;
+		int baseline;
+		Size textsize = getTextSize(text, fontface, fontscale, 2, &baseline);
+		putText(*frame, text, Point(det->c[0]-textsize.width/2, det->c[1]+textsize.height/2), fontface, fontscale, Scalar(0, 0x8c, 0xf0), 2);
+	}
+
+	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[1][0], det->p[1][1]), Scalar(b, g, r), 2);
+	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
+	line(*frame, Point(det->p[1][0], det->p[1][1]), Point(det->p[2][0], det->p[2][1]), Scalar(b, g, r), 2);
+	line(*frame, Point(det->p[2][0], det->p[2][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
 }
