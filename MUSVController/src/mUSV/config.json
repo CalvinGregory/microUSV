@@ -1,0 +1,23 @@
+{
+	"serverIP": "192.168.1.2",
+	"tagID": 0,
+	"label": "mUSV_0",
+	
+	"tagTransform": {
+		"x": 0,
+		"y": 0,
+		"z": 0,
+		"yaw": 0
+	},
+	
+	"PropellerSpin": {
+		"port": 1,
+		"starboard": -1
+	},
+	
+	"PIDGains": {
+		"P": 1,
+		"I": 2,
+		"D": 3
+	}
+}

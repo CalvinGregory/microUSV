@@ -8,10 +8,10 @@ import serial
 import socket
 import time
 import struct
+import sys
 import musv_msg_pb2
+from Config import Config
 
-tagID = 1
-server_ip = '192.168.1.2'
 port = 8078
 
 if __name__ == '__main__':
@@ -19,6 +19,15 @@ if __name__ == '__main__':
     arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
     # Give serial connection time to settle
     time.sleep(2)
+
+    if (len(sys.argv) < 2):
+        print ('No config file path provided')
+        exit()
+        
+    config = Config()
+    config.parse_configs(sys.argv[1])
+    server_ip = config.serverIP
+    tagID = config.tagID
     
     while True:
         requestData = musv_msg_pb2.RequestData()
@@ -47,13 +56,13 @@ if __name__ == '__main__':
             time.sleep(0.25)
         
 
-def sendSpeeds( portSpeed, starboardSpeed ):
+def send_speeds( portSpeed, starboardSpeed ):
     """ Send formated motor speed message to Arduino
-     
+      
     Args:
         portSpeed (int16):      Desired port motor speed (range -127 to 127)
         starboardSpeed (int16): Desired starboard motor speed (range -127 to 127)
-            
+             
     Messages are prepended by two '*' characters to indicate message start.     
     """
     arduino.write(struct.pack('<cchh', '*', '*', starboardSpeed, portSpeed))
