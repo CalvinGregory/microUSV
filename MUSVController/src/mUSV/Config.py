@@ -23,11 +23,11 @@ class Config:
     I = 0
     D = 0
 
-    def __init__(self):
+    def __init__(self, filepath):
         '''
         Constructor
         '''
-        pass
+        self.parse_configs(filepath)
 
     def parse_configs(self, filepath):
         '''

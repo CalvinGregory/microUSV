@@ -24,8 +24,7 @@ if __name__ == '__main__':
         print ('No config file path provided')
         exit()
         
-    config = Config()
-    config.parse_configs(sys.argv[1])
+    config = Config(sys.argv[1])
     server_ip = config.serverIP
     tagID = config.tagID
     
@@ -37,7 +36,7 @@ if __name__ == '__main__':
         try:
             sensorSimulator.connect((server_ip, port))
             sensorSimulator.send(requestData.SerializeToString())
-            
+                        
             sensorData = musv_msg_pb2.SensorData() 
         
             msg = sensorSimulator.recv(128)
@@ -58,11 +57,11 @@ if __name__ == '__main__':
 
 def send_speeds( portSpeed, starboardSpeed ):
     """ Send formated motor speed message to Arduino
-      
+       
     Args:
         portSpeed (int16):      Desired port motor speed (range -127 to 127)
         starboardSpeed (int16): Desired starboard motor speed (range -127 to 127)
-             
+              
     Messages are prepended by two '*' characters to indicate message start.     
     """
     arduino.write(struct.pack('<cchh', '*', '*', starboardSpeed, portSpeed))
