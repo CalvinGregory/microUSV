@@ -12,6 +12,7 @@
 #include "FrameBuffer.h"
 #include "TaggedObject.h"
 #include <math.h>
+#include "CVSS_util.h"
 
 extern "C" {
 #include "apriltag/apriltag.h"
@@ -35,7 +36,6 @@ private:
 	apriltag_detector_t* td;
 	zarray_t* detections;
 
-	int tagMatch(int tagID);
 	pose2D pose3Dto2D(apriltag_pose_t pose, AngleUnit unit);
 	void label_tag_detection(cv::Mat* frame, apriltag_detection_t* det);
 public:

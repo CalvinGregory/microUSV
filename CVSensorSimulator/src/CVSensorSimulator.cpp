@@ -20,6 +20,7 @@
 #include "PoseDetector.h"
 #include "Robot.h"
 #include "ConfigParser.h"
+#include "CVSS_util.h"
 #include "musv_msg.pb.h"
 
 extern "C" {
@@ -103,7 +104,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	FrameBuffer fb(settings);
-	PoseDetector pd(&fb, info, &taggedObjects, size);
+	PoseDetector pd(&fb, info, &taggedObjects);
 
 	thread threads[2];
 	threads[0] = thread(vid_cap_thread, ref(fb));
@@ -173,19 +174,20 @@ int main(int argc, char* argv[]) {
 				return -1;
 			}
 
-			//TODO find correct robot using requestData.tag_id()
-			pose2D pose = taggedObjects[0].getPose();
-//			cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl;
+			int index = CVSS_util::tagMatch(&taggedObjects, requestData.tag_id());
+			pose2D pose = taggedObjects[index].getPose();
+//			cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl; //DEBUG message
 
 			sensorData.set_pose_x(pose.x);
 			sensorData.set_pose_y(pose.y);
 			sensorData.set_pose_yaw(pose.yaw);
 			sensorData.add_obstacle_sensors(0);
-			sensorData.add_obstacle_sensors(0);
-			sensorData.add_obstacle_sensors(0);
-			sensorData.add_puck_sensors(0);
-			sensorData.add_puck_sensors(0);
-			sensorData.add_puck_sensors(0);
+			sensorData.add_obstacle_sensors(1);
+			sensorData.add_obstacle_sensors(2);
+			sensorData.add_puck_sensors(3);
+			sensorData.add_puck_sensors(4);
+			sensorData.add_puck_sensors(5);
+			//TODO timestamp in milliseconds instead of seconds
 			*sensorData.mutable_last_updated() = TimeUtil::SecondsToTimestamp(time(NULL) - startTime);
 
 			size_t size = sensorData.ByteSizeLong();

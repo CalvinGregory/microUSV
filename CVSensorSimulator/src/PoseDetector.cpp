@@ -42,7 +42,7 @@ void PoseDetector::updatePoseEstimates() {
 	apriltag_detection_t* det;
 	for(int i = 0; i < zarray_size(detections); i++) {
 		zarray_get(detections, i, &det);
-		int index = tagMatch(det->id);
+		int index = CVSS_util::tagMatch(objects, det->id);
 		if (index < 0) {
 			zarray_remove_index(detections, i, 0);
 			i--;
@@ -65,16 +65,16 @@ Mat* PoseDetector::getLabelledFrame() {
 	return &frame;
 }
 
-int PoseDetector::tagMatch(int tagID) {
-	int index = -1;
-	for (int i = 0; i < objects->size(); i++) {
-		if (objects->at(i).getTagID() == tagID) {
-			index = i;
-			break;
-		}
-	}
-	return index;
-}
+//int PoseDetector::tagMatch(int tagID) {
+//	int index = -1;
+//	for (int i = 0; i < objects->size(); i++) {
+//		if (objects->at(i).getTagID() == tagID) {
+//			index = i;
+//			break;
+//		}
+//	}
+//	return index;
+//}
 
 pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
 	pose2D pose2D;
@@ -87,7 +87,7 @@ pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
 }
 
 void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
-	int index = tagMatch(det->id);
+	int index = CVSS_util::tagMatch(objects, det->id);
 	int fontface;
 	String text;
 	if (!(index < 0)) {
