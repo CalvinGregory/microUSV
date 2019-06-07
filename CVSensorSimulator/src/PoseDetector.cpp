@@ -11,11 +11,10 @@
 using namespace cv;
 using namespace std;
 
-PoseDetector::PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, vector<TaggedObject>* objects, int numObjects) {
+PoseDetector::PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, vector<TaggedObject>* objects) {
 	this->fb = fb;
 	this->detInfo = detInfo;
 	this->objects = objects;
-	this->numObjects = numObjects;
 	detections = NULL;
 	tf = tag25h9_create();
 	td = apriltag_detector_create();
@@ -52,7 +51,7 @@ void PoseDetector::updatePoseEstimates() {
 			apriltag_pose_t pose;
 			detInfo.det = det;
 			estimate_tag_pose(&detInfo, &pose);
-			objects->at(index).setPose(pose3Dto2D(pose, true));
+			objects->at(index).setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
 		}
 	}
 }
@@ -68,7 +67,7 @@ Mat* PoseDetector::getLabelledFrame() {
 
 int PoseDetector::tagMatch(int tagID) {
 	int index = -1;
-	for (int i = 0; i < numObjects; i++) {
+	for (int i = 0; i < objects->size(); i++) {
 		if (objects->at(i).getTagID() == tagID) {
 			index = i;
 			break;
@@ -77,10 +76,10 @@ int PoseDetector::tagMatch(int tagID) {
 	return index;
 }
 
-pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, bool degrees) {
+pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
 	pose2D pose2D;
 	pose2D.yaw = atan2(pose.R->data[3], pose.R->data[0]); //radians
-	if (degrees)
+	if (unit == AngleUnit::DEGREES)
 		pose2D.yaw = pose2D.yaw * 180 / 3.14159;
 	pose2D.x = pose.t->data[0];
 	pose2D.y = pose.t->data[1];

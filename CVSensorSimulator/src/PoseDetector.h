@@ -19,12 +19,16 @@ extern "C" {
 #include "apriltag/apriltag_pose.h"
 }
 
+enum class AngleUnit {
+	RADIANS,
+	DEGREES
+};
+
 class PoseDetector {
 private:
 	FrameBuffer* fb;
 	apriltag_detection_info_t detInfo;
 	std::vector<TaggedObject>* objects;
-	int numObjects;
 
 	cv::Mat frame;
 	apriltag_family_t* tf;
@@ -32,10 +36,10 @@ private:
 	zarray_t* detections;
 
 	int tagMatch(int tagID);
-	pose2D pose3Dto2D(apriltag_pose_t pose, bool degrees);
+	pose2D pose3Dto2D(apriltag_pose_t pose, AngleUnit unit);
 	void label_tag_detection(cv::Mat* frame, apriltag_detection_t* det);
 public:
-	PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, std::vector<TaggedObject>* objects, int numObjects);
+	PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, std::vector<TaggedObject>* objects);
 	~PoseDetector();
 	void updatePoseEstimates();
 	cv::Mat* getLabelledFrame();
