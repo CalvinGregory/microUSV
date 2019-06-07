@@ -65,17 +65,6 @@ Mat* PoseDetector::getLabelledFrame() {
 	return &frame;
 }
 
-//int PoseDetector::tagMatch(int tagID) {
-//	int index = -1;
-//	for (int i = 0; i < objects->size(); i++) {
-//		if (objects->at(i).getTagID() == tagID) {
-//			index = i;
-//			break;
-//		}
-//	}
-//	return index;
-//}
-
 pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
 	pose2D pose2D;
 	pose2D.yaw = atan2(pose.R->data[3], pose.R->data[0]); //radians
