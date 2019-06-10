@@ -36,6 +36,10 @@ curses.cbreak()
 screen.keypad(True)
 
 speed = 100
+# Acceptable spin coefficients are +1 or -1 
+# depending on motor wiring polarity and propeller helix direction
+port_propeller_spin = 1
+starboard_propeller_spin = 1
 
 try:
     while True:
@@ -54,21 +58,21 @@ try:
             speed = 127
         # For w,a,s,d and q,e,z,c key presses send motor speeds to Arduino.
         elif msg == ord('w'): 
-            sendSpeeds(speed, speed)
+            sendSpeeds(port_propeller_spin * speed, starboard_propeller_spin * speed)
         elif msg == ord('a'):
-            sendSpeeds(-speed, speed)
+            sendSpeeds(port_propeller_spin * -speed, starboard_propeller_spin * speed)
         elif msg == ord('s'):
-            sendSpeeds(-speed, -speed)
+            sendSpeeds(port_propeller_spin * -speed, starboard_propeller_spin * -speed)
         elif msg == ord('d'):
-            sendSpeeds(speed, -speed)
+            sendSpeeds(port_propeller_spin * speed, starboard_propeller_spin * -speed)
         elif msg == ord('q'):
-            sendSpeeds(0, speed)
+            sendSpeeds(0, starboard_propeller_spin * speed)
         elif msg == ord('e'):
-            sendSpeeds(speed, 0)
+            sendSpeeds(port_propeller_spin * speed, 0)
         elif msg == ord('z'):
-            sendSpeeds(0, -speed)
+            sendSpeeds(0, starboard_propeller_spin * -speed)
         elif msg == ord('c'):
-            sendSpeeds(-speed, 0)
+            sendSpeeds(port_propeller_spin * -speed, 0)
         # If not a control character, set motor speeds to 0.
         else:
             sendSpeeds(0, 0)
