@@ -67,6 +67,7 @@ Mat* PoseDetector::getLabelledFrame() {
 
 pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
 	pose2D pose2D;
+	gettimeofday(&pose2D.timestamp, NULL);
 	pose2D.yaw = atan2(pose.R->data[3], pose.R->data[0]); //radians
 	if (unit == AngleUnit::DEGREES)
 		pose2D.yaw = pose2D.yaw * 180 / 3.14159;

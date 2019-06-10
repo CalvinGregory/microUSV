@@ -13,6 +13,7 @@
 #include <functional>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/time.h>
 #include "opencv2/opencv.hpp"
 #include <google/protobuf/util/time_util.h>
 
@@ -65,6 +66,9 @@ void detector_thread(PoseDetector& pd) {
 
 int main(int argc, char* argv[]) {
 	running = true;
+	struct timeval startTime;
+	gettimeofday(&startTime, NULL);
+
 	ConfigParser::Config config;
 	if (argc > 1) {
 		config = ConfigParser::getConfigs(argv[1]);
@@ -154,7 +158,7 @@ int main(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	int64 startTime = time(NULL);
+	struct timeval currentTime;
 
 	while (running) {
 		mUSV::RequestData requestData;
@@ -176,7 +180,18 @@ int main(int argc, char* argv[]) {
 
 			int index = CVSS_util::tagMatch(&taggedObjects, requestData.tag_id());
 			pose2D pose = taggedObjects[index].getPose();
-//			cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl; //DEBUG message
+			//DEBUG message
+//			cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl;
+
+			currentTime = pose.timestamp;
+			long seconds = currentTime.tv_sec - startTime.tv_sec;
+			long uSeconds = currentTime.tv_usec - startTime.tv_usec;
+			if (uSeconds < 0) {
+				uSeconds = uSeconds + 1e6;
+				seconds--;
+			}
+			cout << "s: " << seconds << endl;
+			cout << "us:" << uSeconds << endl;
 
 			sensorData.set_pose_x(pose.x);
 			sensorData.set_pose_y(pose.y);
@@ -187,8 +202,7 @@ int main(int argc, char* argv[]) {
 			sensorData.add_puck_sensors(3);
 			sensorData.add_puck_sensors(4);
 			sensorData.add_puck_sensors(5);
-			//TODO timestamp in milliseconds instead of seconds
-			*sensorData.mutable_last_updated() = TimeUtil::SecondsToTimestamp(time(NULL) - startTime);
+			*sensorData.mutable_last_updated() = TimeUtil::MicrosecondsToTimestamp(seconds * 1e6 + uSeconds);
 
 			size_t size = sensorData.ByteSizeLong();
 			char* msg = new char [size];

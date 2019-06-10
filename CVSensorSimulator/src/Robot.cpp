@@ -19,6 +19,7 @@ Robot::Robot(int tagID, double size_x, double size_y, string label) {
 	boundingBox[1] = size_y;
 	sem_init(&mutex, 0, 1);
 	tagRGB = make_tuple(0, 0, 255);
+	gettimeofday(&this->pose.timestamp, NULL);
 }
 
 Robot::~Robot() {

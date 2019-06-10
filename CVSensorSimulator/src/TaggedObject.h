@@ -11,12 +11,14 @@
 
 #include <iostream>
 #include <tuple>
+#include <sys/time.h>
 #include "semaphore.h"
 
 typedef struct {
 	double x = 0;
 	double y = 0;
 	double yaw = 0;
+	struct timeval timestamp;
 } pose2D;
 
 class TaggedObject {

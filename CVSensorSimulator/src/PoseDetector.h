@@ -12,6 +12,7 @@
 #include "FrameBuffer.h"
 #include "TaggedObject.h"
 #include <math.h>
+#include <sys/time.h>
 #include "CVSS_util.h"
 
 extern "C" {
