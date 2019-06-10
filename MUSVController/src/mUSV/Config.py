@@ -10,23 +10,23 @@ class Config:
     '''
     classdocs
     '''
-    serverIP = "192.168.1.0"
-    tagID = 0
-    label = "musv"
-    tagTF_x = 0
-    tagTF_y = 0
-    tagTF_z = 0
-    tagTF_yaw = 0
-    propSpin_port = 1
-    propSpin_star = 1
-    P = 1
-    I = 0
-    D = 0
 
     def __init__(self, filepath):
         '''
         Constructor
         '''
+        self.serverIP = "192.168.1.0"
+        self.tagID = 1
+        self.label = "musv"
+        self.tagTF_x = 0
+        self.tagTF_y = 0
+        self.tagTF_z = 0
+        self.tagTF_yaw = 0
+        self.propSpin_port = 1
+        self.propSpin_star = 1
+        self.P = 1
+        self.I = 0
+        self.D = 0
         self.parse_configs(filepath)
 
     def parse_configs(self, filepath):
