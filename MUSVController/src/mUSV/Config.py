@@ -24,9 +24,12 @@ class Config:
         self.tagTF_yaw = 0
         self.propSpin_port = 1
         self.propSpin_star = 1
-        self.P = 1
-        self.I = 0
-        self.D = 0
+        self.P_dist = 1
+        self.I_dist = 0
+        self.D_dist = 0
+        self.P_ang = 1
+        self.I_ang = 0
+        self.D_ang = 0
         self.parse_configs(filepath)
 
     def parse_configs(self, filepath):
@@ -45,6 +48,9 @@ class Config:
         self.tagTF_yaw = config['tagTransform']['yaw']
         self.propSpin_port = config['PropellerSpin']['port']
         self.propSpin_star = config['PropellerSpin']['starboard']
-        self.P = config['PIDGains']['P']
-        self.I = config['PIDGains']['I']
-        self.D = config['PIDGains']['D']
+        self.P_dist = config['PIDGains']['P_dist']
+        self.I_dist = config['PIDGains']['I_dist']
+        self.D_dist = config['PIDGains']['D_dist']
+        self.P_ang = config['PIDGains']['P_ang']
+        self.I_ang = config['PIDGains']['I_ang']
+        self.D_ang = config['PIDGains']['D_ang']

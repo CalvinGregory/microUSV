@@ -16,8 +16,11 @@
 	},
 	
 	"PIDGains": {
-		"P": 1,
-		"I": 2,
-		"D": 3
+		"P_dist": 1,
+		"I_dist": 2,
+		"D_dist": 3,
+		"P_ang": 4,
+		"I_ang": 5,
+		"D_ang": 6
 	}
 }
