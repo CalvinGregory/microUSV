@@ -5,13 +5,23 @@ import "google/protobuf/timestamp.proto";
 
 message RequestData {
 	int32 tag_id = 1;
+	bool request_waypoints = 2;
 }
 
 message SensorData {
-	float pose_x = 1;
-	float pose_y = 2;
-	float pose_yaw = 3;
-	repeated int32 obstacle_sensors = 4 [packed=true];
-	repeated int32 puck_sensors = 5 [packed=true];
-	google.protobuf.Timestamp last_updated = 6;
+	message Pose2D {
+		float x = 1;
+		float y = 2;
+		float yaw = 3;
+	}
+	Pose2D pose = 1;
+	repeated int32 obstacle_sensors = 2 [packed=true];
+	repeated int32 puck_sensors = 3 [packed=true];
+	google.protobuf.Timestamp timestamp = 4;
+	message Waypoint {
+		float x = 1;
+		float y = 2;
+	}
+	repeated Waypoint waypoints = 5;
+	bool loop_waypoints = 6;
 }

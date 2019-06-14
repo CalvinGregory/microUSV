@@ -42,7 +42,7 @@ struct TableStruct_musv_5fmsg_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::google::protobuf::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::google::protobuf::internal::ParseTable schema[2]
+  static const ::google::protobuf::internal::ParseTable schema[4]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::google::protobuf::internal::FieldMetadata field_metadata[];
   static const ::google::protobuf::internal::SerializationTable serialization_table[];
@@ -56,11 +56,19 @@ extern RequestDataDefaultTypeInternal _RequestData_default_instance_;
 class SensorData;
 class SensorDataDefaultTypeInternal;
 extern SensorDataDefaultTypeInternal _SensorData_default_instance_;
+class SensorData_Pose2D;
+class SensorData_Pose2DDefaultTypeInternal;
+extern SensorData_Pose2DDefaultTypeInternal _SensorData_Pose2D_default_instance_;
+class SensorData_Waypoint;
+class SensorData_WaypointDefaultTypeInternal;
+extern SensorData_WaypointDefaultTypeInternal _SensorData_Waypoint_default_instance_;
 }  // namespace mUSV
 namespace google {
 namespace protobuf {
 template<> ::mUSV::RequestData* Arena::CreateMaybeMessage<::mUSV::RequestData>(Arena*);
 template<> ::mUSV::SensorData* Arena::CreateMaybeMessage<::mUSV::SensorData>(Arena*);
+template<> ::mUSV::SensorData_Pose2D* Arena::CreateMaybeMessage<::mUSV::SensorData_Pose2D>(Arena*);
+template<> ::mUSV::SensorData_Waypoint* Arena::CreateMaybeMessage<::mUSV::SensorData_Waypoint>(Arena*);
 }  // namespace protobuf
 }  // namespace google
 namespace mUSV {
@@ -168,12 +176,264 @@ class RequestData :
   ::google::protobuf::int32 tag_id() const;
   void set_tag_id(::google::protobuf::int32 value);
 
+  // bool request_waypoints = 2;
+  void clear_request_waypoints();
+  static const int kRequestWaypointsFieldNumber = 2;
+  bool request_waypoints() const;
+  void set_request_waypoints(bool value);
+
   // @@protoc_insertion_point(class_scope:mUSV.RequestData)
  private:
   class HasBitSetters;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::int32 tag_id_;
+  bool request_waypoints_;
+  mutable ::google::protobuf::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_musv_5fmsg_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SensorData_Pose2D :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:mUSV.SensorData.Pose2D) */ {
+ public:
+  SensorData_Pose2D();
+  virtual ~SensorData_Pose2D();
+
+  SensorData_Pose2D(const SensorData_Pose2D& from);
+
+  inline SensorData_Pose2D& operator=(const SensorData_Pose2D& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  #if LANG_CXX11
+  SensorData_Pose2D(SensorData_Pose2D&& from) noexcept
+    : SensorData_Pose2D() {
+    *this = ::std::move(from);
+  }
+
+  inline SensorData_Pose2D& operator=(SensorData_Pose2D&& from) noexcept {
+    if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+  #endif
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return default_instance().GetDescriptor();
+  }
+  static const SensorData_Pose2D& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const SensorData_Pose2D* internal_default_instance() {
+    return reinterpret_cast<const SensorData_Pose2D*>(
+               &_SensorData_Pose2D_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  void Swap(SensorData_Pose2D* other);
+  friend void swap(SensorData_Pose2D& a, SensorData_Pose2D& b) {
+    a.Swap(&b);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SensorData_Pose2D* New() const final {
+    return CreateMaybeMessage<SensorData_Pose2D>(nullptr);
+  }
+
+  SensorData_Pose2D* New(::google::protobuf::Arena* arena) const final {
+    return CreateMaybeMessage<SensorData_Pose2D>(arena);
+  }
+  void CopyFrom(const ::google::protobuf::Message& from) final;
+  void MergeFrom(const ::google::protobuf::Message& from) final;
+  void CopyFrom(const SensorData_Pose2D& from);
+  void MergeFrom(const SensorData_Pose2D& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
+  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
+  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  #else
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) final;
+  #endif  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const final;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      ::google::protobuf::uint8* target) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SensorData_Pose2D* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return nullptr;
+  }
+  inline void* MaybeArenaPtr() const {
+    return nullptr;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // float x = 1;
+  void clear_x();
+  static const int kXFieldNumber = 1;
+  float x() const;
+  void set_x(float value);
+
+  // float y = 2;
+  void clear_y();
+  static const int kYFieldNumber = 2;
+  float y() const;
+  void set_y(float value);
+
+  // float yaw = 3;
+  void clear_yaw();
+  static const int kYawFieldNumber = 3;
+  float yaw() const;
+  void set_yaw(float value);
+
+  // @@protoc_insertion_point(class_scope:mUSV.SensorData.Pose2D)
+ private:
+  class HasBitSetters;
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  float x_;
+  float y_;
+  float yaw_;
+  mutable ::google::protobuf::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_musv_5fmsg_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SensorData_Waypoint :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:mUSV.SensorData.Waypoint) */ {
+ public:
+  SensorData_Waypoint();
+  virtual ~SensorData_Waypoint();
+
+  SensorData_Waypoint(const SensorData_Waypoint& from);
+
+  inline SensorData_Waypoint& operator=(const SensorData_Waypoint& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  #if LANG_CXX11
+  SensorData_Waypoint(SensorData_Waypoint&& from) noexcept
+    : SensorData_Waypoint() {
+    *this = ::std::move(from);
+  }
+
+  inline SensorData_Waypoint& operator=(SensorData_Waypoint&& from) noexcept {
+    if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+  #endif
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return default_instance().GetDescriptor();
+  }
+  static const SensorData_Waypoint& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const SensorData_Waypoint* internal_default_instance() {
+    return reinterpret_cast<const SensorData_Waypoint*>(
+               &_SensorData_Waypoint_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  void Swap(SensorData_Waypoint* other);
+  friend void swap(SensorData_Waypoint& a, SensorData_Waypoint& b) {
+    a.Swap(&b);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SensorData_Waypoint* New() const final {
+    return CreateMaybeMessage<SensorData_Waypoint>(nullptr);
+  }
+
+  SensorData_Waypoint* New(::google::protobuf::Arena* arena) const final {
+    return CreateMaybeMessage<SensorData_Waypoint>(arena);
+  }
+  void CopyFrom(const ::google::protobuf::Message& from) final;
+  void MergeFrom(const ::google::protobuf::Message& from) final;
+  void CopyFrom(const SensorData_Waypoint& from);
+  void MergeFrom(const SensorData_Waypoint& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
+  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
+  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  #else
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) final;
+  #endif  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const final;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      ::google::protobuf::uint8* target) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SensorData_Waypoint* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return nullptr;
+  }
+  inline void* MaybeArenaPtr() const {
+    return nullptr;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // float x = 1;
+  void clear_x();
+  static const int kXFieldNumber = 1;
+  float x() const;
+  void set_x(float value);
+
+  // float y = 2;
+  void clear_y();
+  static const int kYFieldNumber = 2;
+  float y() const;
+  void set_y(float value);
+
+  // @@protoc_insertion_point(class_scope:mUSV.SensorData.Waypoint)
+ private:
+  class HasBitSetters;
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  float x_;
+  float y_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_musv_5fmsg_2eproto;
 };
@@ -217,7 +477,7 @@ class SensorData :
                &_SensorData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    3;
 
   void Swap(SensorData* other);
   friend void swap(SensorData& a, SensorData& b) {
@@ -272,12 +532,15 @@ class SensorData :
 
   // nested types ----------------------------------------------------
 
+  typedef SensorData_Pose2D Pose2D;
+  typedef SensorData_Waypoint Waypoint;
+
   // accessors -------------------------------------------------------
 
-  // repeated int32 obstacle_sensors = 4 [packed = true];
+  // repeated int32 obstacle_sensors = 2 [packed = true];
   int obstacle_sensors_size() const;
   void clear_obstacle_sensors();
-  static const int kObstacleSensorsFieldNumber = 4;
+  static const int kObstacleSensorsFieldNumber = 2;
   ::google::protobuf::int32 obstacle_sensors(int index) const;
   void set_obstacle_sensors(int index, ::google::protobuf::int32 value);
   void add_obstacle_sensors(::google::protobuf::int32 value);
@@ -286,10 +549,10 @@ class SensorData :
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_obstacle_sensors();
 
-  // repeated int32 puck_sensors = 5 [packed = true];
+  // repeated int32 puck_sensors = 3 [packed = true];
   int puck_sensors_size() const;
   void clear_puck_sensors();
-  static const int kPuckSensorsFieldNumber = 5;
+  static const int kPuckSensorsFieldNumber = 3;
   ::google::protobuf::int32 puck_sensors(int index) const;
   void set_puck_sensors(int index, ::google::protobuf::int32 value);
   void add_puck_sensors(::google::protobuf::int32 value);
@@ -298,32 +561,41 @@ class SensorData :
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_puck_sensors();
 
-  // .google.protobuf.Timestamp last_updated = 6;
-  bool has_last_updated() const;
-  void clear_last_updated();
-  static const int kLastUpdatedFieldNumber = 6;
-  const ::google::protobuf::Timestamp& last_updated() const;
-  ::google::protobuf::Timestamp* release_last_updated();
-  ::google::protobuf::Timestamp* mutable_last_updated();
-  void set_allocated_last_updated(::google::protobuf::Timestamp* last_updated);
+  // repeated .mUSV.SensorData.Waypoint waypoints = 5;
+  int waypoints_size() const;
+  void clear_waypoints();
+  static const int kWaypointsFieldNumber = 5;
+  ::mUSV::SensorData_Waypoint* mutable_waypoints(int index);
+  ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint >*
+      mutable_waypoints();
+  const ::mUSV::SensorData_Waypoint& waypoints(int index) const;
+  ::mUSV::SensorData_Waypoint* add_waypoints();
+  const ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint >&
+      waypoints() const;
 
-  // float pose_x = 1;
-  void clear_pose_x();
-  static const int kPoseXFieldNumber = 1;
-  float pose_x() const;
-  void set_pose_x(float value);
+  // .mUSV.SensorData.Pose2D pose = 1;
+  bool has_pose() const;
+  void clear_pose();
+  static const int kPoseFieldNumber = 1;
+  const ::mUSV::SensorData_Pose2D& pose() const;
+  ::mUSV::SensorData_Pose2D* release_pose();
+  ::mUSV::SensorData_Pose2D* mutable_pose();
+  void set_allocated_pose(::mUSV::SensorData_Pose2D* pose);
 
-  // float pose_y = 2;
-  void clear_pose_y();
-  static const int kPoseYFieldNumber = 2;
-  float pose_y() const;
-  void set_pose_y(float value);
+  // .google.protobuf.Timestamp timestamp = 4;
+  bool has_timestamp() const;
+  void clear_timestamp();
+  static const int kTimestampFieldNumber = 4;
+  const ::google::protobuf::Timestamp& timestamp() const;
+  ::google::protobuf::Timestamp* release_timestamp();
+  ::google::protobuf::Timestamp* mutable_timestamp();
+  void set_allocated_timestamp(::google::protobuf::Timestamp* timestamp);
 
-  // float pose_yaw = 3;
-  void clear_pose_yaw();
-  static const int kPoseYawFieldNumber = 3;
-  float pose_yaw() const;
-  void set_pose_yaw(float value);
+  // bool loop_waypoints = 6;
+  void clear_loop_waypoints();
+  static const int kLoopWaypointsFieldNumber = 6;
+  bool loop_waypoints() const;
+  void set_loop_waypoints(bool value);
 
   // @@protoc_insertion_point(class_scope:mUSV.SensorData)
  private:
@@ -334,10 +606,10 @@ class SensorData :
   mutable std::atomic<int> _obstacle_sensors_cached_byte_size_;
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 > puck_sensors_;
   mutable std::atomic<int> _puck_sensors_cached_byte_size_;
-  ::google::protobuf::Timestamp* last_updated_;
-  float pose_x_;
-  float pose_y_;
-  float pose_yaw_;
+  ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint > waypoints_;
+  ::mUSV::SensorData_Pose2D* pose_;
+  ::google::protobuf::Timestamp* timestamp_;
+  bool loop_waypoints_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_musv_5fmsg_2eproto;
 };
@@ -366,53 +638,154 @@ inline void RequestData::set_tag_id(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:mUSV.RequestData.tag_id)
 }
 
+// bool request_waypoints = 2;
+inline void RequestData::clear_request_waypoints() {
+  request_waypoints_ = false;
+}
+inline bool RequestData::request_waypoints() const {
+  // @@protoc_insertion_point(field_get:mUSV.RequestData.request_waypoints)
+  return request_waypoints_;
+}
+inline void RequestData::set_request_waypoints(bool value) {
+  
+  request_waypoints_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.RequestData.request_waypoints)
+}
+
+// -------------------------------------------------------------------
+
+// SensorData_Pose2D
+
+// float x = 1;
+inline void SensorData_Pose2D::clear_x() {
+  x_ = 0;
+}
+inline float SensorData_Pose2D::x() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.Pose2D.x)
+  return x_;
+}
+inline void SensorData_Pose2D::set_x(float value) {
+  
+  x_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.Pose2D.x)
+}
+
+// float y = 2;
+inline void SensorData_Pose2D::clear_y() {
+  y_ = 0;
+}
+inline float SensorData_Pose2D::y() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.Pose2D.y)
+  return y_;
+}
+inline void SensorData_Pose2D::set_y(float value) {
+  
+  y_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.Pose2D.y)
+}
+
+// float yaw = 3;
+inline void SensorData_Pose2D::clear_yaw() {
+  yaw_ = 0;
+}
+inline float SensorData_Pose2D::yaw() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.Pose2D.yaw)
+  return yaw_;
+}
+inline void SensorData_Pose2D::set_yaw(float value) {
+  
+  yaw_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.Pose2D.yaw)
+}
+
+// -------------------------------------------------------------------
+
+// SensorData_Waypoint
+
+// float x = 1;
+inline void SensorData_Waypoint::clear_x() {
+  x_ = 0;
+}
+inline float SensorData_Waypoint::x() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.Waypoint.x)
+  return x_;
+}
+inline void SensorData_Waypoint::set_x(float value) {
+  
+  x_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.Waypoint.x)
+}
+
+// float y = 2;
+inline void SensorData_Waypoint::clear_y() {
+  y_ = 0;
+}
+inline float SensorData_Waypoint::y() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.Waypoint.y)
+  return y_;
+}
+inline void SensorData_Waypoint::set_y(float value) {
+  
+  y_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.Waypoint.y)
+}
+
 // -------------------------------------------------------------------
 
 // SensorData
 
-// float pose_x = 1;
-inline void SensorData::clear_pose_x() {
-  pose_x_ = 0;
+// .mUSV.SensorData.Pose2D pose = 1;
+inline bool SensorData::has_pose() const {
+  return this != internal_default_instance() && pose_ != nullptr;
 }
-inline float SensorData::pose_x() const {
-  // @@protoc_insertion_point(field_get:mUSV.SensorData.pose_x)
-  return pose_x_;
+inline void SensorData::clear_pose() {
+  if (GetArenaNoVirtual() == nullptr && pose_ != nullptr) {
+    delete pose_;
+  }
+  pose_ = nullptr;
 }
-inline void SensorData::set_pose_x(float value) {
+inline const ::mUSV::SensorData_Pose2D& SensorData::pose() const {
+  const ::mUSV::SensorData_Pose2D* p = pose_;
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.pose)
+  return p != nullptr ? *p : *reinterpret_cast<const ::mUSV::SensorData_Pose2D*>(
+      &::mUSV::_SensorData_Pose2D_default_instance_);
+}
+inline ::mUSV::SensorData_Pose2D* SensorData::release_pose() {
+  // @@protoc_insertion_point(field_release:mUSV.SensorData.pose)
   
-  pose_x_ = value;
-  // @@protoc_insertion_point(field_set:mUSV.SensorData.pose_x)
+  ::mUSV::SensorData_Pose2D* temp = pose_;
+  pose_ = nullptr;
+  return temp;
+}
+inline ::mUSV::SensorData_Pose2D* SensorData::mutable_pose() {
+  
+  if (pose_ == nullptr) {
+    auto* p = CreateMaybeMessage<::mUSV::SensorData_Pose2D>(GetArenaNoVirtual());
+    pose_ = p;
+  }
+  // @@protoc_insertion_point(field_mutable:mUSV.SensorData.pose)
+  return pose_;
+}
+inline void SensorData::set_allocated_pose(::mUSV::SensorData_Pose2D* pose) {
+  ::google::protobuf::Arena* message_arena = GetArenaNoVirtual();
+  if (message_arena == nullptr) {
+    delete pose_;
+  }
+  if (pose) {
+    ::google::protobuf::Arena* submessage_arena = nullptr;
+    if (message_arena != submessage_arena) {
+      pose = ::google::protobuf::internal::GetOwnedMessage(
+          message_arena, pose, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  pose_ = pose;
+  // @@protoc_insertion_point(field_set_allocated:mUSV.SensorData.pose)
 }
 
-// float pose_y = 2;
-inline void SensorData::clear_pose_y() {
-  pose_y_ = 0;
-}
-inline float SensorData::pose_y() const {
-  // @@protoc_insertion_point(field_get:mUSV.SensorData.pose_y)
-  return pose_y_;
-}
-inline void SensorData::set_pose_y(float value) {
-  
-  pose_y_ = value;
-  // @@protoc_insertion_point(field_set:mUSV.SensorData.pose_y)
-}
-
-// float pose_yaw = 3;
-inline void SensorData::clear_pose_yaw() {
-  pose_yaw_ = 0;
-}
-inline float SensorData::pose_yaw() const {
-  // @@protoc_insertion_point(field_get:mUSV.SensorData.pose_yaw)
-  return pose_yaw_;
-}
-inline void SensorData::set_pose_yaw(float value) {
-  
-  pose_yaw_ = value;
-  // @@protoc_insertion_point(field_set:mUSV.SensorData.pose_yaw)
-}
-
-// repeated int32 obstacle_sensors = 4 [packed = true];
+// repeated int32 obstacle_sensors = 2 [packed = true];
 inline int SensorData::obstacle_sensors_size() const {
   return obstacle_sensors_.size();
 }
@@ -442,7 +815,7 @@ SensorData::mutable_obstacle_sensors() {
   return &obstacle_sensors_;
 }
 
-// repeated int32 puck_sensors = 5 [packed = true];
+// repeated int32 puck_sensors = 3 [packed = true];
 inline int SensorData::puck_sensors_size() const {
   return puck_sensors_.size();
 }
@@ -472,55 +845,103 @@ SensorData::mutable_puck_sensors() {
   return &puck_sensors_;
 }
 
-// .google.protobuf.Timestamp last_updated = 6;
-inline bool SensorData::has_last_updated() const {
-  return this != internal_default_instance() && last_updated_ != nullptr;
+// .google.protobuf.Timestamp timestamp = 4;
+inline bool SensorData::has_timestamp() const {
+  return this != internal_default_instance() && timestamp_ != nullptr;
 }
-inline const ::google::protobuf::Timestamp& SensorData::last_updated() const {
-  const ::google::protobuf::Timestamp* p = last_updated_;
-  // @@protoc_insertion_point(field_get:mUSV.SensorData.last_updated)
+inline const ::google::protobuf::Timestamp& SensorData::timestamp() const {
+  const ::google::protobuf::Timestamp* p = timestamp_;
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.timestamp)
   return p != nullptr ? *p : *reinterpret_cast<const ::google::protobuf::Timestamp*>(
       &::google::protobuf::_Timestamp_default_instance_);
 }
-inline ::google::protobuf::Timestamp* SensorData::release_last_updated() {
-  // @@protoc_insertion_point(field_release:mUSV.SensorData.last_updated)
+inline ::google::protobuf::Timestamp* SensorData::release_timestamp() {
+  // @@protoc_insertion_point(field_release:mUSV.SensorData.timestamp)
   
-  ::google::protobuf::Timestamp* temp = last_updated_;
-  last_updated_ = nullptr;
+  ::google::protobuf::Timestamp* temp = timestamp_;
+  timestamp_ = nullptr;
   return temp;
 }
-inline ::google::protobuf::Timestamp* SensorData::mutable_last_updated() {
+inline ::google::protobuf::Timestamp* SensorData::mutable_timestamp() {
   
-  if (last_updated_ == nullptr) {
+  if (timestamp_ == nullptr) {
     auto* p = CreateMaybeMessage<::google::protobuf::Timestamp>(GetArenaNoVirtual());
-    last_updated_ = p;
+    timestamp_ = p;
   }
-  // @@protoc_insertion_point(field_mutable:mUSV.SensorData.last_updated)
-  return last_updated_;
+  // @@protoc_insertion_point(field_mutable:mUSV.SensorData.timestamp)
+  return timestamp_;
 }
-inline void SensorData::set_allocated_last_updated(::google::protobuf::Timestamp* last_updated) {
+inline void SensorData::set_allocated_timestamp(::google::protobuf::Timestamp* timestamp) {
   ::google::protobuf::Arena* message_arena = GetArenaNoVirtual();
   if (message_arena == nullptr) {
-    delete reinterpret_cast< ::google::protobuf::MessageLite*>(last_updated_);
+    delete reinterpret_cast< ::google::protobuf::MessageLite*>(timestamp_);
   }
-  if (last_updated) {
+  if (timestamp) {
     ::google::protobuf::Arena* submessage_arena =
-      reinterpret_cast<::google::protobuf::MessageLite*>(last_updated)->GetArena();
+      reinterpret_cast<::google::protobuf::MessageLite*>(timestamp)->GetArena();
     if (message_arena != submessage_arena) {
-      last_updated = ::google::protobuf::internal::GetOwnedMessage(
-          message_arena, last_updated, submessage_arena);
+      timestamp = ::google::protobuf::internal::GetOwnedMessage(
+          message_arena, timestamp, submessage_arena);
     }
     
   } else {
     
   }
-  last_updated_ = last_updated;
-  // @@protoc_insertion_point(field_set_allocated:mUSV.SensorData.last_updated)
+  timestamp_ = timestamp;
+  // @@protoc_insertion_point(field_set_allocated:mUSV.SensorData.timestamp)
+}
+
+// repeated .mUSV.SensorData.Waypoint waypoints = 5;
+inline int SensorData::waypoints_size() const {
+  return waypoints_.size();
+}
+inline void SensorData::clear_waypoints() {
+  waypoints_.Clear();
+}
+inline ::mUSV::SensorData_Waypoint* SensorData::mutable_waypoints(int index) {
+  // @@protoc_insertion_point(field_mutable:mUSV.SensorData.waypoints)
+  return waypoints_.Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint >*
+SensorData::mutable_waypoints() {
+  // @@protoc_insertion_point(field_mutable_list:mUSV.SensorData.waypoints)
+  return &waypoints_;
+}
+inline const ::mUSV::SensorData_Waypoint& SensorData::waypoints(int index) const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.waypoints)
+  return waypoints_.Get(index);
+}
+inline ::mUSV::SensorData_Waypoint* SensorData::add_waypoints() {
+  // @@protoc_insertion_point(field_add:mUSV.SensorData.waypoints)
+  return waypoints_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint >&
+SensorData::waypoints() const {
+  // @@protoc_insertion_point(field_list:mUSV.SensorData.waypoints)
+  return waypoints_;
+}
+
+// bool loop_waypoints = 6;
+inline void SensorData::clear_loop_waypoints() {
+  loop_waypoints_ = false;
+}
+inline bool SensorData::loop_waypoints() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.loop_waypoints)
+  return loop_waypoints_;
+}
+inline void SensorData::set_loop_waypoints(bool value) {
+  
+  loop_waypoints_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.loop_waypoints)
 }
 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 

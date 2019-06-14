@@ -65,6 +65,7 @@ void detector_thread(PoseDetector& pd) {
 }
 
 int main(int argc, char* argv[]) {
+//--- Initialize Threads ---//
 	running = true;
 	struct timeval startTime;
 	gettimeofday(&startTime, NULL);
@@ -117,9 +118,7 @@ int main(int argc, char* argv[]) {
 	threads[0].detach();
 	threads[1].detach();
 
-//--- Socket --- //
-	//TODO encapsulate socket code
-	//TODO wishlist: add threadpool & multiple ports to handle client requests in parallel
+//--- Socket Setup --- //
 	int server_fd, new_socket;
 	struct sockaddr_in address;
 	int opt = 1;
@@ -158,6 +157,7 @@ int main(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+//--- Request Receiver Loop ---//
 	struct timeval currentTime;
 
 	while (running) {
@@ -180,8 +180,6 @@ int main(int argc, char* argv[]) {
 
 			int index = CVSS_util::tagMatch(&taggedObjects, requestData.tag_id());
 			pose2D pose = taggedObjects[index].getPose();
-			//DEBUG message
-//			cout << "x:" << pose.x << " y:" << pose.y << " yaw:" << pose.yaw << endl;
 
 			currentTime = pose.timestamp;
 			long seconds = currentTime.tv_sec - startTime.tv_sec;
@@ -190,19 +188,24 @@ int main(int argc, char* argv[]) {
 				uSeconds = uSeconds + 1e6;
 				seconds--;
 			}
-			cout << "s: " << seconds << endl;
-			cout << "us:" << uSeconds << endl;
 
-			sensorData.set_pose_x(pose.x);
-			sensorData.set_pose_y(pose.y);
-			sensorData.set_pose_yaw(pose.yaw);
+			sensorData.mutable_pose()->set_x(pose.x);
+			sensorData.mutable_pose()->set_y(pose.y);
+			sensorData.mutable_pose()->set_yaw(pose.yaw);
 			sensorData.add_obstacle_sensors(0);
 			sensorData.add_obstacle_sensors(1);
 			sensorData.add_obstacle_sensors(2);
 			sensorData.add_puck_sensors(3);
 			sensorData.add_puck_sensors(4);
 			sensorData.add_puck_sensors(5);
-			*sensorData.mutable_last_updated() = TimeUtil::MicrosecondsToTimestamp(seconds * 1e6 + uSeconds);
+			*sensorData.mutable_timestamp() = TimeUtil::MicrosecondsToTimestamp(seconds * 1e6 + uSeconds);
+
+			if(requestData.request_waypoints()) {
+				mUSV::SensorData::Waypoint* waypoint1 = sensorData.add_waypoints();
+				waypoint1->set_x(0);
+				waypoint1->set_y(0);
+				sensorData.set_loop_waypoints(true);
+			}
 
 			size_t size = sensorData.ByteSizeLong();
 			char* msg = new char [size];

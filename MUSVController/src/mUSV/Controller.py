@@ -22,6 +22,7 @@ class Controller(object):
         self._last_timestamp = -1
         self._lastPose = pose2D(0,0,0)
         self._waypoints = []
+        self._loop_waypoints = False
     
     def get_motor_speeds(self, sensorData):
         '''

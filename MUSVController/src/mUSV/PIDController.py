@@ -51,10 +51,16 @@ class PIDController(Controller):
         @return: integer tuple containing motor speeds (portSpeed, starboardSpeed).
         Motor speeds range from -127 to 127.
         '''
-        msg_timestamp = sensorData.last_updated.seconds + sensorData.last_updated.nanos*1e-9
+        msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
         # If first message received, set time_offset.
         if self._time_offset < 0:
             self._time_offset = time() - msg_timestamp
+        
+        if sensorData.waypoints.__len__() > 0:
+            self._waypoints = []
+            for w in sensorData.waypoints:
+                self._waypoints.append(pose2D(w.x, w.y, 0))
+            self._loop_waypoints = sensorData.loop_waypoints
         
         # If no more waypoints, stop motors.
         if len(self._waypoints) < 1:
@@ -64,7 +70,7 @@ class PIDController(Controller):
             return (0, 0)
         
         if msg_timestamp > self._last_timestamp:
-            pose = pose2D(sensorData.pose_x, sensorData.pose_y, sensorData.pose_yaw)
+            pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
 
             (distance_error, angular_error) = self._get_error(pose, self._waypoints[0])
             # P
@@ -85,41 +91,50 @@ class PIDController(Controller):
             
             throttled_speed = self._throttle*self._speed_limit_upper*distance_control_value
             turn = throttled_speed*angle_control_value
-            (port, starboard) = self._get_bounded_motor_speeds(self._control_vals_to_speeds(throttled_speed, turn))
+            (port, starboard) = self._control_vals_to_speeds(throttled_speed, turn)
+            (port, starboard) = self._get_bounded_motor_speeds(port, starboard)
+            #DEBUG message
+#             print ("motor speeds: ({}, {})".format(port, starboard))
             
             self._motor_speeds = (port, starboard) 
-            self._lastPose = pose2D(sensorData.pose_x, sensorData.pose_y, sensorData.pose_yaw) 
+            self._lastPose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw) 
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
             
             if distance_error < self._waypoint_threshold:
-                self._waypoints.pop()
+                if self._loop_waypoints:
+                    self._waypoints.append(self._waypoints.pop())
+                else:
+                    self._waypoints.pop()
         
         return self._motor_speeds
     
-    def _get_error(self, robot_pose, goal_position):
+    def _get_error(self, robot_pose, goal_pose):
         '''
         @param robot_pose: pose2D object containing the most up to date pose estimate from CVSensorSimulator
-        @param goal_position: tuple (x, y) containing the coordinates of the goal
+        @param goal_position: pose2D object containing the coordinates of the goal, yaw is ignored
         '''
-        dx = robot_pose.x - goal_position[0]
-        dy = robot_pose.y - goal_position[1]
+        dx = robot_pose.x - goal_pose.x
+        dy = robot_pose.y - goal_pose.y
         distance_error = math.sqrt(dx**2 + dy**2)
         
-        if robot_pose.yaw < 0:
-            robot_pose.yaw = robot_pose.yaw + 2*math.pi()
-        
-        goal_angle = math.atan2(dy, dx)
-        if goal_angle < 0:
-            goal_angle = goal_angle + 2*math.pi()
-        
-        angular_error = robot_pose.yaw - goal_angle
+        goal_angle = math.atan2(dy, dx)        
+        angular_error = self._bounded_angle(robot_pose.yaw - goal_angle, math.pi, -math.pi)
         
         return (distance_error, angular_error)
     
+    def _bounded_angle(self, angle, upper_bound, lower_bound):
+        '''
+        '''
+        new_angle = angle
+        while new_angle > upper_bound:
+            new_angle = new_angle - 2*math.pi
+        while new_angle <= lower_bound:
+            new_angle = new_angle + 2*math.pi
+        return new_angle 
+    
     def _control_vals_to_speeds(self, forward_speed, turn_rate):
         '''
-        
         '''
         port = forward_speed/2 - turn_rate/self._motor_distance
         starboard = forward_speed/2 + turn_rate/self._motor_distance

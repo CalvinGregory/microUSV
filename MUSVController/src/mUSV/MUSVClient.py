@@ -38,18 +38,19 @@ if __name__ == '__main__':
     
     controller = PIDController((config.P_dist, config.I_dist, config.D_dist), (config.P_ang, config.I_ang, config.D_ang), config.propSpin_port, config.propSpin_star)
     controller.set_throttle(0.6)
+        
+    # Connect to the arduino over USB
+    arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
+    # Give serial connection time to settle
+    time.sleep(2)
     
-    DebugMode = True
-    
-    if not DebugMode: 
-        # Connect to the arduino over USB
-        arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
-        # Give serial connection time to settle
-        time.sleep(2)
-    
+    first_contact = True
     while True:
         requestData = musv_msg_pb2.RequestData()
         requestData.tag_id = tagID
+        if first_contact:
+            requestData.request_waypoints = True
+            first_contact = False
         
         sensorSimulator = socket.socket()
         try:
@@ -62,22 +63,25 @@ if __name__ == '__main__':
             sensorSimulator.close()
             sensorData.ParseFromString(msg)
             
-#             print ("Pose = x:{} y:{} yaw:{}".format(sensorData.pose_x, sensorData.pose_y, sensorData.pose_yaw))
+            # DEBUG messages
+#             print ("Pose = x:{} y:{} yaw:{}".format(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw))
 #             for obstacle in sensorData.obstacle_sensors:
 #                 print ("Obstacles: ", obstacle)
 #             for puck in sensorData.puck_sensors:
 #                 print ("Pucks: ", puck)
-#             print("TimeStamp: ", sensorData.last_updated)
+#             print("TimeStamp: ", sensorData.timestamp)
+#             for w in sensorData.waypoints:
+#                 print ("Waypoint: ", w)
+#             print("loop_waypoints: ", sensorData.loop_waypoints)
             
             motorSpeeds = controller.get_motor_speeds(sensorData)
-            
-            if not DebugMode:
-                send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
+            send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                 
         except socket.error as e:
             pass
         finally:
-#             time.sleep(0.25)
+            # DEBUG for legibility
+#             time.sleep(0.3)
             pass
 
             
