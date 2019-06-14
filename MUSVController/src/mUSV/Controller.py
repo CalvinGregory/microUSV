@@ -19,7 +19,7 @@ class Controller(object):
         '''
         self._portPropSpin = port_propeller_spin
         self._starPropSpin = starboard_propeller_spin
-        self._lastTime = -1
+        self._last_timestamp = -1
         self._lastPose = pose2D(0,0,0)
         self._waypoints = []
     
