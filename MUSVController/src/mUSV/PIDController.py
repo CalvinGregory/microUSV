@@ -33,7 +33,6 @@ class PIDController(Controller):
         self._speed_limit_lower = -127
         self._waypoint_threshold = 50 #TODO tune me
         self._time_offset = -1
-        self._motor_distance = 0.048 # 48mm
         
     def set_throttle(self, speed):
         '''
@@ -136,8 +135,8 @@ class PIDController(Controller):
     def _control_vals_to_speeds(self, forward_speed, turn_rate):
         '''
         '''
-        port = forward_speed/2 - turn_rate/self._motor_distance
-        starboard = forward_speed/2 + turn_rate/self._motor_distance
+        port = (forward_speed - turn_rate)/2
+        starboard = (forward_speed + turn_rate)/2
         return (port, starboard)
     
     def _get_bounded_motor_speeds(self, port_speed, starboard_speed):
