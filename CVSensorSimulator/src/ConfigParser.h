@@ -52,13 +52,20 @@ namespace CameraInfo {
 }
 
 namespace ConfigParser {
+	typedef struct {
+		float x;
+		float y;
+	} Waypoint;
+
 	typedef struct{
-		int visualize;
+		bool visualize;
 		CameraInfo::cameraInfo cInfo;
 		double tagsize;
 		std::list<Robot> robots;
 		std::list<Puck> pucks;
 		std::list<Obstacle> obstacles;
+		std::list<Waypoint> waypoints;
+		bool loop_waypoints;
 	} Config;
 
 	Config getConfigs(std::string filepath) {
@@ -67,7 +74,7 @@ namespace ConfigParser {
 		fileReader >> jsonFile;
 		fileReader.close();
 		Config config;
-		config.visualize = jsonFile.value("visualize", 1);
+		config.visualize = jsonFile.value("visualize", true);
 		config.cInfo = jsonFile["cameraInfo"].get<CameraInfo::cameraInfo>(); // @suppress("Ambiguous problem")
 		config.tagsize = jsonFile.value("tagsize", 48.0);
 		for (uint i = 0; i < jsonFile["Robots"].size(); i++) {
@@ -86,6 +93,13 @@ namespace ConfigParser {
 			Obstacle obstacle(tagID);
 			config.obstacles.push_back(obstacle);
 		}
+		for (uint i = 0; i < jsonFile["Waypoints"].size(); i++) {
+			Waypoint waypoint;
+			waypoint.x = jsonFile["Waypoints"][i]["x"].get<int>(); // @suppress("Ambiguous problem")
+			waypoint.y = jsonFile["Waypoints"][i]["y"].get<int>(); // @suppress("Ambiguous problem")
+			config.waypoints.push_back(waypoint);
+		}
+		config.loop_waypoints = jsonFile.value("loop_waypoints", false);
 
 		return config;
 	}

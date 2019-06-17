@@ -1,5 +1,5 @@
 {
-	"visualize": 1,
+	"visualize": true,
 	
 	"cameraInfo": {
 		"cameraID": 1,
@@ -26,5 +26,11 @@
 	
 	"Obstacles": [
 		
-	]
+	],
+	
+	"Waypoints": [
+		{"x": 0, "y": 0}
+	],
+	
+	"loop_waypoints": true
 }

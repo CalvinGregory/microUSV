@@ -37,7 +37,7 @@ using google::protobuf::util::TimeUtil;
 #define PORT 8078
 
 bool running;
-int visualize;
+bool visualize;
 
 void vid_cap_thread(FrameBuffer& fb) {
 	while(running) {
@@ -201,10 +201,13 @@ int main(int argc, char* argv[]) {
 			*sensorData.mutable_timestamp() = TimeUtil::MicrosecondsToTimestamp(seconds * 1e6 + uSeconds);
 
 			if(requestData.request_waypoints()) {
-				mUSV::SensorData::Waypoint* waypoint1 = sensorData.add_waypoints();
-				waypoint1->set_x(0);
-				waypoint1->set_y(0);
-				sensorData.set_loop_waypoints(true);
+				for (std::list<ConfigParser::Waypoint>::iterator it = config.waypoints.begin(); it != config.waypoints.end(); it++) {
+					mUSV::SensorData::Waypoint* waypoint = sensorData.add_waypoints();
+					waypoint->set_x(it->x);
+					waypoint->set_y(it->y);
+				}
+
+				sensorData.set_loop_waypoints(config.loop_waypoints);
 			}
 
 			size_t size = sensorData.ByteSizeLong();
