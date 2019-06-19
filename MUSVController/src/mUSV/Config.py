@@ -1,19 +1,54 @@
 '''
-Created on Jun. 4, 2019
+MUSVClient controls the microUSV. It connects to a host computer running CVSensorSimulator to determine 
+its simulated sensor values, then acts on those values, sending instructions to the motor controller.  
 
-@author: CalvinGregory
+Copyright (C) 2019  CalvinGregory  cgregory@mun.ca
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 '''
 
 import json
 
 class Config:
     '''
-    classdocs
+    Config is a class used to import variables from a JSON config file at runtime.
+    
+    Attributes:
+        serverIP (str): IP address of the host computer running the CVSensorSimulator application. 
+        tagID (int): Tag ID number of the AprilTag on this robot. 
+        label (str): This robot's display name.
+        tagTF_x (float): x-axis translation between the robot's coordinate frame and the AprilTag centroid. 
+        tagTF_y (float): y-axis translation between the robot's coordinate frame and the AprilTag centroid. 
+        tagTF_z (float): z-axis translation between the robot's coordinate frame and the AprilTag centroid. 
+        tagTF_yaw (float): z-axis rotation between the robot's coordinate frame and the AprilTag centroid. 
+        propSpin_port (int): coefficient indicating which direction the port propeller should spin. 
+                             Acceptable values are +1 or -1
+        propSpin_star (int): coefficient indicating which direction the starboard propeller should spin. 
+                             Acceptable values are +1 or -1
+        P_dist (float): Distance PID controller proportional gain. 
+        I_dist (float): Distance PID controller integral gain. 
+        D_dist (float): Distance PID controller derivative gain. 
+        P_ang (float): Angular PID controller proportional gain. 
+        I_ang (float): Angular PID controller integral gain. 
+        D_ang (float): Angular PID controller derivative gain. 
     '''
 
     def __init__(self, filepath):
         '''
-        Constructor
+        Creates a Config object, parses target JSON config file and stores its data in this object. 
+        
+        Args:
+            filepath (str): Filepath to a JSON config file to be parsed.
         '''
         self.serverIP = "192.168.1.0"
         self.tagID = 1
@@ -34,7 +69,10 @@ class Config:
 
     def parse_configs(self, filepath):
         '''
-        Parse microUSV json config file at the target location. 
+        Parses target JSON config file and stores its data in this object.
+        
+        Args:
+            filepath (str): Filepath to a JSON config file to be parsed.
         '''
         with open(filepath, 'r') as jsonFile:
             config = json.load(jsonFile)

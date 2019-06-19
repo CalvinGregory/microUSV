@@ -1,11 +1,24 @@
 '''
-Created on May 14, 2019
+musv_teleop interprets SSH keyboard inputs as direction commands and sends 
+the corresponding motor speed commands to the microUSV's motor controller. 
 
-@author: CalvinGregory
+Copyright (C) 2019  CalvinGregory  cgregory@mun.ca
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Based on a tutorial by Christopher Barnatt.
-https://www.explainingcomputers.com/rasp_pi_robotics.html
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 '''
+
+# Based on a tutorial by Christopher Barnatt.
+# https://www.explainingcomputers.com/rasp_pi_robotics.html
 
 import serial
 import curses
@@ -13,7 +26,8 @@ import time
 import struct
 
 def sendSpeeds( portSpeed, starboardSpeed ):
-    """ Send formated motor speed message to Arduino
+    """ 
+    Send formated motor speed message to Arduino
     
     Args:
         portSpeed (int16):      Desired port motor speed (range -127 to 127)

@@ -1,7 +1,20 @@
 '''
-Created on May 15, 2019
+MUSVClient controls the microUSV. It connects to a host computer running CVSensorSimulator to determine 
+its simulated sensor values, then acts on those values, sending instructions to the motor controller.  
 
-@author: CalvinGregory
+Copyright (C) 2019  CalvinGregory  cgregory@mun.ca
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 '''
 
 import serial
@@ -16,18 +29,27 @@ from PIDController import PIDController
 port = 8078
 
 def send_speeds( arduino, portSpeed, starboardSpeed ):
-    """ Send formated motor speed message to Arduino
-       
-    @param arduino:                Serial port variable connecting to Arduino
-    @param portSpeed (int16):      Desired port motor speed (range -127 to 127)
-    @param starboardSpeed (int16): Desired starboard motor speed (range -127 to 127)
+    ''' 
+    Send formated motor speed message to the Arduino peripheral controller board which forwards
+    the message to the microUSV's motor controller. 
+    
+    Args:   
+        arduino (serial.Serial): Serial port variable connecting to the Arduino.
+        portSpeed (int16): Desired port motor speed (range -127 to 127).
+        starboardSpeed (int16): Desired starboard motor speed (range -127 to 127).
               
-    Messages are prepended by two '*' characters to indicate message start.     
-    """
+    Note: Messages are prepended by two '*' characters to indicate message start.     
+    '''
     arduino.write(struct.pack('<cchh', '*', '*', starboardSpeed, portSpeed))
     return
 
 if __name__ == '__main__':
+    '''
+    MUSVClient controls the microUSV. It connects to a host computer running CVSensorSimulator to determine 
+    its simulated sensor values, then acts on those values, sending instructions to the motor controller.
+    '''
+    
+    # Read config file
     if (len(sys.argv) < 2):
         print ('No config file path provided')
         exit()
@@ -36,6 +58,7 @@ if __name__ == '__main__':
     server_ip = config.serverIP
     tagID = config.tagID
     
+    # Build controller object
     controller = PIDController((config.P_dist, config.I_dist, config.D_dist), (config.P_ang, config.I_ang, config.D_ang), config.propSpin_port, config.propSpin_star)
     controller.set_throttle(0.6)
         
@@ -46,6 +69,7 @@ if __name__ == '__main__':
     
     first_contact = True
     while True:
+        # Ping host machine running CVSensorSimulator, request sensor data for this microUSV. 
         requestData = musv_msg_pb2.RequestData()
         requestData.tag_id = tagID
         if first_contact:

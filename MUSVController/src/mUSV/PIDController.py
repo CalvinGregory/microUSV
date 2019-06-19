@@ -1,7 +1,20 @@
 '''
-Created on May 15, 2019
+MUSVClient controls the microUSV. It connects to a host computer running CVSensorSimulator to determine 
+its simulated sensor values, then acts on those values, sending instructions to the motor controller.  
 
-@author: CalvinGregory
+Copyright (C) 2019  CalvinGregory  cgregory@mun.ca
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 '''
 
 from Controller import Controller
@@ -12,16 +25,32 @@ import numpy
 
 class PIDController(Controller):
     '''
-    classdocs
+    The PIDController class implements a pair of PID controllers (distance control and angular control) 
+    to steer the microUSV toward its goal position.  
+    
+    Attributes:
+        _distance_PID_gains (float, float, float): Tuple containing the PID gains for the distance controller (P, I, D).
+        _angle_PID_gains (float, float, float): Tuple containing the PID gans for the angular controller (P, I, D). 
+        _last_error (float, float): Tuple containing the position error from the previous timestep (x, y).
+        _motor_speeds (int, int): Tuple containing the speed values the microUSV's motors should currently be set to. 
+        _throttle (float): Baseline motor output speed. Value should be in range 0 to 1. 
+        _speed_limit_upper (int): Maximum motor speed value. 
+        _speed_limit_lower (int): Minimum motor speed value.
+        _waypoint_threshold (float): Threshold indicating at what distance (mm) to treat the current waypoint as reached. 
+        _time_offset (float): Offset between internal clock and SensorData message timestamps. 
     '''
 
     def __init__(self, distance_PID_gains, angle_PID_gains, port_propeller_spin, starboard_propeller_spin):
         '''
-        Constructor
-        @param distance_PID_gains: tuple (P, I, D) of PID controller gains for distance control
-        @param angle_PID_gains: tuple (P, I, D) of PID controller gains for angle control
-        @param port_propeller_spin: coefficient indicating which direction the port propeller should spin. Acceptable values are +1 or -1
-        @param starboard_propeller_spin: coefficient indicating which direction the starboard propeller should spin. Acceptable values are +1 or -1
+        Initialize a PIDController object. 
+        
+        Args: 
+            distance_PID_gains (float, float, float): tuple (P, I, D) of PID controller gains for distance control
+            angle_PID_gains (float, float, float): tuple (P, I, D) of PID controller gains for angle control
+            port_propeller_spin (int): coefficient indicating which direction the port propeller should spin. 
+                                       Acceptable values are +1 or -1
+            starboard_propeller_spin (int): coefficient indicating which direction the starboard propeller should spin. 
+                                            Acceptable values are +1 or -1
         '''
         super(PIDController, self).__init__(port_propeller_spin, starboard_propeller_spin)
         self._distance_PID_gains = distance_PID_gains
@@ -31,11 +60,16 @@ class PIDController(Controller):
         self._throttle = 1
         self._speed_limit_upper = 127
         self._speed_limit_lower = -127
-        self._waypoint_threshold = 50 #TODO tune me
+        self._waypoint_threshold = 50.0 #TODO tune me
         self._time_offset = -1
         
     def set_throttle(self, speed):
         '''
+        Sets the internal _throttle variable. 
+        Function caps the throttle value to a range from 0 to 1. 
+       
+        Args:
+            speed (float): The desired throttle value. 
         '''
         if speed < 0:
             self._throttle = 0
@@ -46,37 +80,47 @@ class PIDController(Controller):
         
     def get_motor_speeds(self, sensorData):
         '''
-        @param sensorData: 
-        @return: integer tuple containing motor speeds (portSpeed, starboardSpeed).
-        Motor speeds range from -127 to 127.
+        Applies distance and angular PID controllers to the provided sensor data. Calculates motor speeds
+        that will move the microUSV closer to its current goal position. 
+        
+        Args:
+            sensorData (musv_msg_pb2.SensorData): Protocol buffer SensorData message object containing the most 
+                                                  recent simulated sensor values from the host machine.
+        
+        Returns:
+            (int, int): integer tuple containing motor speeds (portSpeed, starboardSpeed).
+                        Motor speed values range from -127 to 127.
         '''
         msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
-        # If first message received, set time_offset.
+        # If this is the first message received, set time_offset.
         if self._time_offset < 0:
             self._time_offset = time() - msg_timestamp
         
+        # If the message contains waypoints, overwrite the current waypoint list and loop flag. 
         if sensorData.waypoints.__len__() > 0:
             self._waypoints = []
             for w in sensorData.waypoints:
                 self._waypoints.append(pose2D(w.x, w.y, 0))
             self._loop_waypoints = sensorData.loop_waypoints
         
-        # If no more waypoints, stop motors.
+        # If no more waypoints in waypoint list, stop motors.
         if len(self._waypoints) < 1:
             return (0, 0)
+        
         # If no new pose data received for 2 seconds, stop motors.
         if time() - self._time_offset - msg_timestamp > 2.0:
             return (0, 0)
         
+        # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
             pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
 
             (distance_error, angular_error) = self._get_error(pose, self._waypoints[0])
-            # P
+            # Apply Proportional gains 
             distance_control_value = self._distance_PID_gains[0]*distance_error
             angle_control_value = self._angle_PID_gains[0]*angular_error
             
-            # I & D 
+            # Apply Integral and Derivative gains if not first message
             if self._last_timestamp > 0:
                 dt = msg_timestamp - self._last_timestamp
                 
@@ -90,7 +134,7 @@ class PIDController(Controller):
             
             throttled_speed = self._throttle*self._speed_limit_upper*distance_control_value
             turn = throttled_speed*angle_control_value
-            (port, starboard) = self._control_vals_to_speeds(throttled_speed, turn)
+            (port, starboard) = self._components_to_speeds(throttled_speed, turn)
             (port, starboard) = self._get_bounded_motor_speeds(port, starboard)
             #DEBUG message
 #             print ("motor speeds: ({}, {})".format(port, starboard))
@@ -110,8 +154,16 @@ class PIDController(Controller):
     
     def _get_error(self, robot_pose, goal_pose):
         '''
-        @param robot_pose: pose2D object containing the most up to date pose estimate from CVSensorSimulator
-        @param goal_position: pose2D object containing the coordinates of the goal, yaw is ignored
+        Calculates the distance and angular error between the microUSV and its current goal position. 
+        Distance error is the distance between the microUSV and it's goal. 
+        Angular error is the difference between the microUSV's heading and the direction toward it's goal.    
+        
+        Args:
+            robot_pose (pose2D): pose2D object containing the most up to date pose estimate from CVSensorSimulator.
+            goal_position (pose2D): pose2D object containing the coordinates of the goal. Note: yaw is ignored.
+            
+        Returns:
+            (float, float): Tuple containing the distance and angular errors (distance_error, angular_error).
         '''
         dx = robot_pose.x - goal_pose.x
         dy = robot_pose.y - goal_pose.y
@@ -124,6 +176,15 @@ class PIDController(Controller):
     
     def _bounded_angle(self, angle, upper_bound, lower_bound):
         '''
+        Constrains an angle in radians to a given range. 
+        
+        Args:
+            angle (float): The angle to constrain. 
+            upper_bound (float): The maximum value the angle can have. 
+            lower_bound (float): The minimum value the angle can have.
+            
+        Returns:
+            float: The equivalent angle to the input, constrained within the provided limits.
         '''
         new_angle = angle
         while new_angle > upper_bound:
@@ -132,8 +193,16 @@ class PIDController(Controller):
             new_angle = new_angle + 2*math.pi
         return new_angle 
     
-    def _control_vals_to_speeds(self, forward_speed, turn_rate):
+    def _components_to_speeds(self, forward_speed, turn_rate):
         '''
+        Calculates the desired motor speeds given a desired linear speed and turn rate.
+        
+        Args:
+            forward_speed (float): The desired forward speed. 
+            turn_rate (float): The desired turn rate (ccw positive). 
+            
+        Returns:
+            (float, float): Motor speed tuple (port_motor_speed, starboard_motor_speed).
         '''
         port = (forward_speed - turn_rate)/2
         starboard = (forward_speed + turn_rate)/2
@@ -143,6 +212,13 @@ class PIDController(Controller):
         '''
         Corrects for desired motor outputs exceeding acceptable motor speed range.
         Wherever possible, the difference between motor values is maintained.
+        
+        Args:
+            port_speed (float): Desired port motor speed, unconstrained. 
+            starboard_speed (float): Desired starboard motor speed, unconstrained. 
+            
+        Returns:
+            (int, int): Rounded and constrained motor speed values (port_motor_speed, starboard_motor_speed). 
         '''
         port = int(round(port_speed))
         starboard = int(round(starboard_speed))  
