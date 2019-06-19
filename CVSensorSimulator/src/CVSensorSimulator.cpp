@@ -1,10 +1,21 @@
-//============================================================================
-// Name        : CVSensorSimulator.cpp
-// Author      : CalvinGregory
-// Version     : 1.0
-// Copyright   : CERN Open Hardware Licence v1.2
-// Description : Computer-Vision based sensor simulator for the microUSV
-//============================================================================
+/*
+ * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
+ * an overhead camera and sends that pose data to microUSV's over TCP.
+ *
+ * Copyright (C) 2019  CalvinGregory  cgregory@mun.ca
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
+ */
 
 #include <iostream>
 #include <unistd.h>
@@ -39,12 +50,23 @@ using google::protobuf::util::TimeUtil;
 bool running;
 bool visualize;
 
+/*
+ * Video Capture thread function. Continuously updates the FrameBuffer.
+ *
+ * @param fb The FrameBuffer object to update.
+ */
 void vid_cap_thread(FrameBuffer& fb) {
 	while(running) {
 		fb.updateFrame();
 	}
 }
 
+/*
+ * AprilTag Detector thread function. Detects poses of AprilTags in the most
+ * recent frame data from the FrameBuffer.
+ *
+ * @param pd The PoseDetector object which performs detections.
+ */
 void detector_thread(PoseDetector& pd) {
 
 	Mat temp_frame(100, 100, CV_8UC3, Scalar(0,0,0));
@@ -70,6 +92,7 @@ int main(int argc, char* argv[]) {
 	struct timeval startTime;
 	gettimeofday(&startTime, NULL);
 
+	// Parse config file and pull values into local variables.
 	ConfigParser::Config config;
 	if (argc > 1) {
 		config = ConfigParser::getConfigs(argv[1]);
@@ -108,6 +131,7 @@ int main(int argc, char* argv[]) {
 		i++;
 	}
 
+	// Build threads and thread objects.
 	FrameBuffer fb(settings);
 	PoseDetector pd(&fb, info, &taggedObjects);
 
@@ -164,6 +188,7 @@ int main(int argc, char* argv[]) {
 		mUSV::RequestData requestData;
 		mUSV::SensorData sensorData;
 
+		// Connect to microUSV and receive data.
 		new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
 		if(new_socket == -1) {
 			if (errno != EWOULDBLOCK) {
@@ -178,6 +203,7 @@ int main(int argc, char* argv[]) {
 				return -1;
 			}
 
+			// Identify microUSV and respond with its sensor data.
 			int index = CVSS_util::tagMatch(&taggedObjects, requestData.tag_id());
 			pose2D pose = taggedObjects[index].getPose();
 

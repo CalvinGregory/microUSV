@@ -27,7 +27,8 @@
 #include "semaphore.h"
 
 /*
- *
+ * pose2D is a struct containing two dimensional pose data in cartesian coordinates.
+ * yaw is defined positive counter-clockwise relative to the positive x-axis.
  */
 typedef struct {
 	double x = 0;
@@ -37,7 +38,8 @@ typedef struct {
 } pose2D;
 
 /*
- *
+ * TaggedObject is an abstract class defining an object marked with an AprilTag.
+ * Pose accessor and mutator are thread safe.
  */
 class TaggedObject {
 protected:
@@ -47,12 +49,23 @@ protected:
 	sem_t mutex;
 	std::tuple<uint, uint, uint> tagRGB;
 public:
+	/*
+	 * @return The object's tagID.
+	 */
 	int getTagID() { return tagID; }
+
+	/*
+	 * @param pose The current 2D pose of the TaggedObject.
+	 */
 	void setPose(pose2D pose) {
 		sem_wait(&mutex);
 		this->pose = pose;
 		sem_post(&mutex);
 	}
+
+	/*
+	 * @return The object's current 2D pose.
+	 */
 	pose2D getPose() {
 		pose2D temp;
 		sem_wait(&mutex);
@@ -60,7 +73,15 @@ public:
 		sem_post(&mutex);
 		return temp;
 	}
+
+	/*
+	 * @return The TaggedObject's label string.
+	 */
 	std::string getLabel() { return label; }
+
+	/*
+	 * @return The TaggedObject's tag color in RGB format.
+	 */
 	std::tuple<uint, uint, uint> getTagColor() { return tagRGB; }
 };
 

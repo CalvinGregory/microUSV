@@ -1,8 +1,20 @@
 /*
- * PoseDetector.cpp
+ * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
+ * an overhead camera and sends that pose data to microUSV's over TCP.
  *
- *  Created on: Apr 15, 2019
- *      Author: calvin
+ * Copyright (C) 2019  CalvinGregory  cgregory@mun.ca
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  */
 
 #include "PoseDetector.h"
@@ -43,11 +55,11 @@ void PoseDetector::updatePoseEstimates() {
 	for(int i = 0; i < zarray_size(detections); i++) {
 		zarray_get(detections, i, &det);
 		int index = CVSS_util::tagMatch(objects, det->id);
-		if (index < 0) {
+		if (index < 0) { // Remove all detections which do not belong to a valid TaggedObject
 			zarray_remove_index(detections, i, 0);
 			i--;
 		}
-		else {
+		else { // Estimate the pose of the TaggedObject
 			apriltag_pose_t pose;
 			detInfo.det = det;
 			estimate_tag_pose(&detInfo, &pose);
@@ -58,6 +70,7 @@ void PoseDetector::updatePoseEstimates() {
 
 Mat* PoseDetector::getLabelledFrame() {
 	apriltag_detection_t* det;
+	// Label each TaggedObject in the image.
 	for(int i = 0; i < zarray_size(detections); i++) {
 		zarray_get(detections, i, &det);
 		label_tag_detection(&frame, det);
@@ -91,15 +104,16 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 		fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
 	}
 
+	// Outline the AprilTag in the TaggedObject's color.
 	uint r = get<0>(objects->at(index).getTagColor());
 	uint g = get<1>(objects->at(index).getTagColor());
 	uint b = get<2>(objects->at(index).getTagColor());
-
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[1][0], det->p[1][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[1][0], det->p[1][1]), Point(det->p[2][0], det->p[2][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[2][0], det->p[2][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
 
+	// Place the TaggedObject's label at the apriltag's location.
 	double fontscale = 1.0;
 	int baseline;
 	Size textsize = getTextSize(text, fontface, fontscale, 2, &baseline);
