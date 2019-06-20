@@ -20,17 +20,17 @@ A PC running CVSensorSimulator must be connected to an overhead webcam and a wif
 
 To set up a microUSV, first flash the PeripheralController sketch onto the microUSV's Arduino Nano. Next, load the MUSVController and Teleop directories onto the microUSV's raspberry pi and install all their required packages. At this point the system can be tested in isolation by connecting to the pi over SSH and runnin the teleop program and confirming the propellers spin and the microUSV's motion behaves as expected. 
 	
-'''
+```
 $ python musv_teleop.py
-'''
+```
 
 Identify the host PC's IP address and the individual microUSV's AprilTag ID number and add them to the microUSV's config.json file under the appropriate fields. 
 
 Finally launch CVSensorSimulator on the host PC and MUSVClient on each of the microUSV's. 
 
-'''
+```
 $ ./CVSensorSimulator /path/to/config.json
 $ python MUSVClient /path/to/config.json
-'''
+```
 
 See the [hardware repository wiki](https://osf.io/k7a8p/wiki/13.%20Lab%20Setup/) for figures and more information.
