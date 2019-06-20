@@ -21,7 +21,6 @@ from Controller import Controller
 from pose2D import pose2D
 from time import time
 import math
-import numpy
 
 class PIDController(Controller):
     '''
@@ -224,8 +223,8 @@ class PIDController(Controller):
         starboard = int(round(starboard_speed))  
         diff = abs(port - starboard)
         if diff >= 2*self._speed_limit_upper:
-            port = self._speed_limit_upper*numpy.sign(port)
-            starboard = self._speed_limit_upper*numpy.sign(starboard)
+            port = int(math.copysign(self._speed_limit_upper, port))
+            starboard = int(math.copysign(self._speed_limit_upper, starboard))
         
         elif port > self._speed_limit_upper:
             port = self._speed_limit_upper
