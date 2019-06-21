@@ -1,5 +1,20 @@
 # MUSVController
 
-Onboard controller (raspberry pi zero) code for the microUSV. 
+MUSVController is the control code for the microUSV's onboard Raspberry Pi. It polls a host PC running CVSensorSimulator for simulated sensor data, then uses PID control for waypoint following. 
 
-Polls CVSensorSimulator desktop application for simulated sensor data. Uses PID control for waypoint following.
+The application can be configured by modifying the config.json file. When performing a new setup, the config file values must be adjusted. 
+
+Config Field | Value
+------------------|------
+serverIP | IP address of the host PC running CVSensorSimulator
+tagID | ID number of the AprilTag on this microUSV
+label | **Unused field:** display name for this microUSV
+tagTransform | **Unused field:** The translation and rotation between the microUSV's AprilTag and coordinate frame. 
+PropellerSpin | Integer coefficients (1 or -1) which indicate if the propellers should spin forward or backward depending on their helix angles. If unsure, test expected behavior and propeller coefficients using the teleop program. 
+PIDGains | Gains for the two PID controllers: distance and angular. 
+
+Launch the application by connecting to the microUSV's raspberry pi over ssh and executing the following.
+
+```
+python MUSVClient.py [PATH_TO_CONFIG.JSON]
+```
