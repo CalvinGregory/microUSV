@@ -51,18 +51,18 @@ $ sudo ldconfig
 ```
 
 #### Required Compiler Flags
--std=c++11
--pthread
+ - -std=c++11
+ - -pthread
 
 #### Required Libraries
-opencv_core
-opencv_highgui
-opencv_features2d
-opencv_calib3d
-opencv_videoio
-opencv_imgcodecs
-opencv_imgproc
-protobuf
+ - opencv_core
+ - opencv_highgui
+ - opencv_features2d
+ - opencv_calib3d
+ - opencv_videoio
+ - opencv_imgcodecs
+ - opencv_imgproc
+ - protobuf
 
 ### Raspberry Pi
 #### Install Disk Image
