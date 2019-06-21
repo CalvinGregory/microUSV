@@ -1,8 +1,8 @@
 # Teleop
 
-Basic teleoperation controller for the microUSV. Allows a user to ssh into a microUSV and control the motors using the wasd, qezc, and 123 keys as inputs through a terminal window. 
+Teleop is a basic teleoperation controller for the microUSV. It allows a user to ssh into a microUSV and control the motors using the wasd, qezc, and 123 keys as inputs through a terminal window. It is intended primarily as a quick testing/debugging tool to ensure a microUSV's motors are behaving as expected. 
 
-Keyboard Inputs:
+## Keyboard Input Mappings
  - W - Drive forward
  - A - Pivot counter clockwise
  - S - Drive backward
@@ -22,3 +22,5 @@ Keyboard Inputs:
 To launch the program, ssh into the microUSV's raspberry pi.  Navigate to the directory containing musv_teleop.py and launch the script using python.
 
     $ python musv_teleop.py
+
+The application will cause the terminal window to go blank and intercept keyboard inputs. The application can be terminated by hitting the Escape key or Ctrl+C.
