@@ -50,19 +50,15 @@ $ sudo make install
 $ sudo ldconfig
 ```
 
-#### Required Compiler Flags
- - -std=c++11
- - -pthread
+#### Build the CVSensorSimulator
+Navigate to the CVSensorSimulator directory, make the build script executable, then run the script. 
 
-#### Required Libraries
- - opencv_core
- - opencv_highgui
- - opencv_features2d
- - opencv_calib3d
- - opencv_videoio
- - opencv_imgcodecs
- - opencv_imgproc
- - protobuf
+```
+$ cd microUSV/CVSensorSimulator
+$ chmod +x build.sh
+$ ./build.sh
+
+```
 
 ### Raspberry Pi
 #### Install Disk Image
