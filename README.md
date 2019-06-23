@@ -57,7 +57,6 @@ Navigate to the CVSensorSimulator directory, make the build script executable, t
 $ cd microUSV/CVSensorSimulator
 $ chmod +x build.sh
 $ ./build.sh
-
 ```
 
 ### Raspberry Pi
