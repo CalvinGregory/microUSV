@@ -68,13 +68,28 @@ void PoseDetector::updatePoseEstimates() {
 	}
 }
 
-Mat* PoseDetector::getLabelledFrame() {
+Mat* PoseDetector::getLabelledFrame(ConfigParser::Config config) {
 	apriltag_detection_t* det;
 	// Label each TaggedObject in the image.
 	for(int i = 0; i < zarray_size(detections); i++) {
 		zarray_get(detections, i, &det);
 		label_tag_detection(&frame, det);
 	}
+
+	uint r = 255;
+	uint g = 0;
+	uint b = 0;
+	int fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
+	int waypoint_number = 0;
+	for (std::list<ConfigParser::Waypoint>::iterator it = config.waypoints.begin(); it != config.waypoints.end(); it++) {
+		cout << "waypoint: " << it->x << ", " << it->y << endl;
+		circle(frame, Point(it->x + config.cInfo.cx, it->y + config.cInfo.cy), 3, Scalar(b, g, r), 2);
+		double fontscale = 1.0;
+		cv::String text = cv::String(to_string(waypoint_number));
+		putText(frame, text, Point(it->x + 15 + config.cInfo.cx, it->y + config.cInfo.cy), fontface, fontscale, Scalar(0, 0x8c, 0xf0), 2);
+		waypoint_number++;
+	}
+
 	return &frame;
 }
 

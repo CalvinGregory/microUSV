@@ -49,6 +49,7 @@ using google::protobuf::util::TimeUtil;
 
 bool running;
 bool visualize;
+ConfigParser::Config config;
 
 /*
  * Video Capture thread function. Continuously updates the FrameBuffer.
@@ -76,7 +77,7 @@ void detector_thread(PoseDetector& pd) {
 	while (running) {
 		pd.updatePoseEstimates();
 		if(visualize) {
-			frame = pd.getLabelledFrame();
+			frame = pd.getLabelledFrame(config);
 			imshow("RobotDetections", *frame);
 		}
 		// ESC key to exit
@@ -93,7 +94,6 @@ int main(int argc, char* argv[]) {
 	gettimeofday(&startTime, NULL);
 
 	// Parse config file and pull values into local variables.
-	ConfigParser::Config config;
 	if (argc > 1) {
 		config = ConfigParser::getConfigs(argv[1]);
 	}

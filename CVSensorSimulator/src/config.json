@@ -5,23 +5,20 @@
 		"cameraID": 1,
 		"x_res": 1920,
 		"y_res": 1080,
-		"fx": 1419.9787511737059,
-		"fy": 1419.9787511737059,
+		"fx": 1440.4750657011593,
+		"fy": 1440.4750657011593,
 		"cx": 960,
 		"cy": 540
 	},
 	
-	"tagsize": 48.0,
+	"tagsize": 51.0,
 	
 	"Robots": [
-		{"tagID": 1, "label": "one"},
-		{"tagID": 2, "label": "two"},
-		{"tagID": 6, "label": "six"},
-		{"tagID": 10, "label": "ten"}
+		{"tagID": 1, "label": "mUSV"}
 	],
 	
 	"Pucks": [
-		{"tagID": 12}
+		
 	],
 	
 	"Obstacles": [
@@ -29,7 +26,8 @@
 	],
 	
 	"Waypoints": [
-		{"x": 0, "y": 0}
+		{"x": 0, "y": 0},
+		{"x": 100, "y": 100}
 	],
 	
 	"loop_waypoints": true

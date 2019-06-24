@@ -26,6 +26,7 @@
 #include <math.h>
 #include <sys/time.h>
 #include "CVSS_util.h"
+#include "ConfigParser.h"
 
 extern "C" {
 #include "apriltag/apriltag.h"
@@ -96,7 +97,7 @@ public:
 	 *
 	 * @return The frame with added tag outlines and labels.
 	 */
-	cv::Mat* getLabelledFrame();
+	cv::Mat* getLabelledFrame(ConfigParser::Config config);
 };
 
 
