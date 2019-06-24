@@ -27,6 +27,7 @@ src/apriltag/tag36h11.c
 
 # Build CVSensorSimulator Objects
 g++ -c -std=c++11 -pthread \
+src/ConfigParser.cpp \
 src/CVSS_util.cpp \
 src/CVSensorSimulator.cpp \
 src/FrameBuffer.cpp \
@@ -41,6 +42,7 @@ g++ -std=c++11 -pthread -o CVSensorSimulator \
 apriltag.o \
 apriltag_pose.o \
 apriltag_quad_thresh.o \
+ConfigParser.o \
 CVSensorSimulator.o \
 CVSS_util.o \
 FrameBuffer.o \
