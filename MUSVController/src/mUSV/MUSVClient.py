@@ -98,14 +98,13 @@ if __name__ == '__main__':
 #                 print ("Waypoint: ", w)
 #             print("loop_waypoints: ", sensorData.loop_waypoints)
             
-            motorSpeeds = controller.get_motor_speeds(sensorData)
+            motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTransform.x, config.tagTransform.y)
             send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                 
         except socket.error as e:
             pass
         finally:
-            # DEBUG for legibility
-#             time.sleep(0.3)
+            time.sleep(0.1)
             pass
 
             

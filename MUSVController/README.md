@@ -9,7 +9,7 @@ Config Field | Value
 serverIP | IP address of the host PC running CVSensorSimulator
 tagID | ID number of the AprilTag on this microUSV
 label | **Unused field:** display name for this microUSV
-tagTransform | **Unused field:** The translation and rotation between the microUSV's AprilTag and coordinate frame. 
+tagTransform | The translation and rotation between the microUSV's AprilTag and coordinate frame. 
 PropellerSpin | Integer coefficients (1 or -1) which indicate if the propellers should spin forward or backward depending on their helix angles. If unsure, test expected behavior and propeller coefficients using the teleop program. 
 PIDGains | Gains for the two PID controllers: distance and angular. 
 

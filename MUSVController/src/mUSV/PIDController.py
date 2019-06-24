@@ -77,7 +77,7 @@ class PIDController(Controller):
         else:
             self._throttle = speed    
         
-    def get_motor_speeds(self, sensorData):
+    def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y):
         '''
         Applies distance and angular PID controllers to the provided sensor data. Calculates motor speeds
         that will move the microUSV closer to its current goal position. 
@@ -85,7 +85,9 @@ class PIDController(Controller):
         Args:
             sensorData (musv_msg_pb2.SensorData): Protocol buffer SensorData message object containing the most 
                                                   recent simulated sensor values from the host machine.
-        
+            tag_offset_x (float): X-axis offset in mm between the AprilTag origin (top left corner) and microUSV origin (center).
+            tag_offset_y (float): Y-axis offset in mm between the AprilTag origin (top left corner) and microUSV origin (center.
+            
         Returns:
             (int, int): integer tuple containing motor speeds (portSpeed, starboardSpeed).
                         Motor speed values range from -127 to 127.
@@ -112,7 +114,7 @@ class PIDController(Controller):
         
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
-            pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
+            pose = pose2D(sensorData.pose.x + tag_offset_x, sensorData.pose.y + tag_offset_y, sensorData.pose.yaw)
 
             (distance_error, angular_error) = self._get_error(pose, self._waypoints[0])
             # Apply Proportional gains 
@@ -139,7 +141,7 @@ class PIDController(Controller):
 #             print ("motor speeds: ({}, {})".format(port, starboard))
             
             self._motor_speeds = (port, starboard) 
-            self._lastPose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw) 
+            self._lastPose = pose
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
             
