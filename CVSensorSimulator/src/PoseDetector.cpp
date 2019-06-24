@@ -76,6 +76,7 @@ Mat* PoseDetector::getLabelledFrame(ConfigParser::Config config) {
 		label_tag_detection(&frame, det);
 	}
 
+	// Draw waypoints on frame
 	uint r = 255;
 	uint g = 0;
 	uint b = 0;

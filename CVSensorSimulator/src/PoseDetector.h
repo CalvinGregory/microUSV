@@ -95,6 +95,8 @@ public:
 	/*
 	 * Adds outlines and labels to all TaggedObjects detected in the frame.
 	 *
+	 * @param config Config file data from ConfigParser. Contains list of waypoints and camera info.
+	 *
 	 * @return The frame with added tag outlines and labels.
 	 */
 	cv::Mat* getLabelledFrame(ConfigParser::Config config);
