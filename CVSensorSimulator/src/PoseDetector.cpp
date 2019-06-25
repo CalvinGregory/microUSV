@@ -87,7 +87,7 @@ Mat* PoseDetector::getLabelledFrame(ConfigParser::Config config) {
 		circle(frame, Point(it->x + config.cInfo.cx, it->y + config.cInfo.cy), 3, Scalar(b, g, r), 2);
 		double fontscale = 1.0;
 		cv::String text = cv::String(to_string(waypoint_number));
-		putText(frame, text, Point(it->x + 15 + config.cInfo.cx, it->y + config.cInfo.cy), fontface, fontscale, Scalar(0, 0x8c, 0xf0), 2);
+		putText(frame, text, Point(it->x + 15 + config.cInfo.cx, it->y + config.cInfo.cy), fontface, fontscale, Scalar(b, g, r), 2);
 		waypoint_number++;
 	}
 

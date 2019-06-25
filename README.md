@@ -51,11 +51,10 @@ $ sudo ldconfig
 ```
 
 #### Build the CVSensorSimulator
-Navigate to the CVSensorSimulator directory, make the build script executable, then run the script. 
+Navigate to the CVSensorSimulator directory then run the script. 
 
 ```
 $ cd microUSV/CVSensorSimulator
-$ chmod +x build.sh
 $ ./build.sh
 ```
 
@@ -162,7 +161,7 @@ $ git clone https://github.com/CalvinGregory/microUSV.git
 ```
 
 ### Arduino Nano
-The **PeripheralController.ino** sketch must be flashed onto the microUSV's Arduino Nano. The application requrires the PololuQik library. The library can be found [here](https://github.com/pololu/qik-arduino) or in the Arduino IDE by searching "PololuQik" in the Library Manager. 
+The **PeripheralController.ino** sketch must be flashed onto the microUSV's Arduino Nano using the Arduino IDE or equivalent. The application requires the PololuQik library. The library can be found [here](https://github.com/pololu/qik-arduino) or in the Arduino IDE by searching "PololuQik" in the Library Manager. 
 
 
 ## Hardware Setup
