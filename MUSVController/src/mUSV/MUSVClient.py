@@ -63,9 +63,9 @@ if __name__ == '__main__':
     controller.set_throttle(0.6)
         
     # Connect to the arduino over USB
-#     arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
-#     # Give serial connection time to settle
-#     time.sleep(2)
+    arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
+    # Give serial connection time to settle
+    time.sleep(2)
     
     first_contact = True
     while True:
@@ -88,7 +88,7 @@ if __name__ == '__main__':
             sensorData.ParseFromString(msg)
             
             motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)
-#             send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
+            send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                 
         except socket.error as e:
             pass
