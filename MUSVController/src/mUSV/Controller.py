@@ -52,7 +52,7 @@ class Controller(object):
         self._waypoints = []
         self._loop_waypoints = False
     
-    def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y):
+    def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y, tag_offset_yaw):
         '''
         Interprets sensor data according to the logic of the controller type implemented in the child class to produce
         motor speed values that move the microUSV toward its current goal. 
@@ -60,8 +60,9 @@ class Controller(object):
         Args:
             sensorData (musv_msg_pb2.SensorData): Protocol buffer SensorData message object containing the most 
                                                   recent simulated sensor values from the host machine.
-            tag_offset_x (float): X-axis offset in mm between the AprilTag origin (top left corner) and microUSV origin (center).
-            tag_offset_y (float): Y-axis offset in mm between the AprilTag origin (top left corner) and microUSV origin (center.
+            tag_offset_x (float): X-axis offset in mm between the AprilTag origin and microUSV origin.
+            tag_offset_y (float): Y-axis offset in mm between the AprilTag origin and microUSV origin.
+            tag_offset_yaw (float): Angular offset in radians between the AprilTag and microUSV coordinate frame. (ccw positive)
             
         Returns:
             (int, int): integer tuple containing motor speeds (portSpeed, starboardSpeed).

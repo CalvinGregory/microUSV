@@ -61,6 +61,8 @@ class PIDController(Controller):
         self._speed_limit_lower = -127
         self._waypoint_threshold = 50.0 #TODO tune me
         self._time_offset = -1
+        self._distance_scale_factor = 1.5 # per meter of height between camera and tag plane
+        self._tag_plane_distance = 3 # meters
         
     def set_throttle(self, speed):
         '''
@@ -77,7 +79,7 @@ class PIDController(Controller):
         else:
             self._throttle = speed    
         
-    def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y):
+    def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y, tag_offset_yaw):
         '''
         Applies distance and angular PID controllers to the provided sensor data. Calculates motor speeds
         that will move the microUSV closer to its current goal position. 
@@ -85,8 +87,9 @@ class PIDController(Controller):
         Args:
             sensorData (musv_msg_pb2.SensorData): Protocol buffer SensorData message object containing the most 
                                                   recent simulated sensor values from the host machine.
-            tag_offset_x (float): X-axis offset in mm between the AprilTag origin (top left corner) and microUSV origin (center).
-            tag_offset_y (float): Y-axis offset in mm between the AprilTag origin (top left corner) and microUSV origin (center.
+            tag_offset_x (float): X-axis offset in mm between the AprilTag origin and microUSV origin.
+            tag_offset_y (float): Y-axis offset in mm between the AprilTag origin and microUSV origin.
+            tag_offset_yaw (float): Angular offset in radians between the AprilTag and microUSV coordinate frame. (ccw positive)
             
         Returns:
             (int, int): integer tuple containing motor speeds (portSpeed, starboardSpeed).
@@ -114,7 +117,21 @@ class PIDController(Controller):
         
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
-            pose = pose2D(sensorData.pose.x + tag_offset_x, sensorData.pose.y + tag_offset_y, sensorData.pose.yaw)
+            # Apply tag offset transform
+            x_offset_tagFrame = math.cos(tag_offset_yaw)*tag_offset_x + math.sin(tag_offset_yaw)*tag_offset_y
+            y_offset_tagFrame = -math.sin(tag_offset_yaw)*tag_offset_x + math.cos(tag_offset_yaw)*tag_offset_y
+            # Apply yaw transform
+            x_offset_worldFrame = math.cos(sensorData.pose.yaw)*x_offset_tagFrame + math.sin(sensorData.pose.yaw)*y_offset_tagFrame
+            y_offset_worldFrame = -math.sin(sensorData.pose.yaw)*x_offset_tagFrame + math.cos(sensorData.pose.yaw)*y_offset_tagFrame
+            
+            x = (sensorData.pose.x + x_offset_worldFrame) * self._distance_scale_factor * self._tag_plane_distance
+            y = (sensorData.pose.y + y_offset_worldFrame) * self._distance_scale_factor * self._tag_plane_distance
+            yaw = self._bounded_angle(sensorData.pose.yaw - tag_offset_yaw, math.pi, -math.pi)
+            
+            pose = pose2D(x, y, yaw)
+            
+            #DEBUG
+            print("pose: x:{} y:{} yaw:{}".format(pose.x, pose.y, pose.yaw))
 
             (distance_error, angular_error) = self._get_error(pose, self._waypoints[0])
             # Apply Proportional gains 

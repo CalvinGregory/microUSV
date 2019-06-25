@@ -63,9 +63,9 @@ if __name__ == '__main__':
     controller.set_throttle(0.6)
         
     # Connect to the arduino over USB
-    arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
-    # Give serial connection time to settle
-    time.sleep(2)
+#     arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
+#     # Give serial connection time to settle
+#     time.sleep(2)
     
     first_contact = True
     while True:
@@ -87,24 +87,13 @@ if __name__ == '__main__':
             sensorSimulator.close()
             sensorData.ParseFromString(msg)
             
-            # DEBUG messages
-#             print ("Pose = x:{} y:{} yaw:{}".format(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw))
-#             for obstacle in sensorData.obstacle_sensors:
-#                 print ("Obstacles: ", obstacle)
-#             for puck in sensorData.puck_sensors:
-#                 print ("Pucks: ", puck)
-#             print("TimeStamp: ", sensorData.timestamp)
-#             for w in sensorData.waypoints:
-#                 print ("Waypoint: ", w)
-#             print("loop_waypoints: ", sensorData.loop_waypoints)
-            
-            motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTransform.x, config.tagTransform.y)
-            send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
+            motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)
+#             send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                 
         except socket.error as e:
             pass
         finally:
-            time.sleep(0.1)
+            time.sleep(0.025)
             pass
 
             
