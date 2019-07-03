@@ -60,7 +60,6 @@ if __name__ == '__main__':
     
     # Build controller object
     controller = PIDController((config.P_dist, config.I_dist, config.D_dist), (config.P_ang, config.I_ang, config.D_ang), config.propSpin_port, config.propSpin_star)
-    controller.set_throttle(0.6)
         
     # Connect to the arduino over USB
     arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
@@ -88,6 +87,7 @@ if __name__ == '__main__':
             sensorData.ParseFromString(msg)
             
             motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)
+            print '(port, starboard): {0}'.format(motorSpeeds)
             send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                 
         except socket.error as e:

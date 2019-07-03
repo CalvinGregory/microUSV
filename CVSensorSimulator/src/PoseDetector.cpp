@@ -83,7 +83,6 @@ Mat* PoseDetector::getLabelledFrame(ConfigParser::Config config) {
 	int fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
 	int waypoint_number = 0;
 	for (std::list<ConfigParser::Waypoint>::iterator it = config.waypoints.begin(); it != config.waypoints.end(); it++) {
-		cout << "waypoint: " << it->x << ", " << it->y << endl;
 		circle(frame, Point(it->x + config.cInfo.cx, it->y + config.cInfo.cy), 3, Scalar(b, g, r), 2);
 		double fontscale = 1.0;
 		cv::String text = cv::String(to_string(waypoint_number));

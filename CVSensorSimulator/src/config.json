@@ -11,7 +11,7 @@
 		"cy": 540
 	},
 	
-	"tagsize": 51.0,
+	"tagsize": 49.0,
 	
 	"Robots": [
 		{"tagID": 1, "label": "mUSV"}
@@ -26,9 +26,8 @@
 	],
 	
 	"Waypoints": [
-		{"x": 0, "y": 0},
-		{"x": 100, "y": 100}
+		{"x": 0, "y": -400}
 	],
 	
-	"loop_waypoints": true
+	"loop_waypoints": false
 }

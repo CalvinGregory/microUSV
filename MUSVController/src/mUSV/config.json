@@ -7,7 +7,7 @@
 		"x": 0,
 		"y": 0,
 		"z": 0,
-		"yaw": 0
+		"yaw": -1.57079632679
 	},
 	
 	"PropellerSpin": {
@@ -16,10 +16,10 @@
 	},
 	
 	"PIDGains": {
-		"P_dist": 1,
+		"P_dist": 0.005,
 		"I_dist": 0,
 		"D_dist": 0,
-		"P_ang": 1,
+		"P_ang": 0.25,
 		"I_ang": 0,
 		"D_ang": 0
 	}
