@@ -1,5 +1,5 @@
 # microUSV
-This repository contains the control software for the microUSV: a small autonomous unmanned surface vehicle for lab work. The hardware repository can be found [here](https://osf.io/k7a8p/).
+This repository contains the control software for the microUSV: a small autonomous unmanned surface vehicle for indoor lab work. The hardware repository can be found [here](https://osf.io/k7a8p/).
 
 The repository contains source code for four separate applications: **CVSensorSimulator**, **MUSVController**, **PeripheralController**, and **Teleop**. 
 
@@ -51,7 +51,7 @@ $ sudo ldconfig
 ```
 
 #### Build the CVSensorSimulator
-Navigate to the CVSensorSimulator directory then run the script. 
+Navigate to the CVSensorSimulator directory then run the build script. 
 
 ```
 $ cd microUSV/CVSensorSimulator
@@ -183,7 +183,7 @@ Finally launch CVSensorSimulator on the host PC and MUSVClient on each of the mi
 
 ```
 $ ./CVSensorSimulator /path/to/config/file/config.json
-$ python MUSVClient /path/to/config/file/config.json
+$ python MUSVClient.py /path/to/config/file/config.json
 ```
 
 See the [hardware repository wiki](https://osf.io/k7a8p/wiki/13.%20Lab%20Setup/) for figures and more information.

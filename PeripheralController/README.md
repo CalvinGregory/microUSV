@@ -1,6 +1,6 @@
 # PeripheralController
 
-PeripheralController is the controller code for the microUSV's Arduino Nano which interfaces between the peripheral devices (Qik motor controller) and the main controller board (Raspberry pi zero). It receives pairs of integers over serial (USB) which it sends as motor speed commands to the Qik motor controller. 
+PeripheralController is the controller code for the microUSV's Arduino Nano which interfaces between the peripheral devices (Qik motor controller) and the main controller board (Raspberry pi zero) at a baud rate of 115200. It receives pairs of integers over serial (USB) which it sends as motor speed commands to the Qik motor controller. 
 
 ### Wiring
 
