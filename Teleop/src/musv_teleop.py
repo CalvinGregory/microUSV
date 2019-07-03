@@ -39,7 +39,7 @@ def sendSpeeds( portSpeed, starboardSpeed ):
     return
 
 # Connect to the arduino over USB
-arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
+arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
 # Give serial connection time to settle
 time.sleep(2)
 

@@ -62,7 +62,7 @@ if __name__ == '__main__':
     controller = PIDController((config.P_dist, config.I_dist, config.D_dist), (config.P_ang, config.I_ang, config.D_ang), config.propSpin_port, config.propSpin_star)
         
     # Connect to the arduino over USB
-    arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 9600, timeout = 1)
+    arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
     # Give serial connection time to settle
     time.sleep(2)
     
