@@ -93,7 +93,7 @@ if __name__ == '__main__':
         except socket.error as e:
             pass
         finally:
-            time.sleep(0.025)
+            time.sleep(0.1)
             pass
 
             
