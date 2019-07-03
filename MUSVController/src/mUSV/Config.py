@@ -65,6 +65,7 @@ class Config:
         self.P_ang = 1
         self.I_ang = 0
         self.D_ang = 0
+        self.speed_limit = 100
         self.parse_configs(filepath)
 
     def parse_configs(self, filepath):
@@ -92,3 +93,4 @@ class Config:
         self.P_ang = config['PIDGains']['P_ang']
         self.I_ang = config['PIDGains']['I_ang']
         self.D_ang = config['PIDGains']['D_ang']
+        self.speed_limit = config['speed_limit']

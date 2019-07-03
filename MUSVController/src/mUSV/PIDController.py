@@ -19,7 +19,6 @@ along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 
 from Controller import Controller
 from pose2D import pose2D
-from time import time
 import math
 
 class PIDController(Controller):
@@ -34,11 +33,10 @@ class PIDController(Controller):
         _motor_speeds (int, int): Tuple containing the speed values the microUSV's motors should currently be set to.  
         _speed_limit_upper (int): Maximum motor speed value. 
         _speed_limit_lower (int): Minimum motor speed value.
-        _waypoint_threshold (float): Threshold indicating at what distance (mm) to treat the current waypoint as reached. 
-        _time_offset (float): Offset between internal clock and SensorData message timestamps. 
+        _waypoint_threshold (float): Threshold indicating at what distance (mm) to treat the current waypoint as reached.  
     '''
 
-    def __init__(self, distance_PID_gains, angle_PID_gains, port_propeller_spin, starboard_propeller_spin):
+    def __init__(self, distance_PID_gains, angle_PID_gains, port_propeller_spin, starboard_propeller_spin, speed_limit):
         '''
         Initialize a PIDController object. 
         
@@ -49,16 +47,19 @@ class PIDController(Controller):
                                        Acceptable values are +1 or -1
             starboard_propeller_spin (int): coefficient indicating which direction the starboard propeller should spin. 
                                             Acceptable values are +1 or -1
+            speed_limit (float): Percentage (0 to 100] of the motor's maximum speed to use as an upper and lower bound on speed outputs.
         '''
         super(PIDController, self).__init__(port_propeller_spin, starboard_propeller_spin)
         self._distance_PID_gains = distance_PID_gains
         self._angle_PID_gains = angle_PID_gains
         self._last_error = (0, 0)
         self._motor_speeds = (0, 0)
-        self._speed_limit_upper = 127
-        self._speed_limit_lower = -127
+        if speed_limit > 0 and speed_limit <= 100:
+            self._speed_limit_upper = int(round(127*speed_limit/100))
+        else:
+            self._speed_limit_upper = 127
+        self._speed_limit_lower = -self._speed_limit_upper
         self._waypoint_threshold = 50.0 #TODO tune me
-        self._time_offset = -1
         self._distance_scale_factor = 1.5 # per meter of height between camera and tag plane
         self._tag_plane_distance = 2.26 # meters    
         
@@ -79,9 +80,6 @@ class PIDController(Controller):
                         Motor speed values range from -127 to 127.
         '''
         msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
-        # If this is the first message received, set time_offset.
-        if self._time_offset < 0:
-            self._time_offset = time() - msg_timestamp
         
         # If the message contains waypoints, overwrite the current waypoint list and loop flag. 
         if sensorData.waypoints.__len__() > 0:
@@ -93,11 +91,7 @@ class PIDController(Controller):
         # If no more waypoints in waypoint list, stop motors.
         if len(self._waypoints) < 1:
             return (0, 0)
-        
-        # If no new pose data received for 2 seconds, stop motors.
-        if time() - self._time_offset - msg_timestamp > 2.0:
-            return (0, 0)
-        
+                
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
             # Apply tag offset transform
