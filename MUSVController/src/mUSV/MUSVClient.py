@@ -66,34 +66,39 @@ if __name__ == '__main__':
     # Give serial connection time to settle
     time.sleep(2)
     
-    first_contact = True
-    while True:
-        # Ping host machine running CVSensorSimulator, request sensor data for this microUSV. 
-        requestData = musv_msg_pb2.RequestData()
-        requestData.tag_id = tagID
-        if first_contact:
-            requestData.request_waypoints = True
-            first_contact = False
-        
-        sensorSimulator = socket.socket()
-        try:
-            sensorSimulator.connect((server_ip, port))
-            sensorSimulator.send(requestData.SerializeToString())
-                        
-            sensorData = musv_msg_pb2.SensorData() 
-        
-            msg = sensorSimulator.recv(128)
-            sensorSimulator.close()
-            sensorData.ParseFromString(msg)
+    try:
+    
+        first_contact = True
+        lastSpeeds = (0,0)
+        while True:
+            # Ping host machine running CVSensorSimulator, request sensor data for this microUSV. 
+            requestData = musv_msg_pb2.RequestData()
+            requestData.tag_id = tagID
+            if first_contact:
+                requestData.request_waypoints = True
+                first_contact = False
             
-            motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)
-            print '(port, starboard): {0}'.format(motorSpeeds)
-            send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
+            sensorSimulator = socket.socket()
+            try:
+                sensorSimulator.connect((server_ip, port))
+                sensorSimulator.send(requestData.SerializeToString())
+                            
+                sensorData = musv_msg_pb2.SensorData() 
+            
+                msg = sensorSimulator.recv(128)
+                sensorSimulator.close()
+                sensorData.ParseFromString(msg)
                 
-        except socket.error as e:
-            pass
-        finally:
-            time.sleep(0.1)
-            pass
+                motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)
+                if motorSpeeds != lastSpeeds:
+                    send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
+                lastSpeeds = motorSpeeds
+                
+            except socket.error as e:
+                print 'Socket connection error'
+            finally:
+                time.sleep(0.1)
+                pass
 
-            
+    finally:
+        send_speeds(arduino, 0, 0)

@@ -91,8 +91,9 @@ try:
         else:
             sendSpeeds(0, 0)
             
-# Reset terminal window to defaults
+# Reset terminal window to defaults and shutdown motors
 finally:
+    sendSpeeds(0, 0)
     curses.nocbreak()
     screen.keypad(False)
     curses.echo()
