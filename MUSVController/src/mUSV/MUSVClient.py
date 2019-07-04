@@ -61,7 +61,7 @@ if __name__ == '__main__':
     tagID = config.tagID
     
     # Build controller object
-    controller = PIDController((config.P_dist, config.I_dist, config.D_dist), (config.P_ang, config.I_ang, config.D_ang), config.propSpin_port, config.propSpin_star, config.speed_limit)
+    controller = PIDController((config.P_dist, config.I_dist, config.D_dist), (config.P_ang, config.I_ang, config.D_ang), config.propSpin_port, config.propSpin_star, config.speed_limit, config.tag_plane_distance)
         
     # Connect to the arduino over USB
     arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
@@ -106,7 +106,6 @@ if __name__ == '__main__':
                     motorSpeeds = (0, 0)
                 
                 if motorSpeeds != lastSpeeds:
-#                     print (motorSpeeds)
                     send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                     pass
                 lastSpeeds = motorSpeeds

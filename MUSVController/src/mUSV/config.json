@@ -24,5 +24,7 @@
 		"D_ang": 0
 	},
 	
-	"speed_limit": 100
+	"speed_limit": 100,
+	
+	"tag_plane_distance": 2.26
 }

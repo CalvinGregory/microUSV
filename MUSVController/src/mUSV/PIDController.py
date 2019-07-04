@@ -36,7 +36,7 @@ class PIDController(Controller):
         _waypoint_threshold (float): Threshold indicating at what distance (mm) to treat the current waypoint as reached.  
     '''
 
-    def __init__(self, distance_PID_gains, angle_PID_gains, port_propeller_spin, starboard_propeller_spin, speed_limit):
+    def __init__(self, distance_PID_gains, angle_PID_gains, port_propeller_spin, starboard_propeller_spin, speed_limit, tag_plane_distance):
         '''
         Initialize a PIDController object. 
         
@@ -48,11 +48,14 @@ class PIDController(Controller):
             starboard_propeller_spin (int): coefficient indicating which direction the starboard propeller should spin. 
                                             Acceptable values are +1 or -1
             speed_limit (float): Percentage (0 to 100] of the motor's maximum speed to use as an upper and lower bound on speed outputs.
+            tag_plane_distance (float): Distance between the camera and the water's surface in meters.
         '''
         super(PIDController, self).__init__(port_propeller_spin, starboard_propeller_spin)
         self._distance_PID_gains = distance_PID_gains
         self._angle_PID_gains = angle_PID_gains
         self._last_error = (0, 0)
+        self._dist_error_sum = 0
+        self._ang_error_sum = 0
         self._motor_speeds = (0, 0)
         if speed_limit > 0 and speed_limit <= 100:
             self._speed_limit_upper = int(round(127*speed_limit/100))
@@ -61,7 +64,7 @@ class PIDController(Controller):
         self._speed_limit_lower = -self._speed_limit_upper
         self._waypoint_threshold = 50.0 #TODO tune me
         self._distance_scale_factor = 1.5 # per meter of height between camera and tag plane
-        self._tag_plane_distance = 2.26 # meters    
+        self._tag_plane_distance = tag_plane_distance
         
     def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y, tag_offset_yaw):
         '''
@@ -117,11 +120,14 @@ class PIDController(Controller):
             if self._last_timestamp > 0:
                 dt = msg_timestamp - self._last_timestamp
                 
-                dist_I_val = self._distance_PID_gains[1]*distance_error*dt
+                self._dist_error_sum = 0.99*self._dist_error_sum + distance_error*dt
+                self._ang_error_sum = 0.99*self._ang_error_sum + angular_error*dt
+                
+                dist_I_val = self._distance_PID_gains[1]*self._dist_error_sum
                 dist_D_val = self._distance_PID_gains[2]*(distance_error - self._last_error[0]) / dt
                 distance_control_value = distance_control_value + dist_I_val + dist_D_val
                 
-                ang_I_val = self._angle_PID_gains[1]*angular_error*dt
+                ang_I_val = self._angle_PID_gains[1]*self._ang_error_sum
                 ang_D_val = self._angle_PID_gains[2]*(angular_error - self._last_error[1]) / dt
                 angle_control_value = angle_control_value + ang_I_val + ang_D_val 
             
@@ -138,6 +144,8 @@ class PIDController(Controller):
             self._last_error = (distance_error, angular_error)
             
             if distance_error < self._waypoint_threshold:
+                self._dist_error_sum = 0
+                self._ang_error_sum = 0
                 if self._loop_waypoints:
                     self._waypoints.append(self._waypoints.pop())
                 else:

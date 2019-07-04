@@ -41,6 +41,8 @@ class Config:
         P_ang (float): Angular PID controller proportional gain. 
         I_ang (float): Angular PID controller integral gain. 
         D_ang (float): Angular PID controller derivative gain. 
+        speed_limit (float): Percentage (0 to 100] of the maximum motor speed to treat as an upper bound on motor speed commands.
+        tag_plane_distance (float): Distance from the camera to the water's surface in meters.
     '''
 
     def __init__(self, filepath):
@@ -66,6 +68,7 @@ class Config:
         self.I_ang = 0
         self.D_ang = 0
         self.speed_limit = 100
+        self.tag_plane_distance = 1
         self.parse_configs(filepath)
 
     def parse_configs(self, filepath):
@@ -94,3 +97,4 @@ class Config:
         self.I_ang = config['PIDGains']['I_ang']
         self.D_ang = config['PIDGains']['D_ang']
         self.speed_limit = config['speed_limit']
+        self.tag_plane_distance = config['tag_plane_distance']
