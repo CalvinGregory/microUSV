@@ -15,13 +15,14 @@ The repository contains source code for four separate applications: **CVSensorSi
 ### Teleop
 **Teleop** is an application which runs on the microUSV's onboard Raspberry Pi (tested on Raspbian Stretch). It allows a user to control the microUSV remotely by connecting to the Raspberry Pi over SSH and sending motor commands mapped to the WASD keys to the peripheral controller board (Arduino Nano). This application is used for testing purposes. 
 
-
 ## Software Installation
+The following sections list the required software installation steps for each device: The **Host PC**, **Raspberry Pi**, and **Arduino Nano**. 
+
 ### Host PC
 The host PC runs the CVSensorSimulator application which depends on the OpenCV and protobuf C++ libraries. 
 
 #### Install OpenCV
-I recommend following [this tutorial](https://www.learnopencv.com/install-opencv3-on-ubuntu/). 
+[This tutorial](https://www.learnopencv.com/install-opencv3-on-ubuntu/) is recommended. 
 
 #### Install Protobuf
 Follow the [C++ Installation - Unix](https://github.com/protocolbuffers/protobuf/tree/master/src) instructions. These instructions are summarized below. 
@@ -50,8 +51,8 @@ $ sudo make install
 $ sudo ldconfig
 ```
 
-#### Build the CVSensorSimulator
-Navigate to the CVSensorSimulator directory then run the build script. 
+#### Build the CVSensorSimulator Application
+Download the CVSensorSimulator source code then navigate to the CVSensorSimulator directory and run the build script. 
 
 ```
 $ cd microUSV/CVSensorSimulator
@@ -59,13 +60,12 @@ $ ./build.sh
 ```
 
 ### Raspberry Pi
-#### Install Disk Image
+#### Option 1: Install Disk Image
 Using the provided [microUSV disk image](https://osf.io/wtcd3/) is strongly recommended as the protobuf installation process takes several hours on a Raspberry Pi Zero. The protobuf library must be installed from source since there is no existing whl for the ARMv6Z architecture. The image is setup using Raspbian Stretch Lite and has the control software and all required libraries pre-installed. 
 
 Using a program such as [Rufus](https://rufus.ie/) or [Etcher](https://www.balena.io/etcher/), flash the disk image onto a micro SD card and insert it into the Raspberry Pi.
 
-#### Fresh Install
-##### Install Raspbian
+#### Option 2: Fresh Install
 Follow the official [Raspbian installation instructions](https://www.raspberrypi.org/documentation/installation/installing-images/README.md). The instructions are summarized below.
 
  - Download and unzip a Raspbian image. 
@@ -73,8 +73,7 @@ Follow the official [Raspbian installation instructions](https://www.raspberrypi
  - Add a file called "ssh" to the SD card's boot directory
  - Follow the [wireless setup instructions](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md) to connect the Raspberry pi to a wireless network. If the network settings are known, a [headless setup](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md) can be performed by modifying the pi's **wpa_supplicant.conf** file and all subsequent setup steps can be performed over SSH. 
 
-##### Install Python Libraries
-If a Raspbian Lite distro was used, pip may first need to be installed. To check if pip is installed execute the following command.
+Install the required python libraries. If a Raspbian Lite distro was used, pip may first need to be installed. To check if pip is installed execute the following command.
 
 ```
 $ pip --version
@@ -94,10 +93,9 @@ Install the pyserial library.
 $ pip -v install pyserial
 ```
 
-##### Install Protobuf Library
-**Note:** The C++ protobuf installation steps are the same as were listed for the host PC above. Unlike the host PC, installing the protobuf library on a raspberry pi will take several hours and the addition of python installation steps are new. 
+Install the Protobuf library by following the [C++ Installation - Unix](https://github.com/protocolbuffers/protobuf/tree/master/src) instructions. These instructions are summarized below. 
 
-Follow the [C++ Installation - Unix](https://github.com/protocolbuffers/protobuf/tree/master/src) instructions. These instructions are summarized below. 
+**Note:** The C++ protobuf installation steps are the same as were listed for the host PC above. Unlike the host PC, installing the protobuf library on a raspberry pi will take several hours and the addition of python installation steps are new.
 
  - Install required packages
 
@@ -112,9 +110,7 @@ $ sudo apt-get install autoconf automake libtool curl make g++ unzip
 $ unzip protobuf-python-3.7.1.zip
 $ cd ~/protobuf-3.7.1
 ```
-
  - Build the protobuf C++ library. 
-
 ```
 $ ./configure
 $ make
@@ -123,7 +119,7 @@ $ sudo make install
 $ sudo ldconfig
 ```
 
-Follow the Python [Installation](https://github.com/protocolbuffers/protobuf/tree/master/python) instructions. These instructions are summarized below. 
+Follow the Protobuf Python [Installation](https://github.com/protocolbuffers/protobuf/tree/master/python) instructions. These instructions are summarized below. 
 
  - Navigate to the python subdirectory then build and test the library.
 
@@ -141,8 +137,7 @@ $ cd
 $ sudo rm -r protobuf-3.7.1 protobuf-python-3.7.1.zip
 ```
 
-##### Clone the microUSV Software
-First, check if git is installed. 
+Finally, to clone the microUSV source code check if git is installed. 
 
 ```
 $ git --version
@@ -161,8 +156,7 @@ $ git clone https://github.com/CalvinGregory/microUSV.git
 ```
 
 ### Arduino Nano
-The **PeripheralController.ino** sketch must be flashed onto the microUSV's Arduino Nano using the Arduino IDE or equivalent. The application requires the PololuQik library. The library can be found [here](https://github.com/pololu/qik-arduino) or in the Arduino IDE by searching "PololuQik" in the Library Manager. 
-
+The **PeripheralController.ino** sketch must be flashed onto the microUSV's Arduino Nano using the [Arduino IDE](https://www.arduino.cc/en/main/software) or equivalent. The application depends on the PololuQik library. The library can be found [here](https://github.com/pololu/qik-arduino) or in the Arduino IDE itself by searching "PololuQik" in the Library Manager.
 
 ## Hardware Setup
 A host PC running CVSensorSimulator must be connected to an overhead webcam and a wifi network. Any number of microUSV's can be set up and connected to the same wifi network. 
