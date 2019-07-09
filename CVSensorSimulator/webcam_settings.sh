@@ -6,10 +6,10 @@ v4l2-ctl -d /dev/video1 --set-ctrl=focus_absolute=0
 
 # Set exposure manually
 v4l2-ctl -d /dev/video1 --set-ctrl=exposure_auto=1
-v4l2-ctl -d /dev/video1 --set-ctrl=exposure_absolute=25
+v4l2-ctl -d /dev/video1 --set-ctrl=exposure_absolute=250
 
 # Set gain level
-v4l2-ctl -d /dev/video1 --set-ctrl=gain=100
+v4l2-ctl -d /dev/video1 --set-ctrl=gain=255
 
 # Set sharpness
 v4l2-ctl -d /dev/video1 --set-ctrl=sharpness=255
