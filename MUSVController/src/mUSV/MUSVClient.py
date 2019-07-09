@@ -98,7 +98,7 @@ if __name__ == '__main__':
                     motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)
                     last_timestamp = msg_timestamp
                     last_update = time.time()
-                
+
             except socket.error as e:
                 print 'Error connecting to CVSensorSimulator.'
             finally:

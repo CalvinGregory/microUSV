@@ -62,8 +62,8 @@ class PIDController(Controller):
         else:
             self._speed_limit_upper = 127
         self._speed_limit_lower = -self._speed_limit_upper
-        self._waypoint_threshold = 50.0 #TODO tune me
-        self._distance_scale_factor = 1.5 # per meter of height between camera and tag plane
+        self._waypoint_threshold = 50.0
+        self._distance_scale_factor = 0.455 # per meter of height between camera and tag plane
         self._tag_plane_distance = tag_plane_distance
         
     def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y, tag_offset_yaw):
@@ -111,7 +111,7 @@ class PIDController(Controller):
             pose = pose2D(x, y, yaw)
 
             (distance_error, angular_error) = self._get_error(pose, self._waypoints[0])
-            
+
             # Apply Proportional gains 
             distance_control_value = self._distance_PID_gains[0]*distance_error
             angle_control_value = self._angle_PID_gains[0]*angular_error
@@ -142,14 +142,16 @@ class PIDController(Controller):
             self._lastPose = pose
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
-            
+
+            print(self._waypoints[0].x, self._waypoints[0].y)
+
             if distance_error < self._waypoint_threshold:
                 self._dist_error_sum = 0
                 self._ang_error_sum = 0
                 if self._loop_waypoints:
-                    self._waypoints.append(self._waypoints.pop())
+                    self._waypoints.append(self._waypoints.pop(0))
                 else:
-                    self._waypoints.pop()
+                    self._waypoints.pop(0)
         
         return self._motor_speeds
     
