@@ -4,23 +4,24 @@ CVSensorSimulator is a desktop application to simulate a microUSV's onboard sens
 
 The application uses a json config file to which should be modified to reflect a user's setup. 
 
-Config Field | Value
--------------|------
-visualize | Enables or disables the application showing a video feed with labelled tag detections.
-cameraInfo | Camera calibration parameters
-cameraInfo:cameraID | Host computer's webcam index. A built-in webcam will almost always be index 0. 
-camerInfo:x_res | camera's x-resolution
-cameraInfo:y_res | camera's y-resolution
-cameraInfo:fx | camera's x focal length
-cameraInfo:fy | camera's y focal length
-cameraInfo:cx | camera's x center point coordinate in pixels
-cameraInfo:cy | camera's y center point coordinate in pixels
-tagsize | side length of the apriltag in mm (black border)
-Robots | List of all robots being used and their associated AprilTag ID numbers and labels
-Pucks | List of all pucks being used and their associated AprilTag numbers
-Obstacles | **Unused field:** List of obstacles marked with AprilTags and their associated tag numbers
-Waypoints | List of waypoint coordinates to send to each microUSV
-loop_waypoints | flag indicating if waypoint list should be repeated after each one has been reached
+Config Field | Type |  Value
+-------------|------|-------
+visualize | boolean | Enables or disables the application showing a video feed with labelled tag detections.
+cameraInfo |  | Camera calibration parameters (can be found using openCV)
+cameraInfo:cameraID | Integer | Overhead camera's index number on the host PC. This can be found by using the ```v4l2-ctl --list-devices``` command
+camerInfo:x_res | Integer | camera's x-resolution in pixels
+cameraInfo:y_res | Integer | camera's y-resolution in pixels
+cameraInfo:fx | Float | camera's x focal length in mm
+cameraInfo:fy | Float | camera's y focal length in mm
+cameraInfo:cx | Float | camera's x center point coordinate in pixels
+cameraInfo:cy | Float | camera's y center point coordinate in pixels
+tagsize | Float |  side length of the apriltags in mm (measure the black border)
+Robots | Integer, String | List of all robots being used and their associated AprilTag ID numbers and labels
+Pucks | Integer | List of all pucks being used and their associated AprilTag numbers
+Obstacles | Integer | **Unused field:** List of obstacles marked with AprilTags and their associated tag numbers
+Waypoints | Float, Float | List of waypoint coordinates to send to each microUSV
+loop_waypoints | Boolean | Flag indicating if waypoint list should be repeated after each one has been reached
+output_csv | Boolean | Flag indicating if the application should export the pose history for each tagged object to a CSV file
 
 To launch the application, navigate to the CVSensorSimulator binary and execute the following:
 
