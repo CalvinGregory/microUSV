@@ -83,6 +83,7 @@ namespace ConfigParser {
 		std::list<Obstacle> obstacles;
 		std::list<Waypoint> waypoints;
 		bool loop_waypoints;
+		bool output_csv;
 	} Config;
 
 	/*

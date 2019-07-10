@@ -1,5 +1,6 @@
 CVSensorSimulator/src/apriltag/* linguist-vendored
 CVSensorSimulator/src/json.hpp linguist-vendored
+CVSensorSimulator/src/CSVWriter.h linguist-vendored
 CVSensorSimulator/src/musv_msg.pb.cc linguist-vendored
 CVSensorSimulator/src/musv_msg.pb.h linguist-vendored
 MUSVController/src/mUSV/musv_msg_pb2.py linguist-vendored

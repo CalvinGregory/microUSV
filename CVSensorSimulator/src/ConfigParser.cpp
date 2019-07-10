@@ -75,6 +75,6 @@ Config ConfigParser::getConfigs(string filepath) {
 		config.waypoints.push_back(waypoint);
 	}
 	config.loop_waypoints = jsonFile.value("loop_waypoints", false);
-
+	config.output_csv = jsonFile.value("output_csv", false);
 	return config;
 }

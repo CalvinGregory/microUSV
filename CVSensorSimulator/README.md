@@ -21,7 +21,7 @@ Pucks | Integer | List of all pucks being used and their associated AprilTag num
 Obstacles | Integer | **Unused field:** List of obstacles marked with AprilTags and their associated tag numbers
 Waypoints | Float, Float | List of waypoint coordinates to send to each microUSV
 loop_waypoints | Boolean | Flag indicating if waypoint list should be repeated after each one has been reached
-output_csv | Boolean | Flag indicating if the application should export the pose history for each tagged object to a CSV file
+output_csv | Boolean | Flag indicating if the application should export the pose history for each robot to a CSV file
 
 To launch the application, navigate to the CVSensorSimulator binary and execute the following:
 

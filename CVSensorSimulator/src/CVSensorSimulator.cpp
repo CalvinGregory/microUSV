@@ -18,6 +18,9 @@
  */
 
 #include <iostream>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <thread>
@@ -33,6 +36,7 @@
 #include "Robot.h"
 #include "ConfigParser.h"
 #include "CVSS_util.h"
+#include "CSVWriter.h"
 #include "musv_msg.pb.h"
 
 extern "C" {
@@ -67,9 +71,11 @@ void vid_cap_thread(FrameBuffer& fb) {
  * recent frame data from the FrameBuffer.
  *
  * @param pd The PoseDetector object which performs detections.
+ * @param taggedObjects List of all TaggedObjects being tracked by the simulator.
+ * @param csv List of CSV file objects recording the pose of each robot.
+ * @param output_csv Flag indicating if robot pose data should be recorded to the csv files.
  */
-void detector_thread(PoseDetector& pd) {
-
+void detector_thread(PoseDetector& pd, vector<TaggedObject>& taggedObjects, vector<CSVWriter>& csv, bool output_csv) {
 	Mat temp_frame(100, 100, CV_8UC3, Scalar(0,0,0));
 	Mat* frame = &temp_frame;
 	imshow("RobotDetections", *frame);
@@ -79,6 +85,12 @@ void detector_thread(PoseDetector& pd) {
 		if(visualize) {
 			frame = pd.getLabelledFrame(config);
 			imshow("RobotDetections", *frame);
+		}
+		if (output_csv) {
+			for(uint i = 0; i < csv.size(); i++) {
+				pose2D pose = taggedObjects[i].getPose();
+				csv[i].newRow() << pose.x << pose.y << pose.yaw;
+			}
 		}
 		// ESC key to exit
 		if (waitKey(30) == 27) {
@@ -119,6 +131,7 @@ int main(int argc, char* argv[]) {
 
 	int size = config.robots.size() + config.pucks.size();
 	vector<TaggedObject> taggedObjects(size);
+	vector<CSVWriter> csv(config.robots.size());
 	int i = 0;
 	while (config.robots.size() > 0) {
 		taggedObjects[i] = config.robots.front();
@@ -130,6 +143,11 @@ int main(int argc, char* argv[]) {
 		config.pucks.pop_front();
 		i++;
 	}
+	if (config.output_csv) {
+		for (uint i = 0; i < csv.size(); i++) {
+			csv[i].newRow() << "X" << "Y" << "Yaw";
+		}
+	}
 
 	// Build threads and thread objects.
 	FrameBuffer fb(settings);
@@ -137,7 +155,7 @@ int main(int argc, char* argv[]) {
 
 	thread threads[2];
 	threads[0] = thread(vid_cap_thread, ref(fb));
-	threads[1] = thread(detector_thread, ref(pd));
+	threads[1] = thread(detector_thread, ref(pd), ref(taggedObjects), ref(csv), config.output_csv);
 
 	threads[0].detach();
 	threads[1].detach();
@@ -248,5 +266,18 @@ int main(int argc, char* argv[]) {
 	}
 
 	destroyAllWindows();
+
+	if (config.output_csv) {
+		for (uint i = 0; i < csv.size(); i++) {
+			stringstream fileName;
+			fileName << taggedObjects[i].getLabel();
+			fileName << "_pose_data_";
+			auto t = std::time(nullptr);
+			auto tm = *localtime(&t);
+			fileName << put_time(&tm, "%Y-%m-%d_%H:%M");
+			fileName << ".csv";
+			csv[i].writeToFile(fileName.str());
+		}
+	}
 	return 0;
 }

@@ -29,5 +29,7 @@
 		{"x": 0, "y": -400}
 	],
 	
-	"loop_waypoints": false
+	"loop_waypoints": false,
+	
+	"output_csv": false
 }
