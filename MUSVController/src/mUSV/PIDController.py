@@ -63,8 +63,10 @@ class PIDController(Controller):
             self._speed_limit_upper = 127
         self._speed_limit_lower = -self._speed_limit_upper
         self._waypoint_threshold = 50.0
-        self._distance_scale_factor = 0.455 # per meter of height between camera and tag plane
+#        self._distance_scale_factor = 0.455 # per meter of height between camera and tag plane
+        self._distance_scale_factor = 0.3 #720p
         self._tag_plane_distance = tag_plane_distance
+        self._bias = -4.0 #TODO add to config file
         
     def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y, tag_offset_yaw):
         '''
@@ -135,7 +137,9 @@ class PIDController(Controller):
             turn = self._speed_limit_upper*angle_control_value
             
             port = (forward_speed - turn)/2
+            port = port - (self._bias)/100
             starboard = (forward_speed + turn)/2
+            starboard = starboard + (self._bias)/100
             (port, starboard) = self._bounded_motor_speeds(port, starboard)
             
             self._motor_speeds = (port, starboard) 
@@ -143,7 +147,7 @@ class PIDController(Controller):
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
 
-            print(self._waypoints[0].x, self._waypoints[0].y)
+#            print(self._waypoints[0].x, self._waypoints[0].y)
 
             if distance_error < self._waypoint_threshold:
                 self._dist_error_sum = 0
@@ -188,7 +192,7 @@ class PIDController(Controller):
         '''
         port = int(round(port_speed))
         starboard = int(round(starboard_speed))  
-        diff = abs(port - starboard)
+        diff = abs(max(port, starboard) - min(port, starboard))
         
         if diff >= 2*self._speed_limit_upper:
             port = int(math.copysign(self._speed_limit_upper, port))

@@ -35,6 +35,7 @@ def sendSpeeds( portSpeed, starboardSpeed ):
            
     Messages are prepended by two '*' characters to indicate message start.     
     """
+#    print("port:{0} star:{1}".format(portSpeed, starboardSpeed))
     arduino.write(struct.pack('<cchh', '*', '*', starboardSpeed, portSpeed))
     return
 
@@ -49,11 +50,16 @@ curses.noecho()
 curses.cbreak()
 screen.keypad(True)
 
-speed = 100
 # Acceptable spin coefficients are +1 or -1 
 # depending on motor wiring polarity and propeller helix direction
 port_propeller_spin = 1
 starboard_propeller_spin = 1
+
+bias = -4.0
+
+speed = 100
+port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
+starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
 
 try:
     while True:
@@ -66,27 +72,36 @@ try:
         # For 1,2,3 key presses change internal motor speed to preset low, medium, or high
         elif msg == ord('1'): 
             speed = 75
+            port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
+            starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
+            print("setting port:{0} star:{1}".format(port_speed, starboard_speed))
         elif msg == ord('2'): 
             speed = 100
+            port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
+            starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
+            print("setting port:{0} star:{1}".format(port_speed, starboard_speed))
         elif msg == ord('3'): 
             speed = 127
+            port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
+            starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
+            print("setting port:{0} star:{1}".format(port_speed, starboard_speed))
         # For w,a,s,d and q,e,z,c key presses send motor speeds to Arduino.
         elif msg == ord('w'): 
-            sendSpeeds(port_propeller_spin * speed, starboard_propeller_spin * speed)
+            sendSpeeds(port_speed, starboard_speed)
         elif msg == ord('a'):
-            sendSpeeds(port_propeller_spin * -speed, starboard_propeller_spin * speed)
+            sendSpeeds(-port_speed, starboard_speed)
         elif msg == ord('s'):
-            sendSpeeds(port_propeller_spin * -speed, starboard_propeller_spin * -speed)
+            sendSpeeds( -port_speed, -starboard_speed)
         elif msg == ord('d'):
-            sendSpeeds(port_propeller_spin * speed, starboard_propeller_spin * -speed)
+            sendSpeeds(port_speed, -starboard_speed)
         elif msg == ord('q'):
-            sendSpeeds(0, starboard_propeller_spin * speed)
+            sendSpeeds(0, starboard_speed)
         elif msg == ord('e'):
-            sendSpeeds(port_propeller_spin * speed, 0)
+            sendSpeeds(port_speed, 0)
         elif msg == ord('z'):
-            sendSpeeds(0, starboard_propeller_spin * -speed)
+            sendSpeeds(0, -starboard_speed)
         elif msg == ord('c'):
-            sendSpeeds(port_propeller_spin * -speed, 0)
+            sendSpeeds(-port_speed, 0)
         # If not a control character, set motor speeds to 0.
         else:
             sendSpeeds(0, 0)

@@ -92,7 +92,9 @@ if __name__ == '__main__':
                 msg = sensorSimulator.recv(128)
                 sensorSimulator.close()
                 sensorData.ParseFromString(msg)
-                
+
+#                print("x:{0} y:{1}".format(sensorData.pose.x, sensorData.pose.y))
+
                 msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
                 if msg_timestamp > last_timestamp:
                     motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)

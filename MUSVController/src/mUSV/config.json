@@ -16,15 +16,15 @@
 	},
 	
 	"PIDGains": {
-		"P_dist": 0.005,
+		"P_dist": 0.008,
 		"I_dist": 0,
-		"D_dist": 0.001,
-		"P_ang": 0.5,
+		"D_dist": 0,
+		"P_ang": 1.25,
 		"I_ang": 0,
-		"D_ang": 0
+		"D_ang": 1
 	},
 	
-	"speed_limit": 40,
+	"speed_limit": 50,
 	
 	"tag_plane_distance": 1.81
 }
