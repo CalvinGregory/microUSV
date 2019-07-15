@@ -39,5 +39,5 @@
 	
 	"loop_waypoints": false,
 	
-	"output_csv": true
+	"output_csv": false
 }
