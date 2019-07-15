@@ -35,6 +35,9 @@ class Config:
                              Acceptable values are +1 or -1
         propSpin_star (int): coefficient indicating which direction the starboard propeller should spin. 
                              Acceptable values are +1 or -1
+        bias (float): Correction term to account for inequality between port and starboard motor outputs. Value must be a 
+                      percentage between -100.0 and +100.0. Positive bias causes the vehicle to turn more to the left (port) 
+                      while negative bias causes a right (starboard) turn. 
         P_dist (float): Distance PID controller proportional gain. 
         I_dist (float): Distance PID controller integral gain. 
         D_dist (float): Distance PID controller derivative gain. 
@@ -61,6 +64,7 @@ class Config:
         self.tagTF_yaw = 0
         self.propSpin_port = 1
         self.propSpin_star = 1
+        self.bias = 0.0
         self.P_dist = 1
         self.I_dist = 0
         self.D_dist = 0
@@ -90,6 +94,7 @@ class Config:
         self.tagTF_yaw = config['tagTransform']['yaw']
         self.propSpin_port = config['PropellerSpin']['port']
         self.propSpin_star = config['PropellerSpin']['starboard']
+        self.bias = config['bias']
         self.P_dist = config['PIDGains']['P_dist']
         self.I_dist = config['PIDGains']['I_dist']
         self.D_dist = config['PIDGains']['D_dist']

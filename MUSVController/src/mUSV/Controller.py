@@ -33,26 +33,29 @@ class Controller(object):
         _waypoints (pose2D): List of waypoints the microUSV should steer towards, in order. 
         _loop_waypoints (bool): Boolean flag indicating the boat should iterate through the waypoint list, 
                                 then repeat the same list of waypoints. 
+        _tag_offset_x (float): X-axis offset in mm between the AprilTag origin and microUSV origin.
+        _tag_offset_y (float): Y-axis offset in mm between the AprilTag origin and microUSV origin.
+        _tag_offset_yaw (float): Angular offset in radians between the AprilTag and microUSV coordinate frame. (ccw positive)
     '''
 
-    def __init__(self, port_propeller_spin, starboard_propeller_spin):
+    def __init__(self, config):
         '''
         Builds a Controller object. 
         
         Args:
-            port_propeller_spin (int): coefficient indicating which direction the port propeller should spin. 
-                                       Acceptable values are +1 or -1
-            starboard_propeller_spin (int): coefficient indicating which direction the starboard propeller should spin. 
-                                            Acceptable values are +1 or -1
+            config (mUSV/Config): Config file object containing controller initialization constants. 
         '''
-        self._portPropSpin = port_propeller_spin
-        self._starPropSpin = starboard_propeller_spin
+        self._portPropSpin = config.propSpin_port
+        self._starPropSpin = config.propSpin_star
         self._last_timestamp = -1
         self._lastPose = pose2D(0,0,0)
         self._waypoints = []
         self._loop_waypoints = False
+        self._tag_offset_x = config.tagTF_x
+        self._tag_offset_y = config.tagTF_y
+        self._tag_offset_yaw = config.tagTF_yaw
     
-    def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y, tag_offset_yaw):
+    def get_motor_speeds(self, sensorData):
         '''
         Interprets sensor data according to the logic of the controller type implemented in the child class to produce
         motor speed values that move the microUSV toward its current goal. 
@@ -60,9 +63,6 @@ class Controller(object):
         Args:
             sensorData (musv_msg_pb2.SensorData): Protocol buffer SensorData message object containing the most 
                                                   recent simulated sensor values from the host machine.
-            tag_offset_x (float): X-axis offset in mm between the AprilTag origin and microUSV origin.
-            tag_offset_y (float): Y-axis offset in mm between the AprilTag origin and microUSV origin.
-            tag_offset_yaw (float): Angular offset in radians between the AprilTag and microUSV coordinate frame. (ccw positive)
             
         Returns:
             (int, int): integer tuple containing motor speeds (portSpeed, starboardSpeed).

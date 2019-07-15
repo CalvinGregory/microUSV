@@ -61,11 +61,10 @@ if __name__ == '__main__':
     tagID = config.tagID
     
     # Build controller object
-    controller = PIDController((config.P_dist, config.I_dist, config.D_dist), (config.P_ang, config.I_ang, config.D_ang), config.propSpin_port, config.propSpin_star, config.speed_limit, config.tag_plane_distance)
+    controller = PIDController(config)
         
-    # Connect to the arduino over USB
+    # Connect to the arduino over USB and wait for connection to settle
     arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
-    # Give serial connection time to settle
     time.sleep(2)
     
     first_request = True
@@ -93,11 +92,9 @@ if __name__ == '__main__':
                 sensorSimulator.close()
                 sensorData.ParseFromString(msg)
 
-#                print("x:{0} y:{1}".format(sensorData.pose.x, sensorData.pose.y))
-
                 msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
                 if msg_timestamp > last_timestamp:
-                    motorSpeeds = controller.get_motor_speeds(sensorData, config.tagTF_x, config.tagTF_y, config.tagTF_yaw)
+                    motorSpeeds = controller.get_motor_speeds(sensorData)
                     last_timestamp = msg_timestamp
                     last_update = time.time()
 

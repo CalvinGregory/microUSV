@@ -27,48 +27,46 @@ class PIDController(Controller):
     to steer the microUSV toward its goal position.  
     
     Attributes:
+        _bias (float): Correction term to account for inequality between port and starboard motor outputs. Value must be a 
+                       percentage between -100.0 and +100.0. Positive bias causes the vehicle to turn more to the left (port) 
+                       while negative bias causes a right (starboard) turn. 
         _distance_PID_gains (float, float, float): Tuple containing the PID gains for the distance controller (P, I, D).
         _angle_PID_gains (float, float, float): Tuple containing the PID gans for the angular controller (P, I, D). 
         _last_error (float, float): Tuple containing the position error from the previous timestep (x, y).
         _motor_speeds (int, int): Tuple containing the speed values the microUSV's motors should currently be set to.  
         _speed_limit_upper (int): Maximum motor speed value. 
         _speed_limit_lower (int): Minimum motor speed value.
-        _waypoint_threshold (float): Threshold indicating at what distance (mm) to treat the current waypoint as reached.  
+        _waypoint_threshold (float): Threshold indicating at what distance (mm) to treat the current waypoint as reached.
+        _tag_plane_distance (float): Distance from the camera to the water's surface in meters.
     '''
 
-    def __init__(self, distance_PID_gains, angle_PID_gains, port_propeller_spin, starboard_propeller_spin, speed_limit, tag_plane_distance):
+    def __init__(self, config):
         '''
         Initialize a PIDController object. 
         
         Args: 
-            distance_PID_gains (float, float, float): tuple (P, I, D) of PID controller gains for distance control
-            angle_PID_gains (float, float, float): tuple (P, I, D) of PID controller gains for angle control
-            port_propeller_spin (int): coefficient indicating which direction the port propeller should spin. 
-                                       Acceptable values are +1 or -1
-            starboard_propeller_spin (int): coefficient indicating which direction the starboard propeller should spin. 
-                                            Acceptable values are +1 or -1
-            speed_limit (float): Percentage (0 to 100] of the motor's maximum speed to use as an upper and lower bound on speed outputs.
-            tag_plane_distance (float): Distance between the camera and the water's surface in meters.
+            config (mUSV/Config): Config file object containing controller initialization constants. 
         '''
-        super(PIDController, self).__init__(port_propeller_spin, starboard_propeller_spin)
-        self._distance_PID_gains = distance_PID_gains
-        self._angle_PID_gains = angle_PID_gains
+        super(PIDController, self).__init__(config)
+        self._bias = config.bias
+        self._distance_PID_gains = (config.P_dist, config.I_dist, config.D_dist)
+        self._angle_PID_gains = (config.P_ang, config.I_ang, config.D_ang)
         self._last_error = (0, 0)
         self._dist_error_sum = 0
         self._ang_error_sum = 0
         self._motor_speeds = (0, 0)
-        if speed_limit > 0 and speed_limit <= 100:
-            self._speed_limit_upper = int(round(127*speed_limit/100))
+        if config.speed_limit > 0 and config.speed_limit <= 100:
+            self._speed_limit_upper = int(round(127*config.speed_limit/100))
         else:
             self._speed_limit_upper = 127
         self._speed_limit_lower = -self._speed_limit_upper
         self._waypoint_threshold = 50.0
-#        self._distance_scale_factor = 0.455 # per meter of height between camera and tag plane
-        self._distance_scale_factor = 0.3 #720p
-        self._tag_plane_distance = tag_plane_distance
-        self._bias = -4.0 #TODO add to config file
+        # Scale factor per meter of height between camera and water's surface
+#        self._distance_scale_factor = 0.455 # 1080p
+        self._distance_scale_factor = 0.3 # 720p
+        self._tag_plane_distance = config.tag_plane_distance
         
-    def get_motor_speeds(self, sensorData, tag_offset_x, tag_offset_y, tag_offset_yaw):
+    def get_motor_speeds(self, sensorData):
         '''
         Applies distance and angular PID controllers to the provided sensor data. Calculates motor speeds
         that will move the microUSV closer to its current goal position. 
@@ -76,10 +74,7 @@ class PIDController(Controller):
         Args:
             sensorData (musv_msg_pb2.SensorData): Protocol buffer SensorData message object containing the most 
                                                   recent simulated sensor values from the host machine.
-            tag_offset_x (float): X-axis offset in mm between the AprilTag origin and microUSV origin.
-            tag_offset_y (float): Y-axis offset in mm between the AprilTag origin and microUSV origin.
-            tag_offset_yaw (float): Angular offset in radians between the AprilTag and microUSV coordinate frame. (ccw positive)
-            
+                                                              
         Returns:
             (int, int): integer tuple containing motor speeds (portSpeed, starboardSpeed).
                         Motor speed values range from -127 to 127.
@@ -100,15 +95,15 @@ class PIDController(Controller):
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
             # Apply tag offset transform
-            x_offset_tagFrame = math.cos(tag_offset_yaw)*tag_offset_x + math.sin(tag_offset_yaw)*tag_offset_y
-            y_offset_tagFrame = -math.sin(tag_offset_yaw)*tag_offset_x + math.cos(tag_offset_yaw)*tag_offset_y
+            x_offset_tagFrame = math.cos(self._tag_offset_yaw)*self._tag_offset_x + math.sin(self._tag_offset_yaw)*self._tag_offset_y
+            y_offset_tagFrame = -math.sin(self._tag_offset_yaw)*self._tag_offset_x + math.cos(self._tag_offset_yaw)*self._tag_offset_y
             # Apply yaw transform
             x_offset_worldFrame = math.cos(sensorData.pose.yaw)*x_offset_tagFrame + math.sin(sensorData.pose.yaw)*y_offset_tagFrame
             y_offset_worldFrame = -math.sin(sensorData.pose.yaw)*x_offset_tagFrame + math.cos(sensorData.pose.yaw)*y_offset_tagFrame
             
             x = (sensorData.pose.x + x_offset_worldFrame) * self._distance_scale_factor * self._tag_plane_distance
             y = (sensorData.pose.y + y_offset_worldFrame) * self._distance_scale_factor * self._tag_plane_distance
-            yaw = self._bounded_angle(sensorData.pose.yaw - tag_offset_yaw, math.pi, -math.pi)
+            yaw = self._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)
             
             pose = pose2D(x, y, yaw)
 
@@ -146,8 +141,6 @@ class PIDController(Controller):
             self._lastPose = pose
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
-
-#            print(self._waypoints[0].x, self._waypoints[0].y)
 
             if distance_error < self._waypoint_threshold:
                 self._dist_error_sum = 0
