@@ -2,7 +2,7 @@
 
 MUSVController is the control code for the microUSV's onboard Raspberry Pi. It polls a host PC running CVSensorSimulator for simulated sensor data, then uses PID control for waypoint following. 
 
-The application can be configured by modifying the config.json file. When performing a new setup, the config file values must be adjusted. 
+The application can be configured by modifying the config.json file. When performing a new setup, the config file values must be adjusted. The *PropellerSpin* coefficients and *bias* value should match the values found during the [Teleoperation Test](https://osf.io/k7a8p/wiki/14.%20Teleoperation%20Test/).
 
 Config Field | Type | Value
 -------------|------|------
@@ -14,7 +14,7 @@ tagTransform:x | Float | X position offset in mm
 tagTransform:y | Float | Y position offset in mm
 tagTransform:z | Float | **Unused field:** Z position offset in mm
 tagTransform:yaw | Float | Rotation offset in radians
-PropellerSpin |  | Integer coefficients (1 or -1) which indicate if the propellers should spin forward or backward. These should match the coefficients found during the [Teleoperation Test](https://osf.io/k7a8p/wiki/14.%20Teleoperation%20Test/)
+PropellerSpin |  | Integer coefficients (1 or -1) which indicate if the propellers should spin forward or backward. 
 PropellerSpin:port | Integer | Port (left) propeller coefficient
 PropellerSpin:starboard | Integer | Starboard (right) propeller coefficient
 bias | Float | Correction term to account for inequality between port and starboard motor outputs. Value must be a percentage between -100.0 and +100.0. Positive bias causes the vehicle to turn more to the left (port) while negative bias causes a right (starboard) turn.
