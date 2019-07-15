@@ -20,10 +20,12 @@ along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 # Based on a tutorial by Christopher Barnatt.
 # https://www.explainingcomputers.com/rasp_pi_robotics.html
 
+import sys
 import serial
 import curses
 import time
 import struct
+from Config import Config
 
 def sendSpeeds( portSpeed, starboardSpeed ):
     """ 
@@ -35,13 +37,18 @@ def sendSpeeds( portSpeed, starboardSpeed ):
            
     Messages are prepended by two '*' characters to indicate message start.     
     """
-#    print("port:{0} star:{1}".format(portSpeed, starboardSpeed))
     arduino.write(struct.pack('<cchh', '*', '*', starboardSpeed, portSpeed))
     return
 
-# Connect to the arduino over USB
+# Read config file
+if (len(sys.argv) < 2):
+    print ('No config file path provided')
+    exit()
+    
+config = Config(sys.argv[1])
+
+# Connect to the arduino over USB and wait for connection to settle
 arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
-# Give serial connection time to settle
 time.sleep(2)
 
 # Setup terminal window for curses
@@ -50,16 +57,9 @@ curses.noecho()
 curses.cbreak()
 screen.keypad(True)
 
-# Acceptable spin coefficients are +1 or -1 
-# depending on motor wiring polarity and propeller helix direction
-port_propeller_spin = 1
-starboard_propeller_spin = 1
-
-bias = -4.0
-
 speed = 100
-port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
-starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
+port_speed = int(round(config.propSpin_port * (speed - speed*(config.bias/100))))
+starboard_speed = int(round(config.propSpin_star * (speed + speed*(config.bias/100))))
 
 try:
     while True:
@@ -72,19 +72,16 @@ try:
         # For 1,2,3 key presses change internal motor speed to preset low, medium, or high
         elif msg == ord('1'): 
             speed = 75
-            port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
-            starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
-            print("setting port:{0} star:{1}".format(port_speed, starboard_speed))
+            port_speed = int(round(config.propSpin_port * (speed - speed*(config.bias/100))))
+            starboard_speed = int(round(config.propSpin_star * (speed + speed*(config.bias/100))))
         elif msg == ord('2'): 
             speed = 100
-            port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
-            starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
-            print("setting port:{0} star:{1}".format(port_speed, starboard_speed))
+            port_speed = int(round(config.propSpin_port * (speed - speed*(config.bias/100))))
+            starboard_speed = int(round(config.propSpin_star * (speed + speed*(config.bias/100))))
         elif msg == ord('3'): 
             speed = 127
-            port_speed = int(round(port_propeller_spin * (speed - speed*(bias/100))))
-            starboard_speed = int(round(starboard_propeller_spin * (speed + speed*(bias/100))))
-            print("setting port:{0} star:{1}".format(port_speed, starboard_speed))
+            port_speed = int(round(config.propSpin_port * (speed - speed*(config.bias/100))))
+            starboard_speed = int(round(config.propSpin_star * (speed + speed*(config.bias/100))))
         # For w,a,s,d and q,e,z,c key presses send motor speeds to Arduino.
         elif msg == ord('w'): 
             sendSpeeds(port_speed, starboard_speed)
