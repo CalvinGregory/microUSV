@@ -4,7 +4,7 @@ This repository contains the control software for the microUSV: a small autonomo
 The repository contains source code for four separate applications: **CVSensorSimulator**, **MUSVController**, **PeripheralController**, and **Teleop**. 
 
 ### CVSensorSimulator
-**CVSensorSimulator** is a PC application (tested on Ubuntu 16.04) used to simulate the sensor values observed by each microUSV. It uses computer vision to track the pose of each object marked with an AprilTag in the view of an overhead camera. Tagged objects include microUSV's, pucks, and obstacles in the environment. It also acts as a server application, receiving query messages from microUSV's over wifi and replying with that vehicle's sensor data. 
+**CVSensorSimulator** is a PC application (tested on Ubuntu 16.04 and 18.04) used to simulate the sensor values observed by each microUSV. It uses computer vision to track the pose of each object marked with an AprilTag in the view of an overhead camera. Tagged objects include microUSV's, pucks, and obstacles in the environment. It also acts as a server application, receiving query messages from microUSV's over wifi and replying with that vehicle's sensor data. 
 
 ### MUSVController
 **MUSVController** is the main control application which runs on the microUSV's onboard Raspberry Pi (tested on Raspbian Stretch). It queries a server computer running **CVSensorSimulator** for sensor data then uses that sensor data to calculate motor speeds. These motor speeds are sent over serial to the microUSV's onboard peripheral controller board (Arduino Nano). 
