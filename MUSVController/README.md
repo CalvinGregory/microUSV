@@ -31,5 +31,5 @@ tag_plane_distance | Float | Distance from the camera to the water's surface in 
 Launch the application by connecting to the microUSV's raspberry pi over ssh and executing the following.
 
 ```
-python MUSVClient.py [PATH_TO_CONFIG.JSON]
+$ python MUSVClient.py [PATH_TO_CONFIG.JSON]
 ```

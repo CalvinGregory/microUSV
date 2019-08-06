@@ -72,3 +72,37 @@ zarray.o \
 zhash.o \
 zmaxheap.o \
 -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_features2d -lopencv_calib3d -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc -lprotobuf
+
+# Cleanup .o files
+rm apriltag.o \
+apriltag_pose.o \
+apriltag_quad_thresh.o \
+ConfigParser.o \
+CVSensorSimulator.o \
+CVSS_util.o \
+FrameBuffer.o \
+g2d.o getopt.o \
+homography.o \
+image_u8.o \
+image_u8x3.o \
+image_u8x4.o \
+matd.o \
+musv_msg.pb.o \
+Obstacle.o \
+pam.o \
+pjpeg.o \
+pjpeg-idct.o \
+pnm.o \
+PoseDetector.o \
+Puck.o \
+Robot.o \
+string_util.o \
+svd22.o \
+tag25h9.o \
+tag36h11.o \
+time_util.o \
+unionfind.o \
+workerpool.o \
+zarray.o \
+zhash.o \
+zmaxheap.o
