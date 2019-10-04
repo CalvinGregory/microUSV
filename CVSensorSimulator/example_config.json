@@ -1,0 +1,42 @@
+{
+	"visualize": true,
+	
+	"cameraInfo": {
+		"cameraID": 1,
+		"x_res": 1280,
+		"y_res": 720,
+		"fx": 1440.0,
+		"fy": 1440.0,
+		"cx": 640,
+		"cy": 360
+	},
+	
+	"tagsize": 49.0,
+	
+	"Robots": [
+		{"tagID": 1, "label": "mUSV"}
+	],
+	
+	"Pucks": [
+		
+	],
+	
+	"Obstacles": [
+		
+	],
+	
+	"Waypoints": [
+		{"x": -370, "y": 0},
+		{"x": -250, "y": 180},
+		{"x": 0, "y": 250},
+		{"x": 250, "y": 180},
+		{"x": 370, "y": 0},
+		{"x": 250, "y": -180},
+		{"x": 0, "y": -250},
+		{"x": -250, "y": -180}
+	],
+	
+	"loop_waypoints": false,
+	
+	"output_csv": false
+}
