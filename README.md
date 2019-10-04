@@ -1,7 +1,7 @@
 # microUSV
 This repository contains the control software for the microUSV: a small autonomous unmanned surface vehicle for indoor lab work. The hardware repository can be found [here](https://osf.io/k7a8p/).
 
-The repository contains source code for four separate applications: **CVSensorSimulator**, **MUSVController**, **PeripheralController**, and **Teleop**. 
+The repository contains source code for four separate applications: **CVSensorSimulator**, **MUSVController**, **PeripheralController**, and **Teleop**. (Note: The Teleop application resides in the MUSVController directory)
 
 ### CVSensorSimulator
 **CVSensorSimulator** is a PC application (tested on Ubuntu 16.04 and 18.04) used to simulate the sensor values observed by each microUSV. It uses computer vision to track the pose of each object marked with an AprilTag in the view of an overhead camera. Tagged objects include microUSV's, pucks, and obstacles in the environment. It also acts as a server application, receiving query messages from microUSV's over wifi and replying with that vehicle's sensor data. 
