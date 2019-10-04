@@ -5,8 +5,8 @@
 		"cameraID": 1,
 		"x_res": 1280,
 		"y_res": 720,
-		"fx": 1440.0,
-		"fy": 1440.0,
+		"fx": 1440.4750657011593,
+		"fy": 1440.4750657011593,
 		"cx": 640,
 		"cy": 360
 	},
@@ -14,7 +14,12 @@
 	"tagsize": 49.0,
 	
 	"Robots": [
-		{"tagID": 1, "label": "mUSV"}
+		{"tagID": 1, "label": "Ora"},
+		{"tagID": 2, "label": "Yel"},
+		{"tagID": 3, "label": "Gre"},
+		{"tagID": 4, "label": "Blu"},
+		{"tagID": 5, "label": "Bro"},
+		{"tagID": 6, "label": "Red"}
 	],
 	
 	"Pucks": [
