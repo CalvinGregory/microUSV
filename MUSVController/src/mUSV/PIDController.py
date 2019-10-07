@@ -31,7 +31,7 @@ class PIDController(Controller):
                        percentage between -100.0 and +100.0. Positive bias causes the vehicle to turn more to the left (port) 
                        while negative bias causes a right (starboard) turn. 
         _distance_PID_gains (float, float, float): Tuple containing the PID gains for the distance controller (P, I, D).
-        _angle_PID_gains (float, float, float): Tuple containing the PID gans for the angular controller (P, I, D). 
+        _angle_PID_gains (float, float, float): Tuple containing the PID gains for the angular controller (P, I, D). 
         _last_error (float, float): Tuple containing the position error from the previous timestep (x, y).
         _motor_speeds (int, int): Tuple containing the speed values the microUSV's motors should currently be set to.  
         _speed_limit_upper (int): Maximum motor speed value. 
@@ -49,6 +49,8 @@ class PIDController(Controller):
         '''
         super(PIDController, self).__init__(config)
         self._bias = config.bias
+        self._propSpin_port = config.propSpin_port
+        self._propSpin_star = config.propSpin_star
         self._distance_PID_gains = (config.P_dist, config.I_dist, config.D_dist)
         self._angle_PID_gains = (config.P_ang, config.I_ang, config.D_ang)
         self._last_error = (0, 0)
@@ -137,7 +139,7 @@ class PIDController(Controller):
             starboard = starboard + (self._bias)/100
             (port, starboard) = self._bounded_motor_speeds(port, starboard)
             
-            self._motor_speeds = (port, starboard) 
+            self._motor_speeds = (self._propSpin_port*port, self._propSpin_star*starboard) 
             self._lastPose = pose
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
