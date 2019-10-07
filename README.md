@@ -65,6 +65,14 @@ Using the provided [microUSV disk image](https://osf.io/wtcd3/) is strongly reco
 
 Using a program such as [Rufus](https://rufus.ie/) or [Etcher](https://www.balena.io/etcher/), flash the disk image onto a micro SD card and insert it into the Raspberry Pi.
 
+Login to the microUSV's Raspberry Pi over SSh and navigate to the MUSVController/src/mUSV directory. Copy the example_config.json file and modify the copy's parameters when tuning that microUSV's performance. 
+
+```
+cd ~/microUSV/MUSVController/src/mUSV
+cp example_config.json config.json
+nano config.json
+```
+
 #### Option 2: Fresh Install
 Follow the official [Raspbian installation instructions](https://www.raspberrypi.org/documentation/installation/installing-images/README.md). The instructions are summarized below.
 
@@ -155,6 +163,14 @@ Clone the microUSV repository onto the Raspberry Pi home directory.
 $ git clone https://github.com/CalvinGregory/microUSV.git
 ```
 
+Navigate to the MUSVController/src/mUSV directory. Copy the example_config.json file and modify the copy's parameters when tuning that microUSV's performance. 
+
+```
+cd ~/microUSV/MUSVController/src/mUSV
+cp example_config.json config.json
+nano config.json
+```
+
 ### Arduino Nano
 The **PeripheralController.ino** sketch must be flashed onto the microUSV's Arduino Nano using the [Arduino IDE](https://www.arduino.cc/en/main/software) or equivalent. The application depends on the PololuQik library. The library can be found [here](https://github.com/pololu/qik-arduino) or in the Arduino IDE itself by searching "PololuQik" in the Library Manager.
 
@@ -164,7 +180,7 @@ A host PC running CVSensorSimulator must be connected to an overhead webcam and 
 The microUSV's can be tested in isolation by connecting to their pi's over SSH and running the teleop program to confirm the propellers spin and the microUSV's motion behaves as expected. 
 
 ```
-$ python musv_teleop.py
+$ python teleop.py config.json
 ```
 
 Identify the host PC's IP address and the individual microUSV's AprilTag ID number and add them to the microUSV's config.json file under the appropriate fields. 
@@ -176,8 +192,8 @@ $ ifconfig
 Finally launch CVSensorSimulator on the host PC and MUSVClient on each of the microUSV's. 
 
 ```
-$ ./CVSensorSimulator /path/to/config/file/config.json
-$ python MUSVClient.py /path/to/config/file/config.json
+$ ./CVSensorSimulator config.json
+$ python MUSVClient.py config.json
 ```
 
 See the [hardware repository wiki](https://osf.io/k7a8p/wiki/13.%20Lab%20Setup/) for figures and more information.
