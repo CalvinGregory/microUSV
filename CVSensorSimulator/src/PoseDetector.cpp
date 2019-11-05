@@ -23,8 +23,7 @@
 using namespace cv;
 using namespace std;
 
-PoseDetector::PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, vector<TaggedObject>* objects) {
-	this->fb = fb;
+PoseDetector::PoseDetector(apriltag_detection_info_t detInfo, vector<TaggedObject>* objects) {
 	this->detInfo = detInfo;
 	this->objects = objects;
 	detections = NULL;
@@ -39,31 +38,33 @@ PoseDetector::~PoseDetector() {
 	zarray_destroy(detections);
 }
 
-void PoseDetector::updatePoseEstimates() {
-	frame = *fb->getFrame();
-	Mat gray;
-	cvtColor(frame, gray, COLOR_BGR2GRAY);
-	// Make an image_u8_t header for the Mat data
-	image_u8_t im = { .width = gray.cols,
-		.height = gray.rows,
-		.stride = gray.cols,
-		.buf = gray.data
-	};
+void PoseDetector::updatePoseEstimates(Mat* frame) {
+	if (!frame->empty()) {
+		this->frame = *frame;
+		Mat gray;
+		cvtColor(this->frame, gray, COLOR_BGR2GRAY);
+		// Make an image_u8_t header for the Mat data
+		image_u8_t im = { .width = gray.cols,
+			.height = gray.rows,
+			.stride = gray.cols,
+			.buf = gray.data
+		};
 
-	detections = apriltag_detector_detect(td, &im);
-	apriltag_detection_t* det;
-	for(int i = 0; i < zarray_size(detections); i++) {
-		zarray_get(detections, i, &det);
-		int index = CVSS_util::tagMatch(objects, det->id);
-		if (index < 0) { // Remove all detections which do not belong to a valid TaggedObject
-			zarray_remove_index(detections, i, 0);
-			i--;
-		}
-		else { // Estimate the pose of the TaggedObject
-			apriltag_pose_t pose;
-			detInfo.det = det;
-			estimate_tag_pose(&detInfo, &pose);
-			objects->at(index).setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
+		detections = apriltag_detector_detect(td, &im);
+		apriltag_detection_t* det;
+		for(int i = 0; i < zarray_size(detections); i++) {
+			zarray_get(detections, i, &det);
+			int index = CVSS_util::tagMatch(objects, det->id);
+			if (index < 0) { // Remove all detections which do not belong to a valid TaggedObject
+				zarray_remove_index(detections, i, 0);
+				i--;
+			}
+			else { // Estimate the pose of the TaggedObject
+				apriltag_pose_t pose;
+				detInfo.det = det;
+				estimate_tag_pose(&detInfo, &pose);
+				objects->at(index).setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
+			}
 		}
 	}
 }

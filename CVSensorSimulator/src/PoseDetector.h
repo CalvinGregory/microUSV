@@ -51,7 +51,6 @@ enum class AngleUnit {
  */
 class PoseDetector {
 private:
-	FrameBuffer* fb;
 	apriltag_detection_info_t detInfo;
 	std::vector<TaggedObject>* objects;
 
@@ -79,18 +78,19 @@ private:
 	void label_tag_detection(cv::Mat* frame, apriltag_detection_t* det);
 public:
 	/*
-	 * @param fb Pointer to the FrameBuffer object which captures video frames.
 	 * @param detInfo Detection info required by the apriltag detection algorithm.
 	 * @param objects Pointer to the global list of valid TaggedObjects.
 	 */
-	PoseDetector(FrameBuffer* fb, apriltag_detection_info_t detInfo, std::vector<TaggedObject>* objects);
+	PoseDetector(apriltag_detection_info_t detInfo, std::vector<TaggedObject>* objects);
 
 	~PoseDetector();
 
 	/*
-	 * Pulls a new frame from the frame buffer and estimates the poses of all TaggedObjects detected in the frame.
+	 * Estimates the poses of all TaggedObjects detected in the provided frame.
+	 * 
+	 * @param frame Pointer to the camera frame to search for TaggedObjects.
 	 */
-	void updatePoseEstimates();
+	void updatePoseEstimates(cv::Mat* frame);
 
 	/*
 	 * Adds outlines and labels to all TaggedObjects detected in the frame.
