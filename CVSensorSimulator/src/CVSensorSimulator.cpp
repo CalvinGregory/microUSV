@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include "opencv2/opencv.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 #include <google/protobuf/util/time_util.h>
 
 #include "FrameBuffer.h"
@@ -36,6 +37,7 @@
 #include "Robot.h"
 #include "ConfigParser.h"
 #include "CVSS_util.h"
+#include "cyclicbarrier.hpp"
 #include "CSVWriter.h"
 #include "musv_msg.pb.h"
 
@@ -54,49 +56,118 @@ using google::protobuf::util::TimeUtil;
 bool running;
 bool visualize;
 ConfigParser::Config config;
+Mat* frame;
+Mat targetMask;
+
+// Build barriers
+class concrete_callable : public cbar::callable {
+public:
+	concrete_callable() {}
+	virtual void run() override {}
+};
+auto cc = new concrete_callable();
+cbar::cyclicbarrier* frameAcquisitionBarrier = new cbar::cyclicbarrier(2,cc);
+cbar::cyclicbarrier* detectorBarrier0 = new cbar::cyclicbarrier(3,cc);
+cbar::cyclicbarrier* detectorBarrier1 = new cbar::cyclicbarrier(3,cc);
 
 /*
  * Video Capture thread function. Continuously updates the FrameBuffer.
  *
  * @param fb The FrameBuffer object to update.
  */
-void vid_cap_thread(FrameBuffer& fb) {
+void video_capture_thread(FrameBuffer& fb) {
 	while(running) {
 		fb.updateFrame();
 	}
 }
 
 /*
- * AprilTag Detector thread function. Detects poses of AprilTags in the most
+ * AprilTag detector thread function. Detects poses of AprilTags in the most
  * recent frame data from the FrameBuffer.
  *
  * @param pd The PoseDetector object which performs detections.
- * @param taggedObjects List of all TaggedObjects being tracked by the simulator.
- * @param csv List of CSV file objects recording the pose of each robot.
- * @param output_csv Flag indicating if robot pose data should be recorded to the csv files.
  */
-void detector_thread(PoseDetector& pd, vector<TaggedObject>& taggedObjects, vector<CSVWriter>& csv, bool output_csv) {
+void apriltag_detector_thread(PoseDetector& pd) {
 	Mat temp_frame(100, 100, CV_8UC3, Scalar(0,0,0));
-	Mat* frame = &temp_frame;
-	imshow("RobotDetections", *frame);
+	imshow("CVSensorSimulator", temp_frame);
 
 	while (running) {
-		pd.updatePoseEstimates();
+		frameAcquisitionBarrier->await();
+		pd.updatePoseEstimates(frame); 
 		if(visualize) {
-			frame = pd.getLabelledFrame(config);
-			imshow("RobotDetections", *frame);
+			Mat* labelledFrame = pd.getLabelledFrame(config);
+			imshow("CVSensorSimulator", *labelledFrame);
 		}
+		// ESC key to exit
+		if (waitKey(1) == 27) {
+			running = false;
+		}
+		detectorBarrier0->await();
+		detectorBarrier1->await();
+	}
+}
+
+/*
+ * Target detector thread function. Detects colored targets in the camera frame. 
+ * Saves a mask image indicating which pixels are the targeted color. 
+ * 
+ * @param fb The FrameBuffer object to update.
+ */
+void target_detector_thread(FrameBuffer& fb) {
+	Mat hsv;
+	while (running) {
+		frame = fb.getFrame();
+		if (!frame->empty()) {
+			cvtColor(*frame, hsv, COLOR_BGR2HSV);
+		}
+		frameAcquisitionBarrier->await();
+		
+		cv::inRange(hsv, config.target_thresh_low, config.target_thresh_high, targetMask);
+		medianBlur(targetMask, targetMask, 7);
+		
+		detectorBarrier0->await();
+		detectorBarrier1->await();
+	}
+}
+
+/*
+ * Thread function to process apriltag and target detections data. Generates simulated 
+ * sensor values for target and obstacle detections to be sent to each microUSV and 
+ * can export each vessel's pose history to a CSV file. 
+ * 
+ * @param taggedObjects List of all TaggedObjects being tracked by the simulator.
+ * @param csv List of CSV file objects recording the pose of each robot.
+ * @param output_csv Flag indicating if robot pose data should be recorded to the csv files. 
+ */
+void detection_processor_thread(vector<TaggedObject>& taggedObjects, vector<CSVWriter>& csv, bool output_csv) {
+	Mat targets;
+	while (running) {
+		detectorBarrier0->await();
+		detectorBarrier0->reset();
+
+		vector<TaggedObject> robots(taggedObjects); 
+		targets = targetMask.clone();
+
+		detectorBarrier1->await(); 
+		detectorBarrier1->reset();
+
+		//TODO
+		cout << "processor thread: calc sensor values" << endl;
+		// Calc sensor values
+		
 		if (output_csv) {
 			for(uint i = 0; i < csv.size(); i++) {
-				pose2D pose = taggedObjects[i].getPose();
+				pose2D pose = robots[i].getPose();
 				csv[i].newRow() << pose.x << pose.y << pose.yaw;
 			}
 		}
-		// ESC key to exit
-		if (waitKey(30) == 27) {
-			running = false;
-		}
 	}
+
+	// Cleanup barrier objects
+	delete cc;
+	delete frameAcquisitionBarrier;
+	delete detectorBarrier0;
+	delete detectorBarrier1;
 }
 
 int main(int argc, char* argv[]) {
@@ -129,7 +200,8 @@ int main(int argc, char* argv[]) {
 	settings.x_res = config.cInfo.x_res;
 	settings.y_res = config.cInfo.y_res;
 
-	int size = config.robots.size() + config.pucks.size();
+	// int size = config.robots.size() + config.pucks.size();
+	int size = config.robots.size(); // Current setup does not use pucks with apriltags, only the number of robots matters.
 	vector<TaggedObject> taggedObjects(size);
 	vector<CSVWriter> csv(config.robots.size());
 	int i = 0;
@@ -149,16 +221,21 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	// Build threads and thread objects.
+	// Build thread parameter objects.
 	FrameBuffer fb(settings);
-	PoseDetector pd(&fb, info, &taggedObjects);
+	PoseDetector pd(info, &taggedObjects);
+	Mat targetMask;
 
-	thread threads[2];
-	threads[0] = thread(vid_cap_thread, ref(fb));
-	threads[1] = thread(detector_thread, ref(pd), ref(taggedObjects), ref(csv), config.output_csv);
+	// Start threads
+	thread threads[4];
+	threads[0] = thread(video_capture_thread, ref(fb));
+	threads[1] = thread(apriltag_detector_thread, ref(pd));
+	threads[2] = thread(target_detector_thread, ref(fb));
+	threads[3] = thread(detection_processor_thread, ref(taggedObjects), ref(csv), config.output_csv);
 
-	threads[0].detach();
-	threads[1].detach();
+	for (int i = 0; i < 4; i++) {
+		threads[i].detach();
+	}
 
 //--- Socket Setup --- //
 	int server_fd, new_socket;
@@ -279,5 +356,6 @@ int main(int argc, char* argv[]) {
 			csv[i].writeToFile(fileName.str());
 		}
 	}
+	
 	return 0;
 }

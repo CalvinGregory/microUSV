@@ -30,6 +30,7 @@ g++ -c -std=c++11 -pthread \
 src/ConfigParser.cpp \
 src/CVSS_util.cpp \
 src/CVSensorSimulator.cpp \
+src/cyclicbarrier.cpp \
 src/FrameBuffer.cpp \
 src/musv_msg.pb.cc \
 src/Obstacle.cpp \
@@ -45,6 +46,7 @@ apriltag_quad_thresh.o \
 ConfigParser.o \
 CVSensorSimulator.o \
 CVSS_util.o \
+cyclicbarrier.o \
 FrameBuffer.o \
 g2d.o getopt.o \
 homography.o \
@@ -80,6 +82,7 @@ apriltag_quad_thresh.o \
 ConfigParser.o \
 CVSensorSimulator.o \
 CVSS_util.o \
+cyclicbarrier.o \
 FrameBuffer.o \
 g2d.o getopt.o \
 homography.o \
