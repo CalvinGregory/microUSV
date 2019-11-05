@@ -52,6 +52,15 @@ Config ConfigParser::getConfigs(string filepath) {
 	config.visualize = jsonFile.value("visualize", true);
 	config.cInfo = jsonFile["cameraInfo"].get<CameraInfo::cameraInfo>(); // @suppress("Ambiguous problem")
 	config.tagsize = jsonFile.value("tagsize", 48.0);
+	config.tag_plane_dist = jsonFile.value("tag_plane_dist", 1.0);
+	double h = jsonFile["target_hsv_thresh_low"]["h"].get<double>();
+	double s = jsonFile["target_hsv_thresh_low"]["s"].get<double>();
+	double v = jsonFile["target_hsv_thresh_low"]["v"].get<double>();
+	config.target_thresh_low = cv::Scalar(h,s,v);
+	h = jsonFile["target_hsv_thresh_high"]["h"].get<double>();
+	s = jsonFile["target_hsv_thresh_high"]["s"].get<double>();
+	v = jsonFile["target_hsv_thresh_high"]["v"].get<double>();
+	config.target_thresh_high = cv::Scalar(h,s,v);
 	for (uint i = 0; i < jsonFile["Robots"].size(); i++) {
 		int tagID = jsonFile["Robots"][i]["tagID"].get<int>(); // @suppress("Ambiguous problem")
 		std::string label = jsonFile["Robots"][i]["label"].get<std::string>(); // @suppress("Ambiguous problem")

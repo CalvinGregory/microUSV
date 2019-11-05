@@ -12,6 +12,12 @@
 	},
 	
 	"tagsize": 49.0,
+
+	"tag_plane_distance": 1.80,
+
+	"target_hsv_thresh_low": {"h": 149, "s": 133, "v": 0},
+
+	"target_hsv_thresh_high": {"h": 173, "s": 265, "v": 122},
 	
 	"Robots": [
 		{"tagID": 1, "label": "Ora"},

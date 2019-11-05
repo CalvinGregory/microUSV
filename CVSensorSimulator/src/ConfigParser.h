@@ -28,6 +28,7 @@
 #include "Robot.h"
 #include "Puck.h"
 #include "Obstacle.h"
+#include "opencv2/opencv.hpp"
 
 using json = nlohmann::json;
 
@@ -78,6 +79,9 @@ namespace ConfigParser {
 		bool visualize;
 		CameraInfo::cameraInfo cInfo;
 		double tagsize;
+		double tag_plane_dist;
+		cv::Scalar target_thresh_low;
+		cv::Scalar target_thresh_high;
 		std::list<Robot> robots;
 		std::list<Puck> pucks;
 		std::list<Obstacle> obstacles;
