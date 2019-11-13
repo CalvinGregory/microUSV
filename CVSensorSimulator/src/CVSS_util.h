@@ -34,7 +34,7 @@ namespace CVSS_util {
 	 *
 	 * @return If an object with a matching tagID is found, return the object's index, else return -1.
 	 */
-	int tagMatch(std::vector<TaggedObject>* objects, int tagID);
+	int tagMatch(std::vector<TaggedObject*> objects, int tagID);
 }
 
 

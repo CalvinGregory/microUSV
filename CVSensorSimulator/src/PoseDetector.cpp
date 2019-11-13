@@ -23,7 +23,7 @@
 using namespace cv;
 using namespace std;
 
-PoseDetector::PoseDetector(apriltag_detection_info_t detInfo, vector<TaggedObject>* objects) {
+PoseDetector::PoseDetector(apriltag_detection_info_t detInfo, vector<TaggedObject*> objects) {
 	this->detInfo = detInfo;
 	this->objects = objects;
 	detections = NULL;
@@ -63,7 +63,7 @@ void PoseDetector::updatePoseEstimates(Mat* frame) {
 				apriltag_pose_t pose;
 				detInfo.det = det;
 				estimate_tag_pose(&detInfo, &pose);
-				objects->at(index).setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
+				objects.at(index)->setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
 			}
 		}
 	}
@@ -111,7 +111,7 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 	int fontface;
 	String text;
 	if (!(index < 0)) {
-		text = objects->at(index).getLabel();
+		text = objects.at(index)->getLabel();
 		fontface = FONT_HERSHEY_DUPLEX;
 	}
 	else {
@@ -122,9 +122,9 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 	}
 
 	// Outline the AprilTag in the TaggedObject's color.
-	uint r = get<0>(objects->at(index).getTagColor());
-	uint g = get<1>(objects->at(index).getTagColor());
-	uint b = get<2>(objects->at(index).getTagColor());
+	uint r = get<0>(objects.at(index)->getTagColor());
+	uint g = get<1>(objects.at(index)->getTagColor());
+	uint b = get<2>(objects.at(index)->getTagColor());
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[1][0], det->p[1][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[1][0], det->p[1][1]), Point(det->p[2][0], det->p[2][1]), Scalar(b, g, r), 2);
