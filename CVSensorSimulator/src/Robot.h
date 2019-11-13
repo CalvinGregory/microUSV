@@ -22,27 +22,58 @@
 
 
 #include "TaggedObject.h"
+#include <vector>
+#include "opencv2/opencv.hpp"
+
+/*
+ * sensorZone is a struct containing the dimensions to define a triangle representing a sensor's field of view. 
+ *
+ * The sensor is drawn as an isosceles triangle with its apex at coordinates (x_origin, y_origin) relative to the vessel's apriltag. 
+ * The "range" value gives the triangle's height and "fov_ang" its vertex angle. The triangle's bisector line is oriented towards "heading_ang" 
+ * which is measured counter clockwise relative to the vessel's heading. 
+ * 
+ * The coordinate system assumes the centerpoint of the apriltag is the vessel's center and the line from that center toward the vessel's bow 
+ * is 0 degrees. The positive x-axis points towards the vessel's starboard side and the y-axis points towards the bow. 
+ */ 
+typedef struct {
+	double x_origin = 0;
+	double y_origin = 0;
+	double range = 0;
+	double heading_ang = 0;
+	double fov_ang = 0;
+} sensorZone;
 
 /*
  * The Robot class represents a microUSV marked with an AprilTag. Each instance stores the current state of the microUSV.
  */
 class Robot : public TaggedObject {
 protected:
-	// TODO add sensor zone positions/sizes
+	int x_res;
+	int y_res;
+	double tag_plane_dist;
 	double boundingBox[2];
+	std::vector<sensorZone> sensors;
+	/*
+	 *
+	 */ 
+	cv::Mat getSensorMask(int idx, pose2D pose);
 public:
 	/*
 	 * @param tagID This Robot's tagID.
-	 * @param size_x The x dimension of this Robot's bounding box.
-	 * @param size_y The y dimension of this Robot's bounding box.
-	 * @param lable This Robot's label string.
+	 * @param size_x The x dimension of this Robot's bounding box (mm).
+	 * @param size_y The y dimension of this Robot's bounding box (mm).
+	 * @param label This Robot's label string.
 	 */
-	Robot(int tagID, double size_x, double size_y, std::string label);
+	Robot(int tagID, double size_x, double size_y, std::string label, std::vector<sensorZone> sensors, int img_width, int img_height, double tag_plane_dist);
 	~Robot();
 	/*
 	 * @return The Robot's bounding box dimensions stored as a an array of length 2 {x, y}.
 	 */
 	double* getBoundingBox();
+	/*
+	 *
+	 */
+	std::vector<cv::Mat> getSensorMasks(int img_width, int img_height, double tag_plane_dist);
 };
 
 
