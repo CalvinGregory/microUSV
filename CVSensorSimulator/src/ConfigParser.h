@@ -37,13 +37,20 @@ namespace CameraInfo {
 	 * Struct containing all camera related settings to be extracted from config file.
 	 */
 	typedef struct{
+		// Camera ID number for the target camera. 
+		// Use terminal command "v4l2-ctl --list-devices" to list all connected cameras. 
 		int cameraID;
+		// Camera resolution 
 		int x_res;
 		int y_res;
+		// Focal length
 		double fx;
 		double fy;
+		// Camera center pixel
 		double cx;
 		double cy;
+		// Diagonal field of view angle in degrees
+		double FoV_deg;
 	} cameraInfo;
 
 	/*

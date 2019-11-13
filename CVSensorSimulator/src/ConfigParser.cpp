@@ -30,7 +30,8 @@ void CameraInfo::to_json(json& j, const cameraInfo& c) {
 			 {"fx", c.fx},
 			 {"fy", c.fy},
 			 {"cx", c.cx},
-			 {"cy", c.cy}};
+			 {"cy", c.cy},
+			 {"FoV_deg", c.FoV_deg}};
 }
 
 void CameraInfo::from_json(const json& j, cameraInfo& c) {
@@ -41,11 +42,16 @@ void CameraInfo::from_json(const json& j, cameraInfo& c) {
 	j.at("fy").get_to(c.fy);
 	j.at("cx").get_to(c.cx);
 	j.at("cy").get_to(c.cy);
+	j.at("FoV_deg").get_to(c.FoV_deg);
 }
 
 Config ConfigParser::getConfigs(string filepath) {
 	json jsonFile;
 	std::ifstream fileReader(filepath);
+	if (!fileReader.is_open()) {
+		cerr << "No config file found. Check config file path and/or name." << endl;
+		exit(-1);
+	}
 	fileReader >> jsonFile;
 	fileReader.close();
 	Config config;
@@ -64,7 +70,10 @@ Config ConfigParser::getConfigs(string filepath) {
 	for (uint i = 0; i < jsonFile["Robots"].size(); i++) {
 		int tagID = jsonFile["Robots"][i]["tagID"].get<int>(); // @suppress("Ambiguous problem")
 		std::string label = jsonFile["Robots"][i]["label"].get<std::string>(); // @suppress("Ambiguous problem")
-		Robot robot(tagID, 0, 0, label);
+		//TODO add sensorZone dimensions
+		sensorZone s;
+		vector<sensorZone> sensors = {s};
+		Robot robot(tagID, 89.2, 230.0, label, sensors, config.cInfo.x_res, config.cInfo.y_res, config.tag_plane_dist);
 		config.robots.push_back(robot);
 	}
 	for (uint i = 0; i < jsonFile["Pucks"].size(); i++) {
