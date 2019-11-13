@@ -120,11 +120,34 @@ void target_detector_thread(FrameBuffer& fb) {
 		if (!frame->empty()) {
 			cvtColor(*frame, hsv, COLOR_BGR2HSV);
 		}
-		frameAcquisitionBarrier->await();
-		
+		frameAcquisitionBarrier->await();		
+
 		cv::inRange(hsv, config.target_thresh_low, config.target_thresh_high, targetMask);
+
+//TODO re-test w/ deep tank lighting conditions. 
+/*
+		int morph_size = 2;
+		Mat kernel = getStructuringElement(MORPH_RECT, Size(2*morph_size + 1, 2*morph_size + 1), Point(morph_size, morph_size));
+		Mat hsv_closed;
+		morphologyEx(targetMask, hsv_closed, MORPH_CLOSE, kernel);
+		Mat hsv_opened_nc;
+		Mat hsv_mBlur_nc;
+		Mat hsv_opened_c;
+		Mat hsv_mBlur_c;
+		morphologyEx(targetMask, hsv_opened_nc, MORPH_OPEN, kernel);
+		morphologyEx(hsv_closed, hsv_opened_c, MORPH_OPEN, kernel);
+		medianBlur(targetMask, hsv_mBlur_nc, 7);
+		medianBlur(hsv_closed, hsv_mBlur_c, 7);
+
+		imshow("unfiltered", targetMask);
+		imshow("opened w/o closing", hsv_opened_nc);
+		imshow("opened w/ closing", hsv_opened_c);
+		imshow("blurred w/o closing", hsv_mBlur_nc);
+		imshow("blurred w/ closing", hsv_mBlur_c);
+		waitKey(1);
+*/
 		medianBlur(targetMask, targetMask, 7);
-		
+
 		detectorBarrier0->await();
 		detectorBarrier1->await();
 	}
@@ -139,22 +162,36 @@ void target_detector_thread(FrameBuffer& fb) {
  * @param csv List of CSV file objects recording the pose of each robot.
  * @param output_csv Flag indicating if robot pose data should be recorded to the csv files. 
  */
-void detection_processor_thread(vector<TaggedObject>& taggedObjects, vector<CSVWriter>& csv, bool output_csv) {
+void detection_processor_thread(ConfigParser::Config& config, vector<TaggedObject*>& taggedObjects, vector<CSVWriter>& csv, bool output_csv) {
 	Mat targets;
+	// Estimate range of possible detection values in both axes (mm).
+	double FoV_diag_hyp = config.tag_plane_dist*1000 / 4.66755 / cos(config.cInfo.FoV_deg/2); // Correction factor determined by trial and error. ¯\_(ツ)_/¯
+	double FoV_diag_in_plane = FoV_diag_hyp * sin(config.cInfo.FoV_deg/2);
+	double alpha = atan((double)config.cInfo.y_res/config.cInfo.x_res);
+	// Since origin is at center of the frame, max values are 1/2 of frame width. Full measurement range is [-max, +max].
+	double x_max_measurement = FoV_diag_in_plane * cos(alpha); 
+	double y_max_measurement = FoV_diag_in_plane * sin(alpha);
+
 	while (running) {
 		detectorBarrier0->await();
 		detectorBarrier0->reset();
 
-		vector<TaggedObject> robots(taggedObjects); 
+		vector<Robot> robots;
+		for (int i = 0; i < taggedObjects.size(); i++) {
+			Robot* robot = (Robot*)taggedObjects.at(i);
+			robots.push_back(*robot);
+		}
 		targets = targetMask.clone();
 
 		detectorBarrier1->await(); 
 		detectorBarrier1->reset();
 
+		
+		cout << "x:" << robots[0].getPose().x << " y:" << robots[0].getPose().y << " yaw:" << robots[0].getPose().yaw << endl;
 		//TODO
-		cout << "processor thread: calc sensor values" << endl;
 		// Calc sensor values
 		
+
 		if (output_csv) {
 			for(uint i = 0; i < csv.size(); i++) {
 				pose2D pose = robots[i].getPose();
@@ -180,9 +217,9 @@ int main(int argc, char* argv[]) {
 	if (argc > 1) {
 		config = ConfigParser::getConfigs(argv[1]);
 	}
+	// If no file path provided open default file name. 
 	else {
-		cerr << "No config file path provided." << endl;
-		exit(-1);
+		config = ConfigParser::getConfigs("config.json");
 	}
 	visualize = config.visualize;
 
@@ -200,21 +237,16 @@ int main(int argc, char* argv[]) {
 	settings.x_res = config.cInfo.x_res;
 	settings.y_res = config.cInfo.y_res;
 
-	// int size = config.robots.size() + config.pucks.size();
-	int size = config.robots.size(); // Current setup does not use pucks with apriltags, only the number of robots matters.
-	vector<TaggedObject> taggedObjects(size);
+	int size = config.robots.size(); 
+	vector<TaggedObject*> taggedObjects(size);
 	vector<CSVWriter> csv(config.robots.size());
 	int i = 0;
 	while (config.robots.size() > 0) {
-		taggedObjects[i] = config.robots.front();
+		taggedObjects[i] = &config.robots.front();
 		config.robots.pop_front();
 		i++;
 	}
-	while (config.pucks.size() > 0) {
-		taggedObjects[i] = config.pucks.front();
-		config.pucks.pop_front();
-		i++;
-	}
+
 	if (config.output_csv) {
 		for (uint i = 0; i < csv.size(); i++) {
 			csv[i].newRow() << "X" << "Y" << "Yaw";
@@ -223,7 +255,7 @@ int main(int argc, char* argv[]) {
 
 	// Build thread parameter objects.
 	FrameBuffer fb(settings);
-	PoseDetector pd(info, &taggedObjects);
+	PoseDetector pd(info, taggedObjects);
 	Mat targetMask;
 
 	// Start threads
@@ -231,7 +263,7 @@ int main(int argc, char* argv[]) {
 	threads[0] = thread(video_capture_thread, ref(fb));
 	threads[1] = thread(apriltag_detector_thread, ref(pd));
 	threads[2] = thread(target_detector_thread, ref(fb));
-	threads[3] = thread(detection_processor_thread, ref(taggedObjects), ref(csv), config.output_csv);
+	threads[3] = thread(detection_processor_thread, ref(config), ref(taggedObjects), ref(csv), config.output_csv);
 
 	for (int i = 0; i < 4; i++) {
 		threads[i].detach();
@@ -299,8 +331,8 @@ int main(int argc, char* argv[]) {
 			}
 
 			// Identify microUSV and respond with its sensor data.
-			int index = CVSS_util::tagMatch(&taggedObjects, requestData.tag_id());
-			pose2D pose = taggedObjects[index].getPose();
+			int index = CVSS_util::tagMatch(taggedObjects, requestData.tag_id());
+			pose2D pose = taggedObjects[index]->getPose();
 
 			currentTime = pose.timestamp;
 			long seconds = currentTime.tv_sec - startTime.tv_sec;
@@ -337,7 +369,7 @@ int main(int argc, char* argv[]) {
 
 			send(new_socket, msg, size, 0);
 			close(new_socket);
-			memset(buffer,0,128);
+			std::memset(buffer,0,128);
 			delete[] msg;
 		}
 	}
@@ -347,7 +379,7 @@ int main(int argc, char* argv[]) {
 	if (config.output_csv) {
 		for (uint i = 0; i < csv.size(); i++) {
 			stringstream fileName;
-			fileName << taggedObjects[i].getLabel();
+			fileName << taggedObjects[i]->getLabel();
 			fileName << "_pose_data_";
 			auto t = std::time(nullptr);
 			auto tm = *localtime(&t);
