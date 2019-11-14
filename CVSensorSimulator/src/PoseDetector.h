@@ -22,7 +22,7 @@
 
 
 #include "FrameBuffer.h"
-#include "TaggedObject.h"
+#include "Robot.h"
 #include <math.h>
 #include <sys/time.h>
 #include "CVSS_util.h"
@@ -52,7 +52,7 @@ enum class AngleUnit {
 class PoseDetector {
 private:
 	apriltag_detection_info_t detInfo;
-	std::vector<TaggedObject*> objects;
+	std::vector<std::shared_ptr<Robot>> robots;
 
 	cv::Mat frame;
 	apriltag_family_t* tf;
@@ -81,7 +81,7 @@ public:
 	 * @param detInfo Detection info required by the apriltag detection algorithm.
 	 * @param objects Pointer to the global list of valid TaggedObjects.
 	 */
-	PoseDetector(apriltag_detection_info_t detInfo, std::vector<TaggedObject*> objects);
+	PoseDetector(apriltag_detection_info_t detInfo, std::vector<std::shared_ptr<Robot>> robots);
 
 	~PoseDetector();
 

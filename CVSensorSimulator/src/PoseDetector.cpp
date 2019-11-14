@@ -23,9 +23,9 @@
 using namespace cv;
 using namespace std;
 
-PoseDetector::PoseDetector(apriltag_detection_info_t detInfo, vector<TaggedObject*> objects) {
+PoseDetector::PoseDetector(apriltag_detection_info_t detInfo, vector<shared_ptr<Robot>> robots) {
 	this->detInfo = detInfo;
-	this->objects = objects;
+	this->robots = robots;
 	detections = NULL;
 	tf = tag25h9_create();
 	td = apriltag_detector_create();
@@ -54,7 +54,7 @@ void PoseDetector::updatePoseEstimates(Mat* frame) {
 		apriltag_detection_t* det;
 		for(int i = 0; i < zarray_size(detections); i++) {
 			zarray_get(detections, i, &det);
-			int index = CVSS_util::tagMatch(objects, det->id);
+			int index = CVSS_util::tagMatch(robots, det->id);
 			if (index < 0) { // Remove all detections which do not belong to a valid TaggedObject
 				zarray_remove_index(detections, i, 0);
 				i--;
@@ -63,7 +63,7 @@ void PoseDetector::updatePoseEstimates(Mat* frame) {
 				apriltag_pose_t pose;
 				detInfo.det = det;
 				estimate_tag_pose(&detInfo, &pose);
-				objects.at(index)->setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
+				robots.at(index)->setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
 			}
 		}
 	}
@@ -83,7 +83,7 @@ Mat* PoseDetector::getLabelledFrame(ConfigParser::Config config) {
 	uint b = 0;
 	int fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
 	int waypoint_number = 0;
-	for (std::list<ConfigParser::Waypoint>::iterator it = config.waypoints.begin(); it != config.waypoints.end(); it++) {
+	for (std::vector<ConfigParser::Waypoint>::iterator it = config.waypoints.begin(); it != config.waypoints.end(); it++) {
 		circle(frame, Point(it->x + config.cInfo.cx, it->y + config.cInfo.cy), 2, Scalar(b, g, r), 2);
 		// circle(frame, Point(it->x + config.cInfo.cx, it->y + config.cInfo.cy), 50, Scalar(b, g, r), 2);
 		double fontscale = 1.0;
@@ -107,11 +107,11 @@ pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
 }
 
 void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
-	int index = CVSS_util::tagMatch(objects, det->id);
+	int index = CVSS_util::tagMatch(robots, det->id);
 	int fontface;
 	String text;
 	if (!(index < 0)) {
-		text = objects.at(index)->getLabel();
+		text = robots.at(index)->getLabel();
 		fontface = FONT_HERSHEY_DUPLEX;
 	}
 	else {
@@ -122,9 +122,9 @@ void PoseDetector::label_tag_detection(Mat* frame, apriltag_detection_t* det) {
 	}
 
 	// Outline the AprilTag in the TaggedObject's color.
-	uint r = get<0>(objects.at(index)->getTagColor());
-	uint g = get<1>(objects.at(index)->getTagColor());
-	uint b = get<2>(objects.at(index)->getTagColor());
+	uint r = get<0>(robots.at(index)->getTagColor());
+	uint g = get<1>(robots.at(index)->getTagColor());
+	uint b = get<2>(robots.at(index)->getTagColor());
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[1][0], det->p[1][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[0][0], det->p[0][1]), Point(det->p[3][0], det->p[3][1]), Scalar(b, g, r), 2);
 	line(*frame, Point(det->p[1][0], det->p[1][1]), Point(det->p[2][0], det->p[2][1]), Scalar(b, g, r), 2);

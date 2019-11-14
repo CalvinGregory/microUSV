@@ -21,10 +21,10 @@
 
 namespace CVSS_util {
 
-	int tagMatch(std::vector<TaggedObject*> objects, int tagID){
+	int tagMatch(std::vector<std::shared_ptr<Robot>> robots, int tagID){
 		int index = -1;
-		for (uint i = 0; i < objects.size(); i++) {
-			if (objects.at(i)->getTagID() == tagID) {
+		for (uint i = 0; i < robots.size(); i++) {
+			if (robots.at(i)->getTagID() == tagID) {
 				index = i;
 				break;
 			}
