@@ -27,8 +27,6 @@
 #include <memory>
 #include "json.hpp"
 #include "Robot.h"
-#include "Puck.h"
-#include "Obstacle.h"
 #include "opencv2/opencv.hpp"
 
 using json = nlohmann::json;

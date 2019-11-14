@@ -19,7 +19,6 @@
 
 #include "PoseDetector.h"
 #include "Robot.h"
-#include "Puck.h"
 using namespace cv;
 using namespace std;
 
