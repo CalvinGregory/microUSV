@@ -29,14 +29,6 @@
 		{"tagID": 6, "label": "Red"}
 	],
 	
-	"Pucks": [
-		
-	],
-	
-	"Obstacles": [
-		
-	],
-	
 	"Waypoints": [
 		{"x": -370, "y": 0},
 		{"x": -250, "y": 180},

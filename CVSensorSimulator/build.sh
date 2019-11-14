@@ -33,9 +33,7 @@ src/CVSensorSimulator.cpp \
 src/cyclicbarrier.cpp \
 src/FrameBuffer.cpp \
 src/musv_msg.pb.cc \
-src/Obstacle.cpp \
 src/PoseDetector.cpp \
-src/Puck.cpp \
 src/Robot.cpp
 
 # Compile Application
@@ -55,13 +53,11 @@ image_u8x3.o \
 image_u8x4.o \
 matd.o \
 musv_msg.pb.o \
-Obstacle.o \
 pam.o \
 pjpeg.o \
 pjpeg-idct.o \
 pnm.o \
 PoseDetector.o \
-Puck.o \
 Robot.o \
 string_util.o \
 svd22.o \
@@ -91,13 +87,11 @@ image_u8x3.o \
 image_u8x4.o \
 matd.o \
 musv_msg.pb.o \
-Obstacle.o \
 pam.o \
 pjpeg.o \
 pjpeg-idct.o \
 pnm.o \
 PoseDetector.o \
-Puck.o \
 Robot.o \
 string_util.o \
 svd22.o \

@@ -22,8 +22,9 @@
 
 
 #include <iostream>
-#include <list>
 #include <fstream>
+#include <vector>
+#include <memory>
 #include "json.hpp"
 #include "Robot.h"
 #include "Puck.h"
@@ -89,10 +90,8 @@ namespace ConfigParser {
 		double tag_plane_dist;
 		cv::Scalar target_thresh_low;
 		cv::Scalar target_thresh_high;
-		std::list<Robot> robots;
-		std::list<Puck> pucks;
-		std::list<Obstacle> obstacles;
-		std::list<Waypoint> waypoints;
+		std::vector<std::shared_ptr<Robot>> robots;
+		std::vector<Waypoint> waypoints;
 		bool loop_waypoints;
 		bool output_csv;
 	} Config;
