@@ -50,21 +50,20 @@ class Robot : public TaggedObject {
 protected:
 	int x_res;
 	int y_res;
+	int cx;
+	int cy;
 	double tag_plane_dist;
 	double boundingBox[2];
-	std::vector<sensorZone> sensors;
-	/*
-	 *
-	 */ 
-	cv::Mat getSensorMask(int idx, pose2D pose);
+	
 public:
+	std::vector<sensorZone> sensors;
 	/*
 	 * @param tagID This Robot's tagID.
 	 * @param size_x The x dimension of this Robot's bounding box (mm).
 	 * @param size_y The y dimension of this Robot's bounding box (mm).
 	 * @param label This Robot's label string.
 	 */
-	Robot(int tagID, double size_x, double size_y, std::string label, std::vector<sensorZone> sensors, int img_width, int img_height, double tag_plane_dist);
+	Robot(int tagID, double size_x, double size_y, std::string label, int img_width, int img_height, int x_center_px, int y_center_px, double tag_plane_dist);
 	~Robot();
 	/*
 	 * @return The Robot's bounding box dimensions stored as a an array of length 2 {x, y}.
@@ -73,7 +72,7 @@ public:
 	/*
 	 *
 	 */
-	std::vector<cv::Mat> getSensorMasks(int img_width, int img_height, double tag_plane_dist);
+	std::vector<cv::Mat> getSensorMasks(double px_per_mm);
 };
 
 

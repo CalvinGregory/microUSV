@@ -162,7 +162,7 @@ void target_detector_thread(FrameBuffer& fb) {
  * @param csv List of CSV file objects recording the pose of each robot.
  * @param output_csv Flag indicating if robot pose data should be recorded to the csv files. 
  */
-void detection_processor_thread(ConfigParser::Config& config, vector<TaggedObject*>& taggedObjects, vector<CSVWriter>& csv, bool output_csv) {
+void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<Robot>>& robots, vector<CSVWriter>& csv, bool output_csv) {
 	Mat targets;
 	// Estimate range of possible detection values in both axes (mm).
 	double FoV_diag_hyp = config.tag_plane_dist*1000 / 4.66755 / cos(config.cInfo.FoV_deg/2); // Correction factor determined by trial and error. ¯\_(ツ)_/¯
@@ -176,25 +176,27 @@ void detection_processor_thread(ConfigParser::Config& config, vector<TaggedObjec
 		detectorBarrier0->await();
 		detectorBarrier0->reset();
 
-		vector<Robot> robots;
-		for (int i = 0; i < taggedObjects.size(); i++) {
-			Robot* robot = (Robot*)taggedObjects.at(i);
-			robots.push_back(*robot);
-		}
+		// vector<shared_ptr<Robot>> robots_clone;
+		// for (int i = 0; i < robots.size(); i++) {
+		// 	shared_ptr<Robot> robot = make_shared<Robot>(*robots.at(i));
+		// 	robots_clone.push_back(robot);
+		// }
 		targets = targetMask.clone();
 
 		detectorBarrier1->await(); 
 		detectorBarrier1->reset();
 
-		
-		cout << "x:" << robots[0].getPose().x << " y:" << robots[0].getPose().y << " yaw:" << robots[0].getPose().yaw << endl;
+//DEBUG 
+		// cout << "Robot vector sensorZone values inside detection_processor_thread:" << endl;
+		// cout << robots_clone.at(0)->sensors.at(0).x_origin << " " << robots_clone.at(0)->sensors.at(0).y_origin << " " << robots_clone.at(0)->sensors.at(0).range << " " << robots_clone.at(0)->sensors.at(0).heading_ang << " " << robots_clone.at(0)->sensors.at(0).fov_ang << endl;
+
 		//TODO
 		// Calc sensor values
 		
 
 		if (output_csv) {
 			for(uint i = 0; i < csv.size(); i++) {
-				pose2D pose = robots[i].getPose();
+				pose2D pose = robots[i]->getPose();
 				csv[i].newRow() << pose.x << pose.y << pose.yaw;
 			}
 		}
@@ -221,6 +223,7 @@ int main(int argc, char* argv[]) {
 	else {
 		config = ConfigParser::getConfigs("config.json");
 	}
+	
 	visualize = config.visualize;
 
 	apriltag_detection_info_t info;
@@ -238,14 +241,12 @@ int main(int argc, char* argv[]) {
 	settings.y_res = config.cInfo.y_res;
 
 	int size = config.robots.size(); 
-	vector<TaggedObject*> taggedObjects(size);
+	vector<shared_ptr<Robot>> robots(config.robots);
 	vector<CSVWriter> csv(config.robots.size());
-	int i = 0;
-	while (config.robots.size() > 0) {
-		taggedObjects[i] = &config.robots.front();
-		config.robots.pop_front();
-		i++;
-	}
+//DEBUG	
+	cout << "Transferred vector<shared_ptr<Robot>> sensorZone values:" << endl;
+	cout << robots.at(0)->sensors.at(0).x_origin << " " << robots.at(0)->sensors.at(0).y_origin << " " << robots.at(0)->sensors.at(0).range << " " << robots.at(0)->sensors.at(0).heading_ang << " " << robots.at(0)->sensors.at(0).fov_ang << endl;
+
 
 	if (config.output_csv) {
 		for (uint i = 0; i < csv.size(); i++) {
@@ -255,7 +256,7 @@ int main(int argc, char* argv[]) {
 
 	// Build thread parameter objects.
 	FrameBuffer fb(settings);
-	PoseDetector pd(info, taggedObjects);
+	PoseDetector pd(info, robots);
 	Mat targetMask;
 
 	// Start threads
@@ -263,7 +264,7 @@ int main(int argc, char* argv[]) {
 	threads[0] = thread(video_capture_thread, ref(fb));
 	threads[1] = thread(apriltag_detector_thread, ref(pd));
 	threads[2] = thread(target_detector_thread, ref(fb));
-	threads[3] = thread(detection_processor_thread, ref(config), ref(taggedObjects), ref(csv), config.output_csv);
+	threads[3] = thread(detection_processor_thread, ref(config), ref(robots), ref(csv), config.output_csv);
 
 	for (int i = 0; i < 4; i++) {
 		threads[i].detach();
@@ -331,8 +332,8 @@ int main(int argc, char* argv[]) {
 			}
 
 			// Identify microUSV and respond with its sensor data.
-			int index = CVSS_util::tagMatch(taggedObjects, requestData.tag_id());
-			pose2D pose = taggedObjects[index]->getPose();
+			int index = CVSS_util::tagMatch(robots, requestData.tag_id());
+			pose2D pose = robots[index]->getPose();
 
 			currentTime = pose.timestamp;
 			long seconds = currentTime.tv_sec - startTime.tv_sec;
@@ -354,7 +355,7 @@ int main(int argc, char* argv[]) {
 			*sensorData.mutable_timestamp() = TimeUtil::MicrosecondsToTimestamp(seconds * 1e6 + uSeconds);
 
 			if(requestData.request_waypoints()) {
-				for (std::list<ConfigParser::Waypoint>::iterator it = config.waypoints.begin(); it != config.waypoints.end(); it++) {
+				for (std::vector<ConfigParser::Waypoint>::iterator it = config.waypoints.begin(); it != config.waypoints.end(); it++) {
 					mUSV::SensorData::Waypoint* waypoint = sensorData.add_waypoints();
 					waypoint->set_x(it->x);
 					waypoint->set_y(it->y);
@@ -379,7 +380,7 @@ int main(int argc, char* argv[]) {
 	if (config.output_csv) {
 		for (uint i = 0; i < csv.size(); i++) {
 			stringstream fileName;
-			fileName << taggedObjects[i]->getLabel();
+			fileName << robots[i]->getLabel();
 			fileName << "_pose_data_";
 			auto t = std::time(nullptr);
 			auto tm = *localtime(&t);
