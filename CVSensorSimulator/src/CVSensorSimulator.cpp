@@ -170,29 +170,27 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 	double alpha = atan((double)config.cInfo.y_res/config.cInfo.x_res);
 	// Since origin is at center of the frame, max values are 1/2 of frame width. Full measurement range is [-max, +max].
 	double x_max_measurement = FoV_diag_in_plane * cos(alpha); 
-	double y_max_measurement = FoV_diag_in_plane * sin(alpha);
+	// double y_max_measurement = FoV_diag_in_plane * sin(alpha);
 
 	while (running) {
 		detectorBarrier0->await();
 		detectorBarrier0->reset();
 
-		// vector<shared_ptr<Robot>> robots_clone;
-		// for (int i = 0; i < robots.size(); i++) {
-		// 	shared_ptr<Robot> robot = make_shared<Robot>(*robots.at(i));
-		// 	robots_clone.push_back(robot);
-		// }
 		targets = targetMask.clone();
-
+		vector<pose2D> robot_poses;
+		for (int i = 0; i < robots.size(); i++) {
+			robot_poses.push_back(robots.at(i)->getPose());
+		}
+		
 		detectorBarrier1->await(); 
 		detectorBarrier1->reset();
 
-//DEBUG 
-		// cout << "Robot vector sensorZone values inside detection_processor_thread:" << endl;
-		// cout << robots_clone.at(0)->sensors.at(0).x_origin << " " << robots_clone.at(0)->sensors.at(0).y_origin << " " << robots_clone.at(0)->sensors.at(0).range << " " << robots_clone.at(0)->sensors.at(0).heading_ang << " " << robots_clone.at(0)->sensors.at(0).fov_ang << endl;
-
-		//TODO
-		// Calc sensor values
-		
+		for (int i = 0; i < robots.size(); i++) {
+			robots.at(i)->updateSensorValues(targets, robot_poses, i, config.cInfo.x_res/x_max_measurement/2);
+		}
+//DEBUG		
+		// SensorValues temp = robots.at(0)->getSensorValues();
+		// std::cout << temp.targetSensors.at(0) << " " << temp.targetSensors.at(1) << endl;
 
 		if (output_csv) {
 			for(uint i = 0; i < csv.size(); i++) {
@@ -243,10 +241,6 @@ int main(int argc, char* argv[]) {
 	int size = config.robots.size(); 
 	vector<shared_ptr<Robot>> robots(config.robots);
 	vector<CSVWriter> csv(config.robots.size());
-//DEBUG	
-	cout << "Transferred vector<shared_ptr<Robot>> sensorZone values:" << endl;
-	cout << robots.at(0)->sensors.at(0).x_origin << " " << robots.at(0)->sensors.at(0).y_origin << " " << robots.at(0)->sensors.at(0).range << " " << robots.at(0)->sensors.at(0).heading_ang << " " << robots.at(0)->sensors.at(0).fov_ang << endl;
-
 
 	if (config.output_csv) {
 		for (uint i = 0; i < csv.size(); i++) {

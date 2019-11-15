@@ -23,6 +23,7 @@
 
 #include "TaggedObject.h"
 #include <vector>
+#include <mutex>
 #include "opencv2/opencv.hpp"
 
 /*
@@ -41,7 +42,15 @@ typedef struct {
 	double range = 0;
 	double heading_ang = 0;
 	double fov_ang = 0;
-} sensorZone;
+} SensorZone;
+
+typedef struct {
+	pose2D pose;
+	std::vector<bool> targetSensors;
+	std::vector<bool> obstacleSensors;
+	double cluster_point_range;
+	double cluster_point_heading_offset;
+} SensorValues;
 
 /*
  * The Robot class represents a microUSV marked with an AprilTag. Each instance stores the current state of the microUSV.
@@ -54,25 +63,37 @@ protected:
 	int cy;
 	double tag_plane_dist;
 	double boundingBox[2];
-	
+	std::mutex sensorVal_lock;
+	SensorValues sensorVals_complete;
+	SensorValues sensorVals_incomplete;
+	/*
+	 *
+	 */
+	std::vector<cv::Mat> getSensorMasks(pose2D pose, double px_per_mm);
+	double getTargetRange(pose2D my_pose, pose2D target_pose);
+	double getTargetHeadingError(pose2D my_pose, pose2D target_pose);
 public:
-	std::vector<sensorZone> sensors;
+	std::vector<SensorZone> sensors;
 	/*
 	 * @param tagID This Robot's tagID.
 	 * @param size_x The x dimension of this Robot's bounding box (mm).
 	 * @param size_y The y dimension of this Robot's bounding box (mm).
 	 * @param label This Robot's label string.
 	 */
-	Robot(int tagID, double size_x, double size_y, std::string label, int img_width, int img_height, int x_center_px, int y_center_px, double tag_plane_dist);
+	Robot(int tagID, std::string label, int img_width, int img_height, int x_center_px, int y_center_px, double tag_plane_dist);
 	~Robot();
 	/*
 	 * @return The Robot's bounding box dimensions stored as a an array of length 2 {x, y}.
 	 */
 	double* getBoundingBox();
-	/*
-	 *
+	/**
+	 * 
 	 */
-	std::vector<cv::Mat> getSensorMasks(double px_per_mm);
+	void updateSensorValues(cv::Mat targets, std::vector<pose2D> robot_poses, int my_index, double px_per_mm); 
+	/**
+	 * 
+	 */
+	SensorValues getSensorValues();
 };
 
 
