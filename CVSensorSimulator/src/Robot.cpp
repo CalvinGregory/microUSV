@@ -47,13 +47,11 @@ Robot::Robot(int tagID, double size_x, double size_y, string label, int img_widt
 	// right.fov_ang = M_PI/6;
 	// sensors = {left, right};
 	sensors.push_back(left);
-	sem_init(&mutex, 0, 1);
 	tagRGB = make_tuple(0, 0, 255);
 	gettimeofday(&this->pose.timestamp, NULL);
 }
 
 Robot::~Robot() {
-	sem_destroy(&mutex);
 }
 
 double* Robot::getBoundingBox() {

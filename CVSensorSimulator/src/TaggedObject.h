@@ -24,7 +24,7 @@
 #include <iostream>
 #include <tuple>
 #include <sys/time.h>
-#include "semaphore.h"
+#include <mutex>
 
 /*
  * pose2D is a struct containing two dimensional pose data in cartesian coordinates.
@@ -46,7 +46,7 @@ protected:
 	int tagID;
 	pose2D pose;
 	std::string label;
-	sem_t mutex;
+	std::mutex pose_lock;
 	std::tuple<uint, uint, uint> tagRGB;
 public:
 	/*
@@ -58,9 +58,8 @@ public:
 	 * @param pose The current 2D pose of the TaggedObject.
 	 */
 	void setPose(pose2D pose) {
-		sem_wait(&mutex);
+		std::lock_guard<std::mutex> lock(pose_lock);
 		this->pose = pose;
-		sem_post(&mutex);
 	}
 
 	/*
@@ -68,9 +67,8 @@ public:
 	 */
 	pose2D getPose() {
 		pose2D temp;
-		sem_wait(&mutex);
+		std::lock_guard<std::mutex> lock(pose_lock);
 		temp = pose;
-		sem_post(&mutex);
 		return temp;
 	}
 
