@@ -22,6 +22,7 @@ import socket
 import time
 import struct
 import sys
+import os.path
 import musv_msg_pb2
 from Config import Config
 from PIDController import PIDController
@@ -53,10 +54,14 @@ if __name__ == '__main__':
     
     # Read config file
     if (len(sys.argv) < 2):
-        print ('No config file path provided')
-        exit()
-        
-    config = Config(sys.argv[1])
+        if (os.path.isfile('config.json')):
+            config = Config('config.json')
+        else: 
+            print ('No config file path provided')
+            exit()
+    else:    
+        config = Config(sys.argv[1])
+    
     server_ip = config.serverIP
     tagID = config.tagID
     

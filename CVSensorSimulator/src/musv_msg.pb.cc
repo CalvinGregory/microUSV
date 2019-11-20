@@ -137,7 +137,7 @@ const ::google::protobuf::uint32 TableStruct_musv_5fmsg_2eproto::offsets[] PROTO
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData, pose_),
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData, obstacle_sensors_),
-  PROTOBUF_FIELD_OFFSET(::mUSV::SensorData, puck_sensors_),
+  PROTOBUF_FIELD_OFFSET(::mUSV::SensorData, target_sensors_),
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData, timestamp_),
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData, waypoints_),
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData, loop_waypoints_),
@@ -165,20 +165,20 @@ static ::google::protobuf::Message const * const file_default_instances[] = {
 const char descriptor_table_protodef_musv_5fmsg_2eproto[] =
   "\n\016musv_msg.proto\022\004mUSV\032\037google/protobuf/"
   "timestamp.proto\"8\n\013RequestData\022\016\n\006tag_id"
-  "\030\001 \001(\005\022\031\n\021request_waypoints\030\002 \001(\010\"\257\002\n\nSe"
+  "\030\001 \001(\005\022\031\n\021request_waypoints\030\002 \001(\010\"\261\002\n\nSe"
   "nsorData\022%\n\004pose\030\001 \001(\0132\027.mUSV.SensorData"
-  ".Pose2D\022\034\n\020obstacle_sensors\030\002 \003(\005B\002\020\001\022\030\n"
-  "\014puck_sensors\030\003 \003(\005B\002\020\001\022-\n\ttimestamp\030\004 \001"
-  "(\0132\032.google.protobuf.Timestamp\022,\n\twaypoi"
-  "nts\030\005 \003(\0132\031.mUSV.SensorData.Waypoint\022\026\n\016"
-  "loop_waypoints\030\006 \001(\010\032+\n\006Pose2D\022\t\n\001x\030\001 \001("
-  "\002\022\t\n\001y\030\002 \001(\002\022\013\n\003yaw\030\003 \001(\002\032 \n\010Waypoint\022\t\n"
-  "\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002b\006proto3"
+  ".Pose2D\022\034\n\020obstacle_sensors\030\002 \003(\005B\002\020\001\022\032\n"
+  "\016target_sensors\030\003 \003(\005B\002\020\001\022-\n\ttimestamp\030\004"
+  " \001(\0132\032.google.protobuf.Timestamp\022,\n\twayp"
+  "oints\030\005 \003(\0132\031.mUSV.SensorData.Waypoint\022\026"
+  "\n\016loop_waypoints\030\006 \001(\010\032+\n\006Pose2D\022\t\n\001x\030\001 "
+  "\001(\002\022\t\n\001y\030\002 \001(\002\022\013\n\003yaw\030\003 \001(\002\032 \n\010Waypoint\022"
+  "\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002b\006proto3"
   ;
 ::google::protobuf::internal::DescriptorTable descriptor_table_musv_5fmsg_2eproto = {
   false, InitDefaults_musv_5fmsg_2eproto, 
   descriptor_table_protodef_musv_5fmsg_2eproto,
-  "musv_msg.proto", &assign_descriptors_table_musv_5fmsg_2eproto, 427,
+  "musv_msg.proto", &assign_descriptors_table_musv_5fmsg_2eproto, 429,
 };
 
 void AddDescriptors_musv_5fmsg_2eproto() {
@@ -1178,7 +1178,7 @@ void SensorData::clear_timestamp() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int SensorData::kPoseFieldNumber;
 const int SensorData::kObstacleSensorsFieldNumber;
-const int SensorData::kPuckSensorsFieldNumber;
+const int SensorData::kTargetSensorsFieldNumber;
 const int SensorData::kTimestampFieldNumber;
 const int SensorData::kWaypointsFieldNumber;
 const int SensorData::kLoopWaypointsFieldNumber;
@@ -1193,7 +1193,7 @@ SensorData::SensorData(const SensorData& from)
   : ::google::protobuf::Message(),
       _internal_metadata_(nullptr),
       obstacle_sensors_(from.obstacle_sensors_),
-      puck_sensors_(from.puck_sensors_),
+      target_sensors_(from.target_sensors_),
       waypoints_(from.waypoints_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   if (from.has_pose()) {
@@ -1244,7 +1244,7 @@ void SensorData::Clear() {
   (void) cached_has_bits;
 
   obstacle_sensors_.Clear();
-  puck_sensors_.Clear();
+  target_sensors_.Clear();
   waypoints_.Clear();
   if (GetArenaNoVirtual() == nullptr && pose_ != nullptr) {
     delete pose_;
@@ -1304,13 +1304,13 @@ const char* SensorData::_InternalParse(const char* begin, const char* end, void*
         } while ((::google::protobuf::io::UnalignedLoad<::google::protobuf::uint64>(ptr) & 255) == 16 && (ptr += 1));
         break;
       }
-      // repeated int32 puck_sensors = 3 [packed = true];
+      // repeated int32 target_sensors = 3 [packed = true];
       case 3: {
         if (static_cast<::google::protobuf::uint8>(tag) == 26) {
           ptr = ::google::protobuf::io::ReadSize(ptr, &size);
           GOOGLE_PROTOBUF_PARSER_ASSERT(ptr);
           parser_till_end = ::google::protobuf::internal::PackedInt32Parser;
-          object = msg->mutable_puck_sensors();
+          object = msg->mutable_target_sensors();
           if (size > end - ptr) goto len_delim_till_end;
           auto newend = ptr + size;
           if (size) ptr = parser_till_end(ptr, newend, object, ctx);
@@ -1318,7 +1318,7 @@ const char* SensorData::_InternalParse(const char* begin, const char* end, void*
           break;
         } else if (static_cast<::google::protobuf::uint8>(tag) != 24) goto handle_unusual;
         do {
-          msg->add_puck_sensors(::google::protobuf::internal::ReadVarint(&ptr));
+          msg->add_target_sensors(::google::protobuf::internal::ReadVarint(&ptr));
           GOOGLE_PROTOBUF_PARSER_ASSERT(ptr);
           if (ptr >= end) break;
         } while ((::google::protobuf::io::UnalignedLoad<::google::protobuf::uint64>(ptr) & 255) == 24 && (ptr += 1));
@@ -1417,16 +1417,16 @@ bool SensorData::MergePartialFromCodedStream(
         break;
       }
 
-      // repeated int32 puck_sensors = 3 [packed = true];
+      // repeated int32 target_sensors = 3 [packed = true];
       case 3: {
         if (static_cast< ::google::protobuf::uint8>(tag) == (26 & 0xFF)) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, this->mutable_puck_sensors())));
+                 input, this->mutable_target_sensors())));
         } else if (static_cast< ::google::protobuf::uint8>(tag) == (24 & 0xFF)) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitiveNoInline<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 1, 26u, input, this->mutable_puck_sensors())));
+                 1, 26u, input, this->mutable_target_sensors())));
         } else {
           goto handle_unusual;
         }
@@ -1512,15 +1512,15 @@ void SensorData::SerializeWithCachedSizes(
       this->obstacle_sensors(i), output);
   }
 
-  // repeated int32 puck_sensors = 3 [packed = true];
-  if (this->puck_sensors_size() > 0) {
+  // repeated int32 target_sensors = 3 [packed = true];
+  if (this->target_sensors_size() > 0) {
     ::google::protobuf::internal::WireFormatLite::WriteTag(3, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
-    output->WriteVarint32(_puck_sensors_cached_byte_size_.load(
+    output->WriteVarint32(_target_sensors_cached_byte_size_.load(
         std::memory_order_relaxed));
   }
-  for (int i = 0, n = this->puck_sensors_size(); i < n; i++) {
+  for (int i = 0, n = this->target_sensors_size(); i < n; i++) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32NoTag(
-      this->puck_sensors(i), output);
+      this->target_sensors(i), output);
   }
 
   // .google.protobuf.Timestamp timestamp = 4;
@@ -1576,17 +1576,17 @@ void SensorData::SerializeWithCachedSizes(
       WriteInt32NoTagToArray(this->obstacle_sensors_, target);
   }
 
-  // repeated int32 puck_sensors = 3 [packed = true];
-  if (this->puck_sensors_size() > 0) {
+  // repeated int32 target_sensors = 3 [packed = true];
+  if (this->target_sensors_size() > 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteTagToArray(
       3,
       ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED,
       target);
     target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(
-        _puck_sensors_cached_byte_size_.load(std::memory_order_relaxed),
+        _target_sensors_cached_byte_size_.load(std::memory_order_relaxed),
          target);
     target = ::google::protobuf::internal::WireFormatLite::
-      WriteInt32NoTagToArray(this->puck_sensors_, target);
+      WriteInt32NoTagToArray(this->target_sensors_, target);
   }
 
   // .google.protobuf.Timestamp timestamp = 4;
@@ -1645,17 +1645,17 @@ size_t SensorData::ByteSizeLong() const {
     total_size += data_size;
   }
 
-  // repeated int32 puck_sensors = 3 [packed = true];
+  // repeated int32 target_sensors = 3 [packed = true];
   {
     size_t data_size = ::google::protobuf::internal::WireFormatLite::
-      Int32Size(this->puck_sensors_);
+      Int32Size(this->target_sensors_);
     if (data_size > 0) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
             static_cast<::google::protobuf::int32>(data_size));
     }
     int cached_size = ::google::protobuf::internal::ToCachedSize(data_size);
-    _puck_sensors_cached_byte_size_.store(cached_size,
+    _target_sensors_cached_byte_size_.store(cached_size,
                                     std::memory_order_relaxed);
     total_size += data_size;
   }
@@ -1718,7 +1718,7 @@ void SensorData::MergeFrom(const SensorData& from) {
   (void) cached_has_bits;
 
   obstacle_sensors_.MergeFrom(from.obstacle_sensors_);
-  puck_sensors_.MergeFrom(from.puck_sensors_);
+  target_sensors_.MergeFrom(from.target_sensors_);
   waypoints_.MergeFrom(from.waypoints_);
   if (from.has_pose()) {
     mutable_pose()->::mUSV::SensorData_Pose2D::MergeFrom(from.pose());
@@ -1757,7 +1757,7 @@ void SensorData::InternalSwap(SensorData* other) {
   using std::swap;
   _internal_metadata_.Swap(&other->_internal_metadata_);
   obstacle_sensors_.InternalSwap(&other->obstacle_sensors_);
-  puck_sensors_.InternalSwap(&other->puck_sensors_);
+  target_sensors_.InternalSwap(&other->target_sensors_);
   CastToBase(&waypoints_)->InternalSwap(CastToBase(&other->waypoints_));
   swap(pose_, other->pose_);
   swap(timestamp_, other->timestamp_);

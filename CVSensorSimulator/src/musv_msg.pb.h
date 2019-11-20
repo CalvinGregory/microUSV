@@ -549,17 +549,17 @@ class SensorData :
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_obstacle_sensors();
 
-  // repeated int32 puck_sensors = 3 [packed = true];
-  int puck_sensors_size() const;
-  void clear_puck_sensors();
-  static const int kPuckSensorsFieldNumber = 3;
-  ::google::protobuf::int32 puck_sensors(int index) const;
-  void set_puck_sensors(int index, ::google::protobuf::int32 value);
-  void add_puck_sensors(::google::protobuf::int32 value);
+  // repeated int32 target_sensors = 3 [packed = true];
+  int target_sensors_size() const;
+  void clear_target_sensors();
+  static const int kTargetSensorsFieldNumber = 3;
+  ::google::protobuf::int32 target_sensors(int index) const;
+  void set_target_sensors(int index, ::google::protobuf::int32 value);
+  void add_target_sensors(::google::protobuf::int32 value);
   const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
-      puck_sensors() const;
+      target_sensors() const;
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
-      mutable_puck_sensors();
+      mutable_target_sensors();
 
   // repeated .mUSV.SensorData.Waypoint waypoints = 5;
   int waypoints_size() const;
@@ -604,8 +604,8 @@ class SensorData :
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 > obstacle_sensors_;
   mutable std::atomic<int> _obstacle_sensors_cached_byte_size_;
-  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > puck_sensors_;
-  mutable std::atomic<int> _puck_sensors_cached_byte_size_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > target_sensors_;
+  mutable std::atomic<int> _target_sensors_cached_byte_size_;
   ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint > waypoints_;
   ::mUSV::SensorData_Pose2D* pose_;
   ::google::protobuf::Timestamp* timestamp_;
@@ -815,34 +815,34 @@ SensorData::mutable_obstacle_sensors() {
   return &obstacle_sensors_;
 }
 
-// repeated int32 puck_sensors = 3 [packed = true];
-inline int SensorData::puck_sensors_size() const {
-  return puck_sensors_.size();
+// repeated int32 target_sensors = 3 [packed = true];
+inline int SensorData::target_sensors_size() const {
+  return target_sensors_.size();
 }
-inline void SensorData::clear_puck_sensors() {
-  puck_sensors_.Clear();
+inline void SensorData::clear_target_sensors() {
+  target_sensors_.Clear();
 }
-inline ::google::protobuf::int32 SensorData::puck_sensors(int index) const {
-  // @@protoc_insertion_point(field_get:mUSV.SensorData.puck_sensors)
-  return puck_sensors_.Get(index);
+inline ::google::protobuf::int32 SensorData::target_sensors(int index) const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.target_sensors)
+  return target_sensors_.Get(index);
 }
-inline void SensorData::set_puck_sensors(int index, ::google::protobuf::int32 value) {
-  puck_sensors_.Set(index, value);
-  // @@protoc_insertion_point(field_set:mUSV.SensorData.puck_sensors)
+inline void SensorData::set_target_sensors(int index, ::google::protobuf::int32 value) {
+  target_sensors_.Set(index, value);
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.target_sensors)
 }
-inline void SensorData::add_puck_sensors(::google::protobuf::int32 value) {
-  puck_sensors_.Add(value);
-  // @@protoc_insertion_point(field_add:mUSV.SensorData.puck_sensors)
+inline void SensorData::add_target_sensors(::google::protobuf::int32 value) {
+  target_sensors_.Add(value);
+  // @@protoc_insertion_point(field_add:mUSV.SensorData.target_sensors)
 }
 inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
-SensorData::puck_sensors() const {
-  // @@protoc_insertion_point(field_list:mUSV.SensorData.puck_sensors)
-  return puck_sensors_;
+SensorData::target_sensors() const {
+  // @@protoc_insertion_point(field_list:mUSV.SensorData.target_sensors)
+  return target_sensors_;
 }
 inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
-SensorData::mutable_puck_sensors() {
-  // @@protoc_insertion_point(field_mutable_list:mUSV.SensorData.puck_sensors)
-  return &puck_sensors_;
+SensorData::mutable_target_sensors() {
+  // @@protoc_insertion_point(field_mutable_list:mUSV.SensorData.target_sensors)
+  return &target_sensors_;
 }
 
 // .google.protobuf.Timestamp timestamp = 4;
