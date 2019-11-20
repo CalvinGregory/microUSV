@@ -23,30 +23,29 @@
 using namespace std;
 using namespace cv;
 
-Robot::Robot(int tagID, string label, int img_width, int img_height, int x_center_px, int y_center_px, double tag_plane_dist) {
+Robot::Robot(int tagID, string label, int img_width, int img_height, double tag_plane_dist) {
 	this->tagID = tagID;
 	this->label = label;
 	boundingBox[0] = 89.2;
 	boundingBox[1] = 230.0;
 	this->x_res = img_width;
 	this->y_res = img_height;
-	this->cx = x_center_px;
-	this->cy = y_center_px;
 	this->tag_plane_dist = tag_plane_dist;
+
 	SensorZone left;
-	left.x_origin = -20;
-	left.y_origin = 20;
+	left.x_origin = -30;
+	left.y_origin = 30;
 	left.range = 250;
 	left.heading_ang = -M_PI/9;
 	left.fov_ang = M_PI/6;
 	SensorZone right;
-	right.x_origin = 20;
-	right.y_origin = 20;
+	right.x_origin = 30;
+	right.y_origin = 30;
 	right.range = 250;
 	right.heading_ang = M_PI/9;
 	right.fov_ang = M_PI/6;
 	sensors = {left, right};
-	// sensors.push_back(left);
+
 	tagRGB = make_tuple(0, 0, 255);
 	gettimeofday(&this->pose.timestamp, NULL);
 }
@@ -64,8 +63,8 @@ vector<cv::Mat> Robot::getSensorMasks(pose2D pose, double px_per_mm) {
 		Mat mask(y_res, x_res, CV_8U, Scalar(0,0,0));
 
 		vector<Point> FoV;
-		int apex_x = cvRound(cx + pose.x + px_per_mm*sensors.at(i).x_origin*cos(pose.yaw) + px_per_mm*sensors.at(i).y_origin*sin(pose.yaw));
-		int apex_y = cvRound(cy + pose.y + px_per_mm*sensors.at(i).x_origin*sin(pose.yaw) - px_per_mm*sensors.at(i).y_origin*cos(pose.yaw));
+		int apex_x = cvRound(pose.x_px + px_per_mm*(sensors.at(i).x_origin*cos(pose.yaw) + sensors.at(i).y_origin*sin(pose.yaw)));
+		int apex_y = cvRound(pose.y_px + px_per_mm*(sensors.at(i).x_origin*sin(pose.yaw) - sensors.at(i).y_origin*cos(pose.yaw)));
 		FoV.push_back(Point(apex_x, apex_y));
 		double hyp = px_per_mm*sensors.at(i).range*cos(sensors.at(i).fov_ang/2);
 		int vertex_x = cvRound(apex_x + hyp*sin(pose.yaw + sensors.at(i).heading_ang + sensors.at(i).fov_ang/2));
@@ -92,12 +91,14 @@ void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_i
 	vector<Mat> masks = getSensorMasks(sensorVals_incomplete.pose, px_per_mm);
 	
 //DEBUG
-	// Mat combined_masks;
-	// bitwise_or(masks.at(0), masks.at(1), combined_masks);
-	// char buffer [30];
-	// int n = sprintf(buffer, "sensor_mask_%d", my_index);
-	// imshow(buffer, combined_masks);
-	// waitKey(1);
+	// if (my_index == 0) {
+	// 	Mat combined_masks;
+	// 	bitwise_or(masks.at(0), masks.at(1), combined_masks);
+	// 	char buffer [30];
+	// 	int n = sprintf(buffer, "sensor_mask_%d", my_index);
+	// 	imshow(buffer, combined_masks);
+	// 	waitKey(1);
+	// }
 
 	for (int i = 0; i < masks.size(); i++) {
 		Mat detections;

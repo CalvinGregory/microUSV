@@ -62,7 +62,7 @@ void PoseDetector::updatePoseEstimates(Mat* frame) {
 				apriltag_pose_t pose;
 				detInfo.det = det;
 				estimate_tag_pose(&detInfo, &pose);
-				robots.at(index)->setPose(pose3Dto2D(pose, AngleUnit::RADIANS));
+				robots.at(index)->setPose(pose3Dto2D(pose, det->c[0], det->c[1], AngleUnit::RADIANS));
 			}
 		}
 	}
@@ -94,7 +94,7 @@ Mat* PoseDetector::getLabelledFrame(ConfigParser::Config config) {
 	return &frame;
 }
 
-pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
+pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, uint pose_x_px, uint pose_y_px, AngleUnit unit) {
 	pose2D pose2D;
 	gettimeofday(&pose2D.timestamp, NULL);
 	pose2D.yaw = atan2(pose.R->data[3], pose.R->data[0]); //radians
@@ -102,6 +102,9 @@ pose2D PoseDetector::pose3Dto2D(apriltag_pose_t pose, AngleUnit unit) {
 		pose2D.yaw = pose2D.yaw * 180 / 3.14159;
 	pose2D.x = pose.t->data[0];
 	pose2D.y = pose.t->data[1];
+	pose2D.x_px = pose_x_px;
+	pose2D.y_px = pose_y_px;
+
 	return pose2D;
 }
 

@@ -190,7 +190,9 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 		}
 //DEBUG		
 		// SensorValues temp = robots.at(0)->getSensorValues();
-		// std::cout << temp.targetSensors.at(0) << " " << temp.targetSensors.at(1) << endl;
+		// std::cout << "targetSensor: " << temp.targetSensors.at(0) << " " << temp.targetSensors.at(1) << endl;
+		// cout << "x_max_measurement: " << x_max_measurement << endl;
+		// std::cout << "pose: " << temp.pose.x << " " << temp.pose.y << " " << temp.pose.yaw << endl;
 
 		if (output_csv) {
 			for(uint i = 0; i < csv.size(); i++) {
@@ -327,9 +329,10 @@ int main(int argc, char* argv[]) {
 
 			// Identify microUSV and respond with its sensor data.
 			int index = CVSS_util::tagMatch(robots, requestData.tag_id());
-			pose2D pose = robots[index]->getPose();
+			SensorValues sensorValues = robots[index]->getSensorValues();
+			// pose2D pose = robots[index]->getPose();
 
-			currentTime = pose.timestamp;
+			currentTime = sensorValues.pose.timestamp;
 			long seconds = currentTime.tv_sec - startTime.tv_sec;
 			long uSeconds = currentTime.tv_usec - startTime.tv_usec;
 			if (uSeconds < 0) {
@@ -337,9 +340,9 @@ int main(int argc, char* argv[]) {
 				seconds--;
 			}
 
-			sensorData.mutable_pose()->set_x(pose.x);
-			sensorData.mutable_pose()->set_y(pose.y);
-			sensorData.mutable_pose()->set_yaw(pose.yaw);
+			sensorData.mutable_pose()->set_x(sensorValues.pose.x);
+			sensorData.mutable_pose()->set_y(sensorValues.pose.y);
+			sensorData.mutable_pose()->set_yaw(sensorValues.pose.yaw);
 			sensorData.add_obstacle_sensors(0);
 			sensorData.add_obstacle_sensors(1);
 			sensorData.add_obstacle_sensors(2);

@@ -34,6 +34,8 @@ typedef struct {
 	double x = 0;
 	double y = 0;
 	double yaw = 0;
+	uint x_px = 0;
+	uint y_px = 0;
 	struct timeval timestamp;
 } pose2D;
 

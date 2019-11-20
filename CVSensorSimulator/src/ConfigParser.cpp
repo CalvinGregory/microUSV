@@ -70,7 +70,7 @@ Config ConfigParser::getConfigs(string filepath) {
 	for (uint i = 0; i < jsonFile["Robots"].size(); i++) {
 		int tagID = jsonFile["Robots"][i]["tagID"].get<int>(); // @suppress("Ambiguous problem")
 		std::string label = jsonFile["Robots"][i]["label"].get<std::string>(); // @suppress("Ambiguous problem")
-		shared_ptr<Robot> robot = make_shared<Robot>(tagID, label, config.cInfo.x_res, config.cInfo.y_res, config.cInfo.cx, config.cInfo.cy, config.tag_plane_dist);
+		shared_ptr<Robot> robot = make_shared<Robot>(tagID, label, config.cInfo.x_res, config.cInfo.y_res, config.tag_plane_dist);
 		config.robots.push_back(robot);
 	}
 	for (uint i = 0; i < jsonFile["Waypoints"].size(); i++) {

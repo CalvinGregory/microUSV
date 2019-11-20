@@ -67,7 +67,7 @@ private:
 	 *
 	 * @return The AprilTag's pose in 2D space.
 	 */
-	pose2D pose3Dto2D(apriltag_pose_t pose, AngleUnit unit);
+	pose2D pose3Dto2D(apriltag_pose_t pose, uint pose_x_px, uint pose_y_px, AngleUnit unit);
 
 	/*
 	 * Adds an outline and label string to the frame at the provided apriltag's location.
