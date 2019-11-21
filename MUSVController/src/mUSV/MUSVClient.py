@@ -59,7 +59,7 @@ if __name__ == '__main__':
         else: 
             print ('No config file path provided')
             exit()
-    else:    
+    else:
         config = Config(sys.argv[1])
     
     server_ip = config.serverIP
@@ -67,10 +67,11 @@ if __name__ == '__main__':
     
     # Build controller object
     controller = PIDController(config)
-        
-    # Connect to the arduino over USB and wait for connection to settle
-    arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
-    time.sleep(2)
+
+    if not config.debug_mode:    
+        # Connect to the arduino over USB and wait for connection to settle
+        arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
+        time.sleep(2)
     
     first_request = True
     last_timestamp = -1
@@ -110,12 +111,12 @@ if __name__ == '__main__':
                     motorSpeeds = (0, 0)
                 
                 if motorSpeeds != lastSpeeds:
-                    send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
-                    pass
+                    if not config.debug_mode:
+                        send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                 lastSpeeds = motorSpeeds
                 
                 time.sleep(0.1)
 
     finally:
-        send_speeds(arduino, 0, 0)
-        pass
+        if not config.debug_mode:
+            send_speeds(arduino, 0, 0)
