@@ -343,12 +343,12 @@ int main(int argc, char* argv[]) {
 			sensorData.mutable_pose()->set_x(sensorValues.pose.x);
 			sensorData.mutable_pose()->set_y(sensorValues.pose.y);
 			sensorData.mutable_pose()->set_yaw(sensorValues.pose.yaw);
-			sensorData.add_obstacle_sensors(0);
-			sensorData.add_obstacle_sensors(1);
-			sensorData.add_obstacle_sensors(2);
-			sensorData.add_target_sensors(3);
-			sensorData.add_target_sensors(4);
-			sensorData.add_target_sensors(5);
+			// sensorData.add_obstacle_sensors(0);
+			for(int i = 0 ; i < sensorValues.targetSensors.size(); i++) {
+				sensorData.add_target_sensors(sensorValues.targetSensors.at(i));
+			}
+			sensorData.mutable_clusterpoint()->set_range(sensorValues.cluster_point_range);
+			sensorData.mutable_clusterpoint()->set_heading(sensorValues.cluster_point_heading);
 			*sensorData.mutable_timestamp() = TimeUtil::MicrosecondsToTimestamp(seconds * 1e6 + uSeconds);
 
 			if(requestData.request_waypoints()) {
