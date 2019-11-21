@@ -42,7 +42,7 @@ struct TableStruct_musv_5fmsg_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::google::protobuf::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::google::protobuf::internal::ParseTable schema[4]
+  static const ::google::protobuf::internal::ParseTable schema[5]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::google::protobuf::internal::FieldMetadata field_metadata[];
   static const ::google::protobuf::internal::SerializationTable serialization_table[];
@@ -56,6 +56,9 @@ extern RequestDataDefaultTypeInternal _RequestData_default_instance_;
 class SensorData;
 class SensorDataDefaultTypeInternal;
 extern SensorDataDefaultTypeInternal _SensorData_default_instance_;
+class SensorData_ClusterPoint;
+class SensorData_ClusterPointDefaultTypeInternal;
+extern SensorData_ClusterPointDefaultTypeInternal _SensorData_ClusterPoint_default_instance_;
 class SensorData_Pose2D;
 class SensorData_Pose2DDefaultTypeInternal;
 extern SensorData_Pose2DDefaultTypeInternal _SensorData_Pose2D_default_instance_;
@@ -67,6 +70,7 @@ namespace google {
 namespace protobuf {
 template<> ::mUSV::RequestData* Arena::CreateMaybeMessage<::mUSV::RequestData>(Arena*);
 template<> ::mUSV::SensorData* Arena::CreateMaybeMessage<::mUSV::SensorData>(Arena*);
+template<> ::mUSV::SensorData_ClusterPoint* Arena::CreateMaybeMessage<::mUSV::SensorData_ClusterPoint>(Arena*);
 template<> ::mUSV::SensorData_Pose2D* Arena::CreateMaybeMessage<::mUSV::SensorData_Pose2D>(Arena*);
 template<> ::mUSV::SensorData_Waypoint* Arena::CreateMaybeMessage<::mUSV::SensorData_Waypoint>(Arena*);
 }  // namespace protobuf
@@ -439,6 +443,125 @@ class SensorData_Waypoint :
 };
 // -------------------------------------------------------------------
 
+class SensorData_ClusterPoint :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:mUSV.SensorData.ClusterPoint) */ {
+ public:
+  SensorData_ClusterPoint();
+  virtual ~SensorData_ClusterPoint();
+
+  SensorData_ClusterPoint(const SensorData_ClusterPoint& from);
+
+  inline SensorData_ClusterPoint& operator=(const SensorData_ClusterPoint& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  #if LANG_CXX11
+  SensorData_ClusterPoint(SensorData_ClusterPoint&& from) noexcept
+    : SensorData_ClusterPoint() {
+    *this = ::std::move(from);
+  }
+
+  inline SensorData_ClusterPoint& operator=(SensorData_ClusterPoint&& from) noexcept {
+    if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+  #endif
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return default_instance().GetDescriptor();
+  }
+  static const SensorData_ClusterPoint& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const SensorData_ClusterPoint* internal_default_instance() {
+    return reinterpret_cast<const SensorData_ClusterPoint*>(
+               &_SensorData_ClusterPoint_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    3;
+
+  void Swap(SensorData_ClusterPoint* other);
+  friend void swap(SensorData_ClusterPoint& a, SensorData_ClusterPoint& b) {
+    a.Swap(&b);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SensorData_ClusterPoint* New() const final {
+    return CreateMaybeMessage<SensorData_ClusterPoint>(nullptr);
+  }
+
+  SensorData_ClusterPoint* New(::google::protobuf::Arena* arena) const final {
+    return CreateMaybeMessage<SensorData_ClusterPoint>(arena);
+  }
+  void CopyFrom(const ::google::protobuf::Message& from) final;
+  void MergeFrom(const ::google::protobuf::Message& from) final;
+  void CopyFrom(const SensorData_ClusterPoint& from);
+  void MergeFrom(const SensorData_ClusterPoint& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
+  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
+  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  #else
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) final;
+  #endif  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const final;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      ::google::protobuf::uint8* target) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SensorData_ClusterPoint* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return nullptr;
+  }
+  inline void* MaybeArenaPtr() const {
+    return nullptr;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // float range = 1;
+  void clear_range();
+  static const int kRangeFieldNumber = 1;
+  float range() const;
+  void set_range(float value);
+
+  // float heading = 2;
+  void clear_heading();
+  static const int kHeadingFieldNumber = 2;
+  float heading() const;
+  void set_heading(float value);
+
+  // @@protoc_insertion_point(class_scope:mUSV.SensorData.ClusterPoint)
+ private:
+  class HasBitSetters;
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  float range_;
+  float heading_;
+  mutable ::google::protobuf::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_musv_5fmsg_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SensorData :
     public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:mUSV.SensorData) */ {
  public:
@@ -477,7 +600,7 @@ class SensorData :
                &_SensorData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   void Swap(SensorData* other);
   friend void swap(SensorData& a, SensorData& b) {
@@ -534,6 +657,7 @@ class SensorData :
 
   typedef SensorData_Pose2D Pose2D;
   typedef SensorData_Waypoint Waypoint;
+  typedef SensorData_ClusterPoint ClusterPoint;
 
   // accessors -------------------------------------------------------
 
@@ -591,6 +715,15 @@ class SensorData :
   ::google::protobuf::Timestamp* mutable_timestamp();
   void set_allocated_timestamp(::google::protobuf::Timestamp* timestamp);
 
+  // .mUSV.SensorData.ClusterPoint clusterPoint = 7;
+  bool has_clusterpoint() const;
+  void clear_clusterpoint();
+  static const int kClusterPointFieldNumber = 7;
+  const ::mUSV::SensorData_ClusterPoint& clusterpoint() const;
+  ::mUSV::SensorData_ClusterPoint* release_clusterpoint();
+  ::mUSV::SensorData_ClusterPoint* mutable_clusterpoint();
+  void set_allocated_clusterpoint(::mUSV::SensorData_ClusterPoint* clusterpoint);
+
   // bool loop_waypoints = 6;
   void clear_loop_waypoints();
   static const int kLoopWaypointsFieldNumber = 6;
@@ -609,6 +742,7 @@ class SensorData :
   ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint > waypoints_;
   ::mUSV::SensorData_Pose2D* pose_;
   ::google::protobuf::Timestamp* timestamp_;
+  ::mUSV::SensorData_ClusterPoint* clusterpoint_;
   bool loop_waypoints_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_musv_5fmsg_2eproto;
@@ -728,6 +862,38 @@ inline void SensorData_Waypoint::set_y(float value) {
   
   y_ = value;
   // @@protoc_insertion_point(field_set:mUSV.SensorData.Waypoint.y)
+}
+
+// -------------------------------------------------------------------
+
+// SensorData_ClusterPoint
+
+// float range = 1;
+inline void SensorData_ClusterPoint::clear_range() {
+  range_ = 0;
+}
+inline float SensorData_ClusterPoint::range() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.ClusterPoint.range)
+  return range_;
+}
+inline void SensorData_ClusterPoint::set_range(float value) {
+  
+  range_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.ClusterPoint.range)
+}
+
+// float heading = 2;
+inline void SensorData_ClusterPoint::clear_heading() {
+  heading_ = 0;
+}
+inline float SensorData_ClusterPoint::heading() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.ClusterPoint.heading)
+  return heading_;
+}
+inline void SensorData_ClusterPoint::set_heading(float value) {
+  
+  heading_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.ClusterPoint.heading)
 }
 
 // -------------------------------------------------------------------
@@ -935,9 +1101,62 @@ inline void SensorData::set_loop_waypoints(bool value) {
   // @@protoc_insertion_point(field_set:mUSV.SensorData.loop_waypoints)
 }
 
+// .mUSV.SensorData.ClusterPoint clusterPoint = 7;
+inline bool SensorData::has_clusterpoint() const {
+  return this != internal_default_instance() && clusterpoint_ != nullptr;
+}
+inline void SensorData::clear_clusterpoint() {
+  if (GetArenaNoVirtual() == nullptr && clusterpoint_ != nullptr) {
+    delete clusterpoint_;
+  }
+  clusterpoint_ = nullptr;
+}
+inline const ::mUSV::SensorData_ClusterPoint& SensorData::clusterpoint() const {
+  const ::mUSV::SensorData_ClusterPoint* p = clusterpoint_;
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.clusterPoint)
+  return p != nullptr ? *p : *reinterpret_cast<const ::mUSV::SensorData_ClusterPoint*>(
+      &::mUSV::_SensorData_ClusterPoint_default_instance_);
+}
+inline ::mUSV::SensorData_ClusterPoint* SensorData::release_clusterpoint() {
+  // @@protoc_insertion_point(field_release:mUSV.SensorData.clusterPoint)
+  
+  ::mUSV::SensorData_ClusterPoint* temp = clusterpoint_;
+  clusterpoint_ = nullptr;
+  return temp;
+}
+inline ::mUSV::SensorData_ClusterPoint* SensorData::mutable_clusterpoint() {
+  
+  if (clusterpoint_ == nullptr) {
+    auto* p = CreateMaybeMessage<::mUSV::SensorData_ClusterPoint>(GetArenaNoVirtual());
+    clusterpoint_ = p;
+  }
+  // @@protoc_insertion_point(field_mutable:mUSV.SensorData.clusterPoint)
+  return clusterpoint_;
+}
+inline void SensorData::set_allocated_clusterpoint(::mUSV::SensorData_ClusterPoint* clusterpoint) {
+  ::google::protobuf::Arena* message_arena = GetArenaNoVirtual();
+  if (message_arena == nullptr) {
+    delete clusterpoint_;
+  }
+  if (clusterpoint) {
+    ::google::protobuf::Arena* submessage_arena = nullptr;
+    if (message_arena != submessage_arena) {
+      clusterpoint = ::google::protobuf::internal::GetOwnedMessage(
+          message_arena, clusterpoint, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  clusterpoint_ = clusterpoint;
+  // @@protoc_insertion_point(field_set_allocated:mUSV.SensorData.clusterPoint)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

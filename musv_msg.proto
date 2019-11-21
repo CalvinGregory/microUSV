@@ -24,4 +24,9 @@ message SensorData {
 	}
 	repeated Waypoint waypoints = 5;
 	bool loop_waypoints = 6;
+	message ClusterPoint {
+		float range = 1;
+		float heading = 2;
+	}
+	ClusterPoint clusterPoint = 7;
 }
