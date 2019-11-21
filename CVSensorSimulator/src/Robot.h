@@ -49,7 +49,7 @@ typedef struct {
 	std::vector<bool> targetSensors;
 	std::vector<bool> obstacleSensors;
 	double cluster_point_range;
-	double cluster_point_heading_offset;
+	double cluster_point_heading;
 } SensorValues;
 
 /*
@@ -69,7 +69,7 @@ protected:
 	 */
 	std::vector<cv::Mat> getSensorMasks(pose2D pose, double px_per_mm);
 	double getTargetRange(pose2D my_pose, pose2D target_pose);
-	double getTargetHeadingError(pose2D my_pose, pose2D target_pose);
+	double getTargetHeading(pose2D my_pose, pose2D target_pose);
 public:
 	std::vector<SensorZone> sensors;
 	/*

@@ -85,7 +85,7 @@ vector<cv::Mat> Robot::getSensorMasks(pose2D pose, double px_per_mm) {
 void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_index, double px_per_mm) {
 	sensorVals_incomplete.pose = robot_poses.at(my_index);
 	sensorVals_incomplete.cluster_point_range = getTargetRange(sensorVals_incomplete.pose, pose2D());
-	sensorVals_incomplete.cluster_point_heading_offset = getTargetHeadingError(sensorVals_incomplete.pose, pose2D());
+	sensorVals_incomplete.cluster_point_heading = getTargetHeading(sensorVals_incomplete.pose, pose2D());
 	
 	vector<bool> targetSensors;
 	vector<Mat> masks = getSensorMasks(sensorVals_incomplete.pose, px_per_mm);
@@ -122,6 +122,6 @@ double Robot::getTargetRange(pose2D my_pose, pose2D target_pose) {
 	return sqrt(pow(my_pose.x - target_pose.x,2.0) + pow(my_pose.y - target_pose.y,2.0));
 }
 
-double Robot::getTargetHeadingError(pose2D my_pose, pose2D target_pose) {
-	return atan2(target_pose.x - my_pose.x, target_pose.y - my_pose.y) - my_pose.yaw;
+double Robot::getTargetHeading(pose2D my_pose, pose2D target_pose) {
+	return atan2(target_pose.x - my_pose.x, target_pose.y - my_pose.y);
 }
