@@ -28,5 +28,7 @@
 	
 	"speed_limit": 50,
 	
-	"tag_plane_distance": 1.81
+	"tag_plane_distance": 1.81, 
+
+	"debug_mode": false
 }

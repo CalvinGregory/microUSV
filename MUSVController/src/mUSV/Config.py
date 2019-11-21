@@ -73,6 +73,7 @@ class Config:
         self.D_ang = 0
         self.speed_limit = 100
         self.tag_plane_distance = 1
+        self.debug_mode = False
         self.parse_configs(filepath)
 
     def parse_configs(self, filepath):
@@ -103,3 +104,4 @@ class Config:
         self.D_ang = config['PIDGains']['D_ang']
         self.speed_limit = config['speed_limit']
         self.tag_plane_distance = config['tag_plane_distance']
+        self.debug_mode = config['debug_mode']
