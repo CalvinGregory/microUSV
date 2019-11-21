@@ -18,6 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 '''
 
 from pose2D import pose2D
+import math
 
 class Controller(object):
     '''
@@ -45,8 +46,14 @@ class Controller(object):
         Args:
             config (mUSV/Config): Config file object containing controller initialization constants. 
         '''
+        self._bias = config.bias
         self._portPropSpin = config.propSpin_port
         self._starPropSpin = config.propSpin_star
+        if config.speed_limit > 0 and config.speed_limit <= 100:
+            self._speed_limit_upper = int(round(127*config.speed_limit/100))
+        else:
+            self._speed_limit_upper = 127
+        self._speed_limit_lower = -self._speed_limit_upper
         self._last_timestamp = -1
         self._lastPose = pose2D(0,0,0)
         self._waypoints = []
@@ -69,3 +76,60 @@ class Controller(object):
                         Motor speed values range from -127 to 127.
         '''
         pass
+
+    def _bounded_angle(self, angle, upper_bound, lower_bound):
+        '''
+        Constrains an angle in radians to a given range. 
+        
+        Args:
+            angle (float): The angle to constrain. 
+            upper_bound (float): The maximum value the angle can have. 
+            lower_bound (float): The minimum value the angle can have.
+            
+        Returns:
+            float: The equivalent angle to the input, constrained within the provided limits.
+        '''
+        new_angle = angle
+        while new_angle > upper_bound:
+            new_angle = new_angle - 2*math.pi
+        while new_angle <= lower_bound:
+            new_angle = new_angle + 2*math.pi
+        return new_angle 
+
+    def _bounded_motor_speeds(self, port_speed, starboard_speed):
+        '''
+        Corrects for desired motor outputs exceeding acceptable motor speed range.
+        Wherever possible, the difference between motor values is maintained.
+        
+        Args:
+            port_speed (float): Desired port motor speed, unconstrained. 
+            starboard_speed (float): Desired starboard motor speed, unconstrained. 
+            
+        Returns:
+            (int, int): Rounded and constrained motor speed values (port_motor_speed, starboard_motor_speed). 
+        '''
+        port = int(round(port_speed))
+        starboard = int(round(starboard_speed))  
+        diff = abs(max(port, starboard) - min(port, starboard))
+        
+        if diff >= 2*self._speed_limit_upper:
+            port = int(math.copysign(self._speed_limit_upper, port))
+            starboard = int(math.copysign(self._speed_limit_upper, starboard))
+        
+        elif port > self._speed_limit_upper or starboard > self._speed_limit_upper:
+            if port > starboard:
+                port = self._speed_limit_upper
+                starboard = port - diff
+            else:
+                starboard = self._speed_limit_upper
+                port = starboard - diff
+        
+        elif port < self._speed_limit_lower or starboard < self._speed_limit_lower:
+            if port < starboard:
+                port = self._speed_limit_lower
+                starboard = port + diff
+            else:
+                starboard = self._speed_limit_lower
+                port = starboard + diff
+            
+        return (port, starboard)

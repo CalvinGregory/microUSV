@@ -48,20 +48,12 @@ class PIDController(Controller):
             config (mUSV/Config): Config file object containing controller initialization constants. 
         '''
         super(PIDController, self).__init__(config)
-        self._bias = config.bias
-        self._propSpin_port = config.propSpin_port
-        self._propSpin_star = config.propSpin_star
         self._distance_PID_gains = (config.P_dist, config.I_dist, config.D_dist)
         self._angle_PID_gains = (config.P_ang, config.I_ang, config.D_ang)
         self._last_error = (0, 0)
         self._dist_error_sum = 0
         self._ang_error_sum = 0
         self._motor_speeds = (0, 0)
-        if config.speed_limit > 0 and config.speed_limit <= 100:
-            self._speed_limit_upper = int(round(127*config.speed_limit/100))
-        else:
-            self._speed_limit_upper = 127
-        self._speed_limit_lower = -self._speed_limit_upper
         self._waypoint_threshold = 50.0
         # Scale factor per meter of height between camera and water's surface
 #        self._distance_scale_factor = 0.455 # 1080p
@@ -105,8 +97,8 @@ class PIDController(Controller):
             
             x = (sensorData.pose.x + x_offset_worldFrame) * self._distance_scale_factor * self._tag_plane_distance
             y = (sensorData.pose.y + y_offset_worldFrame) * self._distance_scale_factor * self._tag_plane_distance
-            yaw = self._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)
-            
+            yaw = super(PIDController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)            
+
             pose = pose2D(x, y, yaw)
 
             (distance_error, angular_error) = self._get_error(pose, self._waypoints[0])
@@ -137,7 +129,7 @@ class PIDController(Controller):
             port = port - (self._bias)/100
             starboard = (forward_speed + turn)/2
             starboard = starboard + (self._bias)/100
-            (port, starboard) = self._bounded_motor_speeds(port, starboard)
+            (port, starboard) = super(PIDController, self)._bounded_motor_speeds(port, starboard)
             
             self._motor_speeds = (self._propSpin_port*port, self._propSpin_star*starboard) 
             self._lastPose = pose
@@ -153,64 +145,7 @@ class PIDController(Controller):
                     self._waypoints.pop(0)
         
         return self._motor_speeds
-    
-    def _bounded_angle(self, angle, upper_bound, lower_bound):
-        '''
-        Constrains an angle in radians to a given range. 
-        
-        Args:
-            angle (float): The angle to constrain. 
-            upper_bound (float): The maximum value the angle can have. 
-            lower_bound (float): The minimum value the angle can have.
-            
-        Returns:
-            float: The equivalent angle to the input, constrained within the provided limits.
-        '''
-        new_angle = angle
-        while new_angle > upper_bound:
-            new_angle = new_angle - 2*math.pi
-        while new_angle <= lower_bound:
-            new_angle = new_angle + 2*math.pi
-        return new_angle 
 
-    def _bounded_motor_speeds(self, port_speed, starboard_speed):
-        '''
-        Corrects for desired motor outputs exceeding acceptable motor speed range.
-        Wherever possible, the difference between motor values is maintained.
-        
-        Args:
-            port_speed (float): Desired port motor speed, unconstrained. 
-            starboard_speed (float): Desired starboard motor speed, unconstrained. 
-            
-        Returns:
-            (int, int): Rounded and constrained motor speed values (port_motor_speed, starboard_motor_speed). 
-        '''
-        port = int(round(port_speed))
-        starboard = int(round(starboard_speed))  
-        diff = abs(max(port, starboard) - min(port, starboard))
-        
-        if diff >= 2*self._speed_limit_upper:
-            port = int(math.copysign(self._speed_limit_upper, port))
-            starboard = int(math.copysign(self._speed_limit_upper, starboard))
-        
-        elif port > self._speed_limit_upper or starboard > self._speed_limit_upper:
-            if port > starboard:
-                port = self._speed_limit_upper
-                starboard = port - diff
-            else:
-                starboard = self._speed_limit_upper
-                port = starboard - diff
-        
-        elif port < self._speed_limit_lower or starboard < self._speed_limit_lower:
-            if port < starboard:
-                port = self._speed_limit_lower
-                starboard = port + diff
-            else:
-                starboard = self._speed_limit_lower
-                port = starboard + diff
-            
-        return (port, starboard)
-    
     def _get_error(self, robot_pose, goal_pose):
         '''
         Calculates the distance and angular error between the microUSV and its current goal position. 
@@ -230,6 +165,6 @@ class PIDController(Controller):
         distance_error = math.sqrt(dx**2 + dy**2)
         
         goal_angle = math.atan2(dy, dx)
-        angular_error = self._bounded_angle(robot_pose.yaw - goal_angle, math.pi, -math.pi)
+        angular_error = super(PIDController, self)._bounded_angle(robot_pose.yaw - goal_angle, math.pi, -math.pi)
                 
         return (distance_error, angular_error)
