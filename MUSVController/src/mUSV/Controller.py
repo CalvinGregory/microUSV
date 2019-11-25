@@ -46,6 +46,7 @@ class Controller(object):
         Args:
             config (mUSV/Config): Config file object containing controller initialization constants. 
         '''
+        self._motor_speeds = (0, 0)
         self._bias = config.bias
         self._portPropSpin = config.propSpin_port
         self._starPropSpin = config.propSpin_star
@@ -56,8 +57,6 @@ class Controller(object):
         self._speed_limit_lower = -self._speed_limit_upper
         self._last_timestamp = -1
         self._lastPose = pose2D(0,0,0)
-        self._waypoints = []
-        self._loop_waypoints = False
         self._tag_offset_x = config.tagTF_x
         self._tag_offset_y = config.tagTF_y
         self._tag_offset_yaw = config.tagTF_yaw

@@ -53,8 +53,9 @@ class PIDController(Controller):
         self._last_error = (0, 0)
         self._dist_error_sum = 0
         self._ang_error_sum = 0
-        self._motor_speeds = (0, 0)
         self._waypoint_threshold = 50.0
+        self._waypoints = []
+        self._loop_waypoints = False
         # Scale factor per meter of height between camera and water's surface
 #        self._distance_scale_factor = 0.455 # 1080p
         self._distance_scale_factor = 0.3 # 720p
@@ -131,7 +132,7 @@ class PIDController(Controller):
             starboard = starboard + (self._bias)/100
             (port, starboard) = super(PIDController, self)._bounded_motor_speeds(port, starboard)
             
-            self._motor_speeds = (self._propSpin_port*port, self._propSpin_star*starboard) 
+            self._motor_speeds = (self._portPropSpin*port, self._starPropSpin*starboard) 
             self._lastPose = pose
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
