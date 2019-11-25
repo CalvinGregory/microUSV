@@ -26,6 +26,7 @@ import os.path
 import musv_msg_pb2
 from Config import Config
 from PIDController import PIDController
+from OrbitalController import OrbitalController
 
 port = 8078
 
@@ -66,7 +67,11 @@ if __name__ == '__main__':
     tagID = config.tagID
     
     # Build controller object
-    controller = PIDController(config)
+    if config.controller_type == "orbital":
+        controller = OrbitalController(config)
+    else:
+        controller = PIDController(config)
+    
 
     if not config.debug_mode:    
         # Connect to the arduino over USB and wait for connection to settle
