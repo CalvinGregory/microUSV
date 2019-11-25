@@ -71,8 +71,14 @@ class Config:
         self.P_ang = 1
         self.I_ang = 0
         self.D_ang = 0
+        self.P_speed = 1
+        self.I_speed = 0
         self.speed_limit = 100
         self.tag_plane_distance = 1
+        self.controller_type = 'pid'
+        self.orbit_threshold = 0.0
+        self.orbit_speed = 0.0
+        self.orbit_veer = 0.0
         self.debug_mode = False
         self.parse_configs(filepath)
 
@@ -102,6 +108,12 @@ class Config:
         self.P_ang = config['PIDGains']['P_ang']
         self.I_ang = config['PIDGains']['I_ang']
         self.D_ang = config['PIDGains']['D_ang']
+        self.P_speed = config['PIDGains']['P_speed']
+        self.I_speed = config['PIDGains']['I_speed']
         self.speed_limit = config['speed_limit']
         self.tag_plane_distance = config['tag_plane_distance']
+        self.controller_type = config['controller_type']
+        self.orbit_threshold = config['orbit_threshold']
+        self.orbit_speed = config['orbit_speed']
+        self.orbit_veer = config['orbit_veer']
         self.debug_mode = config['debug_mode']

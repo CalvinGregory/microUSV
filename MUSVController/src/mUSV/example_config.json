@@ -23,12 +23,22 @@
 		"D_dist": 0,
 		"P_ang": 1.25,
 		"I_ang": 0,
-		"D_ang": 1
+		"D_ang": 1,
+		"P_speed": 1,
+		"I_speed": 0
 	},
 	
 	"speed_limit": 50,
 	
 	"tag_plane_distance": 1.81, 
+
+	"controller_type": "pid",
+	
+	"orbit_threshold": 250.0,
+
+	"orbit_speed": 200.0,
+
+	"orbit_veer": 20.0, 
 
 	"debug_mode": false
 }
