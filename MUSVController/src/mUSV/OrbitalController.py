@@ -6,17 +6,16 @@ class OrbitalController(Controller):
 
     def __init__(self, config):
         super(OrbitalController, self).__init__(config)
+        self._speed = 0.0
+        self._orbit_threshold = config.orbit_threshold
+        self._orbit_speed = config.orbit_speed
+        self._orbit_veer = config.orbit_veer
+        self._speed_PID_gains = (config.P_speed, config.I_speed)
+        self._speed_error_sum = 0
 
     def get_motor_speeds(self, sensorData):
         msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
-        
-        # If the message contains waypoints, overwrite the current waypoint list and loop flag. 
-        if sensorData.waypoints.__len__() > 0:
-            self._waypoints = []
-            for w in sensorData.waypoints:
-                self._waypoints.append(pose2D(w.x, w.y, 0))
-            self._loop_waypoints = sensorData.loop_waypoints
-                        
+                                
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
             # Apply tag offset transform
@@ -31,3 +30,48 @@ class OrbitalController(Controller):
             yaw = super(OrbitalController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)
             
             pose = pose2D(x, y, yaw)
+            heading_error = super(OrbitalController,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, math.pi, -math.pi)
+            
+            # print(sensorData.clusterPoint.range, super(OrbitalController,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, math.pi, -math.pi))
+            port = 0
+            starboard = 0
+
+            # If not first message
+            if self._last_timestamp > 0:
+                dt = msg_timestamp - self._last_timestamp
+                self._speed = math.sqrt((pose.x - self._lastPose.x)**2 + (pose.y - self._lastPose.y)**2) / dt
+                speed_error = self._orbit_speed - self._speed
+                self._speed_error_sum = 0.99*self._speed_error_sum + speed_error*dt
+                # PI Controller
+                speed_control_value = self._speed_PID_gains[0]*speed_error + self._speed_PID_gains[1]*self._speed_error_sum
+                port = self._speed_limit_upper*speed_control_value - self._bias/100
+                starboard = self._speed_limit_upper*speed_control_value + self._bias/100
+                
+                # if inside cluster area
+                if sensorData.clusterPoint.range < self._orbit_threshold:
+                    # veer left
+                    port = port - self._orbit_veer/100*self._speed_limit_upper
+                    starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
+                # if target detected to port
+                elif (sensorData.target_sensors[0]):
+                    # veer left
+                    port = port - self._orbit_veer/100*self._speed_limit_upper
+                    starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
+                # if not perpendicular to cluster center point
+                elif heading_error < math.pi/2 - math.pi/90:
+                    # veer left
+                    port = port - self._orbit_veer/100*self._speed_limit_upper
+                    starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
+                else:
+                    #veer right
+                    port = port + self._orbit_veer/100*self._speed_limit_upper
+                    starboard = starboard - self._orbit_veer/100*self._speed_limit_upper
+            
+            (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)
+            
+            self._motor_speeds = (self._portPropSpin*port, self._starPropSpin*starboard) 
+            self._lastPose = pose
+            self._last_timestamp = msg_timestamp
+
+        print(self._motor_speeds)
+        return self._motor_speeds
