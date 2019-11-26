@@ -1,4 +1,4 @@
-/*
+/**
  * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
  * an overhead camera and sends that pose data to microUSV's over TCP.
  *
@@ -34,7 +34,7 @@ extern "C" {
 #include "apriltag/apriltag_pose.h"
 }
 
-/*
+/**
  * Enum representing the possible angle units.
  */
 enum class AngleUnit {
@@ -42,7 +42,7 @@ enum class AngleUnit {
 	DEGREES
 };
 
-/*
+/**
  * Wrapper class of the AprilTag pose detection algorithm from https://github.com/AprilRobotics/apriltag.
  *
  * PoseDetector object detects AprilTags in a provided image. It removes all tags which were not specified
@@ -59,17 +59,19 @@ private:
 	apriltag_detector_t* td;
 	zarray_t* detections;
 
-	/*
+	/**
 	 * Converts 3D pose data to 2D pose data.
 	 *
 	 * @param pose 3D pose data from the apriltag detector algorithm.
+	 * @param pose_x_px X-coordinate of 2D Apriltag pose expressed in image coordinates in pixels. 
+	 * @param pose_y_px Y-coordinate of 2D Apriltag pose expressed in image coordinates in pixels. 
 	 * @param unit Specifies if output should be in Radians or Degrees.
 	 *
 	 * @return The AprilTag's pose in 2D space.
 	 */
 	pose2D pose3Dto2D(apriltag_pose_t pose, uint pose_x_px, uint pose_y_px, AngleUnit unit);
 
-	/*
+	/**
 	 * Adds an outline and label string to the frame at the provided apriltag's location.
 	 *
 	 * @param frame Pointer to the frame to modify.
@@ -77,22 +79,22 @@ private:
 	 */
 	void label_tag_detection(cv::Mat* frame, apriltag_detection_t* det);
 public:
-	/*
+	/**
 	 * @param detInfo Detection info required by the apriltag detection algorithm.
-	 * @param objects Pointer to the global list of valid TaggedObjects.
+	 * @param robots Vector of global pointers to valid Robots.
 	 */
 	PoseDetector(apriltag_detection_info_t detInfo, std::vector<std::shared_ptr<Robot>> robots);
 
 	~PoseDetector();
 
-	/*
-	 * Estimates the poses of all TaggedObjects detected in the provided frame.
+	/**
+	 * Estimates the poses of all Robots detected in the provided frame.
 	 * 
 	 * @param frame Pointer to the camera frame to search for TaggedObjects.
 	 */
 	void updatePoseEstimates(cv::Mat* frame);
 
-	/*
+	/**
 	 * Adds outlines and labels to all TaggedObjects detected in the frame.
 	 *
 	 * @param config Config file data from ConfigParser. Contains list of waypoints and camera info.

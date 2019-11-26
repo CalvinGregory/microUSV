@@ -25,14 +25,18 @@ class Controller(object):
     Controller is an abstract class which interprets sensor data and produces motor speed outputs. 
     
     Attributes:
+        _bias (float): Correction term to account for inequality between port and starboard motor outputs. Value must be a 
+                       percentage between -100.0 and +100.0. Positive bias causes the vehicle to turn more to the left (port) 
+                       while negative bias causes a right (starboard) turn. 
+        _motor_speeds (int, int): Tuple containing the speed values the microUSV's motors should currently be set to.  
         _portPropSpin (int): coefficient indicating which direction the port propeller should spin. 
                              Acceptable values are +1 or -1
         _starPropSpin (int): coefficient indicating which direction the starboard propeller should spin. 
                              Acceptable values are +1 or -1
+        _speed_limit_upper (int): Maximum motor speed value. 
+        _speed_limit_lower (int): Minimum motor speed value.
         _last_timestamp (float): Attribute tracks the timestamp of the most recently used sensorData message. 
         _lastPose (pose2D): Attribute tracks the most recent robot pose estimate. 
-        _waypoints (pose2D): List of waypoints the microUSV should steer towards, in order. 
-        _loop_waypoints (bool): Boolean flag indicating the boat should iterate through the waypoint list, 
                                 then repeat the same list of waypoints. 
         _tag_offset_x (float): X-axis offset in mm between the AprilTag origin and microUSV origin.
         _tag_offset_y (float): Y-axis offset in mm between the AprilTag origin and microUSV origin.

@@ -1,4 +1,4 @@
-/*
+/**
  * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
  * an overhead camera and sends that pose data to microUSV's over TCP.
  *
@@ -52,7 +52,7 @@ namespace CameraInfo {
 		double FoV_deg;
 	} cameraInfo;
 
-	/*
+	/**
 	 * Function called by nlohmann::json to convert a cameraInfo object to a json object.
 	 *
 	 * @param j The destination json object.
@@ -60,7 +60,7 @@ namespace CameraInfo {
 	 */
 	void to_json(json& j, const cameraInfo& c);
 
-	/*
+	/**
 	 * Function called by nlohmann::json to convert a json object to a cameraInfo object.
 	 *
 	 * @param j The json object to convert.
@@ -70,7 +70,7 @@ namespace CameraInfo {
 }
 
 namespace ConfigParser {
-	/*
+	/**
 	 * Struct defining cartesian coordinates of a waypoint.
 	 */
 	typedef struct {
@@ -78,7 +78,7 @@ namespace ConfigParser {
 		float y;
 	} Waypoint;
 
-	/*
+	/**
 	 * Struct containing all data extracted from a json config file.
 	 */
 	typedef struct{
@@ -94,7 +94,7 @@ namespace ConfigParser {
 		bool output_csv;
 	} Config;
 
-	/*
+	/**
 	 * Extracts configuration data from a json config file.
 	 *
 	 * @param filepath The path to the json config file to be parsed.

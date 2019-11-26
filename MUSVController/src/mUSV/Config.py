@@ -44,8 +44,15 @@ class Config:
         P_ang (float): Angular PID controller proportional gain. 
         I_ang (float): Angular PID controller integral gain. 
         D_ang (float): Angular PID controller derivative gain. 
+        P_speed (float): Speed PI controller proportional gain.
+        I_speed (float): Speed PI controller integral gain. 
         speed_limit (float): Percentage (0 to 100] of the maximum motor speed to treat as an upper bound on motor speed commands.
         tag_plane_distance (float): Distance from the camera to the water's surface in meters.
+        controller_type (string): Flag controlling which controller type the microUSV should use. 'pid' for PID control and 'orbital' for Orbital Construction.
+        orbit_threshold (float): Orbit distance from cluster point. 
+        orbit_speed (float): Target forward speed for orbital controller.
+        orbit_veer (float): Orbital controller steering parameter. Controls how much the vessel tries to veer off course if it detects a target. 
+        debug_mode (boolean): Flag enabling debug mode. Debug mode removes calls to Arduino serial port, allows testing in desktop environment. 
     '''
 
     def __init__(self, filepath):

@@ -1,4 +1,4 @@
-/*
+/**
  * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
  * an overhead camera and sends that pose data to microUSV's over TCP.
  *
@@ -23,14 +23,13 @@
 using namespace std;
 using namespace cv;
 
-Robot::Robot(int tagID, string label, int img_width, int img_height, double tag_plane_dist) {
+Robot::Robot(int tagID, string label, int img_width, int img_height) {
 	this->tagID = tagID;
 	this->label = label;
 	boundingBox[0] = 89.2;
 	boundingBox[1] = 230.0;
 	this->x_res = img_width;
 	this->y_res = img_height;
-	this->tag_plane_dist = tag_plane_dist;
 
 	SensorZone left;
 	left.x_origin = -30;

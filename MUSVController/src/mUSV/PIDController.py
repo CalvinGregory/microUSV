@@ -27,15 +27,11 @@ class PIDController(Controller):
     to steer the microUSV toward its goal position.  
     
     Attributes:
-        _bias (float): Correction term to account for inequality between port and starboard motor outputs. Value must be a 
-                       percentage between -100.0 and +100.0. Positive bias causes the vehicle to turn more to the left (port) 
-                       while negative bias causes a right (starboard) turn. 
         _distance_PID_gains (float, float, float): Tuple containing the PID gains for the distance controller (P, I, D).
         _angle_PID_gains (float, float, float): Tuple containing the PID gains for the angular controller (P, I, D). 
         _last_error (float, float): Tuple containing the position error from the previous timestep (x, y).
-        _motor_speeds (int, int): Tuple containing the speed values the microUSV's motors should currently be set to.  
-        _speed_limit_upper (int): Maximum motor speed value. 
-        _speed_limit_lower (int): Minimum motor speed value.
+        _waypoints (pose2D): List of waypoints the microUSV should steer towards, in order. 
+        _loop_waypoints (bool): Boolean flag indicating the boat should iterate through the waypoint list, 
         _waypoint_threshold (float): Threshold indicating at what distance (mm) to treat the current waypoint as reached.
         _tag_plane_distance (float): Distance from the camera to the water's surface in meters.
     '''

@@ -1,20 +1,66 @@
+'''
+MUSVClient controls the microUSV. It connects to a host computer running CVSensorSimulator to determine 
+its simulated sensor values, then acts on those values, sending instructions to the motor controller.  
+
+Copyright (C) 2019  CalvinGregory  cgregory@mun.ca
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
+'''
+
 from Controller import Controller
 from pose2D import pose2D
 import math
 
 class OrbitalController(Controller):
+    '''
+    The OrbitalController class implements the algorithm described in OC2: A Swarm of Simple Robots Constructing Planar Shapes by Andrew Vardy. 
+    Each vessel orbits clockwise around a point, gathering nearby targets outside of the orbit into a cluster at that point. 
 
+    Attributes:
+        _orbit_threshold (float): Distance from the cluster point at which to orbit.
+        _orbit_speed (float): Forward speed at which to orbit.
+        _orbit_veer (float): Steering parameter. Controls how much the vessel tries to veer off course if it detects a target. 
+        _speed_PI_gains (float, float): Tuple containing the PI gains for the vessel's speed controller (P, I).
+    '''
     def __init__(self, config):
+        '''
+        Initialize an OrbitalController object.
+
+        Args:
+            config (mUSV/Config): Config file object containing controller initialization constants. 
+        '''
         super(OrbitalController, self).__init__(config)
         self._speed = 0.0
         self._orbit_threshold = config.orbit_threshold
         self._orbit_speed = config.orbit_speed
         self._orbit_veer = config.orbit_veer
-        self._speed_PID_gains = (config.P_speed, config.I_speed)
+        self._speed_PI_gains = (config.P_speed, config.I_speed)
         self._speed_error_sum = 0
         self._heading_error_tolerance = math.pi/90
 
     def get_motor_speeds(self, sensorData):
+        '''
+        Applies orbital and speed control logic to the provided sensor data. Calculates motor speeds
+        that will move the microUSV along the orbit's trajectory or towards a nearby target. 
+        
+        Args:
+            sensorData (musv_msg_pb2.SensorData): Protocol buffer SensorData message object containing the most 
+                                                  recent simulated sensor values from the host machine.
+                                                              
+        Returns:
+            (int, int): integer tuple containing motor speeds (portSpeed, starboardSpeed).
+                        Motor speed values range from -127 to 127.
+        '''
         msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
                                 
         # If message includes new pose data
@@ -46,7 +92,7 @@ class OrbitalController(Controller):
                 # print (self._speed_error_sum)
 
                 # PI Controller
-                speed_control_value = self._speed_PID_gains[0]*speed_error + self._speed_PID_gains[1]*self._speed_error_sum
+                speed_control_value = self._speed_PI_gains[0]*speed_error + self._speed_PI_gains[1]*self._speed_error_sum
                 
                 # print ('speed_control_value', speed_control_value)
                 

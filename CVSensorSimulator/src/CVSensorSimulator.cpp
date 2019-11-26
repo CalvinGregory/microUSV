@@ -1,4 +1,4 @@
-/*
+/**
  * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
  * an overhead camera and sends that pose data to microUSV's over TCP.
  *
@@ -59,7 +59,7 @@ ConfigParser::Config config;
 Mat* frame;
 Mat targetMask;
 
-// Build barriers
+// Build global barriers
 class concrete_callable : public cbar::callable {
 public:
 	concrete_callable() {}
@@ -70,7 +70,7 @@ cbar::cyclicbarrier* frameAcquisitionBarrier = new cbar::cyclicbarrier(2,cc);
 cbar::cyclicbarrier* detectorBarrier0 = new cbar::cyclicbarrier(3,cc);
 cbar::cyclicbarrier* detectorBarrier1 = new cbar::cyclicbarrier(3,cc);
 
-/*
+/**
  * Video Capture thread function. Continuously updates the FrameBuffer.
  *
  * @param fb The FrameBuffer object to update.
@@ -81,9 +81,9 @@ void video_capture_thread(FrameBuffer& fb) {
 	}
 }
 
-/*
+/**
  * AprilTag detector thread function. Detects poses of AprilTags in the most
- * recent frame data from the FrameBuffer.
+ * recent frame data from the FrameBuffer. Generates visualization video feed.
  *
  * @param pd The PoseDetector object which performs detections.
  */
@@ -107,9 +107,9 @@ void apriltag_detector_thread(PoseDetector& pd) {
 	}
 }
 
-/*
+/**
  * Target detector thread function. Detects colored targets in the camera frame. 
- * Saves a mask image indicating which pixels are the targeted color. 
+ * Saves a global mask image indicating which pixels are the targeted color. 
  * 
  * @param fb The FrameBuffer object to update.
  */
@@ -153,12 +153,13 @@ void target_detector_thread(FrameBuffer& fb) {
 	}
 }
 
-/*
+/**
  * Thread function to process apriltag and target detections data. Generates simulated 
  * sensor values for target and obstacle detections to be sent to each microUSV and 
  * can export each vessel's pose history to a CSV file. 
  * 
- * @param taggedObjects List of all TaggedObjects being tracked by the simulator.
+ * @param config Configuration data extracted from provided json file. Contains camera information.
+ * @param robots List of all robots being tracked by the simulator.
  * @param csv List of CSV file objects recording the pose of each robot.
  * @param output_csv Flag indicating if robot pose data should be recorded to the csv files. 
  */
@@ -219,7 +220,7 @@ int main(int argc, char* argv[]) {
 	if (argc > 1) {
 		config = ConfigParser::getConfigs(argv[1]);
 	}
-	// If no file path provided open default file name. 
+	// If no file path provided attempt to open default file name. 
 	else {
 		config = ConfigParser::getConfigs("config.json");
 	}
@@ -330,7 +331,6 @@ int main(int argc, char* argv[]) {
 			// Identify microUSV and respond with its sensor data.
 			int index = CVSS_util::tagMatch(robots, requestData.tag_id());
 			SensorValues sensorValues = robots[index]->getSensorValues();
-			// pose2D pose = robots[index]->getPose();
 
 			currentTime = sensorValues.pose.timestamp;
 			long seconds = currentTime.tv_sec - startTime.tv_sec;

@@ -1,4 +1,4 @@
-/*
+/**
  * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
  * an overhead camera and sends that pose data to microUSV's over TCP.
  *
@@ -26,11 +26,11 @@
 #include "Robot.h"
 
 namespace CVSS_util {
-	/*
-	 * Searches the list of TaggedObjects for one who's tagID matches the target tagID. If found,
+	/**
+	 * Searches the list of Robots for one who's tagID matches the target tagID. If found,
 	 * return the index of the TaggedObject inside the objects vector.
 	 *
-	 * @param objects The TaggedObject vector to search.
+	 * @param robots The Robot vector to search.
 	 * @param tagID The tagID number to search for.
 	 *
 	 * @return If an object with a matching tagID is found, return the object's index, else return -1.

@@ -1,4 +1,4 @@
-/*
+/**
  * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
  * an overhead camera and sends that pose data to microUSV's over TCP.
  *
@@ -24,7 +24,7 @@
 #include <mutex>
 #include "opencv2/opencv.hpp"
 
-/*
+/**
  * Struct defining relevant camera parameters.
  *
  * cameraID is the host computer's assigned camera ID value for the camera to be used.
@@ -37,7 +37,7 @@ typedef struct {
 	int y_res;
 } VidCapSettings;
 
-/*
+/**
  * FrameBuffer is a class which captures and exports the most recent video frame from a camera.
  *
  * FrameBuffer is meant to be run in a loop calling updateFrame() in its own thread.
@@ -56,7 +56,7 @@ private:
 	cv::Mat frames[2];
 	std::mutex frame_lock[2];
 
-	/*
+	/**
 	 * Gets the opposite of the current active index.
 	 *
 	 * @return The opposite index of the current active index (if 0 then 1 and vice versa).
@@ -65,19 +65,19 @@ private:
 public:
 	FrameBuffer();
 
-	/*
+	/**
 	 * @param settings Camera settings data to initialize the FrameBuffer.
 	 */
 	FrameBuffer(VidCapSettings settings);
 
 	~FrameBuffer();
 
-	/*
+	/**
 	 * Store the most recent camera frame data into the active frame.
 	 */
 	void updateFrame();
 
-	/*
+	/**
 	 * Return the contents of the active frame (the most recent frame data). Set the inactive
 	 * frame as the new active frame.
 	 *

@@ -1,4 +1,4 @@
-/*
+/**
  * CVSensorSimulator tracks the pose of objects fitted with AprilTags in view of
  * an overhead camera and sends that pose data to microUSV's over TCP.
  *
@@ -26,8 +26,8 @@
 #include <sys/time.h>
 #include <mutex>
 
-/*
- * pose2D is a struct containing two dimensional pose data in cartesian coordinates.
+/**
+ * pose2D is a struct containing two dimensional pose data in cartesian and pixel coordinates.
  * yaw is defined positive counter-clockwise relative to the positive x-axis.
  */
 typedef struct {
@@ -39,7 +39,7 @@ typedef struct {
 	struct timeval timestamp;
 } pose2D;
 
-/*
+/**
  * TaggedObject is an abstract class defining an object marked with an AprilTag.
  * Pose accessor and mutator are thread safe.
  */
@@ -51,12 +51,12 @@ protected:
 	std::mutex pose_lock;
 	std::tuple<uint, uint, uint> tagRGB;
 public:
-	/*
+	/**
 	 * @return The object's tagID.
 	 */
 	int getTagID() { return tagID; }
 
-	/*
+	/**
 	 * @param pose The current 2D pose of the TaggedObject.
 	 */
 	void setPose(pose2D pose) {
@@ -64,7 +64,7 @@ public:
 		this->pose = pose;
 	}
 
-	/*
+	/**
 	 * @return The object's current 2D pose.
 	 */
 	pose2D getPose() {
@@ -74,12 +74,12 @@ public:
 		return temp;
 	}
 
-	/*
+	/**
 	 * @return The TaggedObject's label string.
 	 */
 	std::string getLabel() { return label; }
 
-	/*
+	/**
 	 * @return The TaggedObject's tag color in RGB format.
 	 */
 	std::tuple<uint, uint, uint> getTagColor() { return tagRGB; }
