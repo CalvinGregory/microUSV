@@ -34,16 +34,16 @@ Robot::Robot(int tagID, string label, int img_width, int img_height, double tag_
 
 	SensorZone left;
 	left.x_origin = -30;
-	left.y_origin = 30;
-	left.range = 250;
-	left.heading_ang = -M_PI/9;
-	left.fov_ang = M_PI/6;
+	left.y_origin = 70;
+	left.range = 300;
+	left.heading_ang = -M_PI/180*35;
+	left.fov_ang = M_PI/180*78;
 	SensorZone right;
 	right.x_origin = 30;
-	right.y_origin = 30;
-	right.range = 250;
-	right.heading_ang = M_PI/9;
-	right.fov_ang = M_PI/6;
+	right.y_origin = 70;
+	right.range = 300;
+	right.heading_ang = M_PI/180*35;
+	right.fov_ang = M_PI/180*78;
 	sensors = {left, right};
 
 	tagRGB = make_tuple(0, 0, 255);
