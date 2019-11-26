@@ -12,6 +12,7 @@ class OrbitalController(Controller):
         self._orbit_veer = config.orbit_veer
         self._speed_PID_gains = (config.P_speed, config.I_speed)
         self._speed_error_sum = 0
+        self._heading_error_tolerance = math.pi/90
 
     def get_motor_speeds(self, sensorData):
         msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
@@ -30,9 +31,8 @@ class OrbitalController(Controller):
             yaw = super(OrbitalController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)
             
             pose = pose2D(x, y, yaw)
-            heading_error = super(OrbitalController,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, math.pi, -math.pi)
+            heading_error = super(OrbitalController,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, 2*math.pi, 0)
             
-            # print(sensorData.clusterPoint.range, super(OrbitalController,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, math.pi, -math.pi))
             port = 0
             starboard = 0
 
@@ -41,11 +41,17 @@ class OrbitalController(Controller):
                 dt = msg_timestamp - self._last_timestamp
                 self._speed = math.sqrt((pose.x - self._lastPose.x)**2 + (pose.y - self._lastPose.y)**2) / dt
                 speed_error = self._orbit_speed - self._speed
-                self._speed_error_sum = 0.99*self._speed_error_sum + speed_error*dt
+                self._speed_error_sum = 0.9*self._speed_error_sum + speed_error*dt
+
+                # print (self._speed_error_sum)
+
                 # PI Controller
                 speed_control_value = self._speed_PID_gains[0]*speed_error + self._speed_PID_gains[1]*self._speed_error_sum
-                port = self._speed_limit_upper*speed_control_value - self._bias/100
-                starboard = self._speed_limit_upper*speed_control_value + self._bias/100
+                
+                # print ('speed_control_value', speed_control_value)
+                
+                port = self._speed_limit_upper*(speed_control_value - self._bias/100)
+                starboard = self._speed_limit_upper*(speed_control_value + self._bias/100)
                 
                 # if inside cluster area
                 if sensorData.clusterPoint.range < self._orbit_threshold:
@@ -58,14 +64,16 @@ class OrbitalController(Controller):
                     port = port - self._orbit_veer/100*self._speed_limit_upper
                     starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
                 # if not perpendicular to cluster center point
-                elif heading_error < math.pi/2 - math.pi/90:
+                elif heading_error < math.pi/2 - self._heading_error_tolerance:
                     # veer left
                     port = port - self._orbit_veer/100*self._speed_limit_upper
                     starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
-                else:
-                    #veer right
+                elif heading_error > math.pi/2 + self._heading_error_tolerance:
+                    # veer right
                     port = port + self._orbit_veer/100*self._speed_limit_upper
                     starboard = starboard - self._orbit_veer/100*self._speed_limit_upper
+                # else go straight
+                    
             
             (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)
             
@@ -73,5 +81,5 @@ class OrbitalController(Controller):
             self._lastPose = pose
             self._last_timestamp = msg_timestamp
 
-        print(self._motor_speeds)
+        # print('motor speeds', self._motor_speeds)
         return self._motor_speeds
