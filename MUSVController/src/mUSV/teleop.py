@@ -25,6 +25,7 @@ import serial
 import curses
 import time
 import struct
+import os.path
 from Config import Config
 
 def sendSpeeds( portSpeed, starboardSpeed ):
@@ -42,10 +43,13 @@ def sendSpeeds( portSpeed, starboardSpeed ):
 
 # Read config file
 if (len(sys.argv) < 2):
-    print ('No config file path provided')
-    exit()
-    
-config = Config(sys.argv[1])
+    if (os.path.isfile('config.json')):
+        config = Config('config.json')
+    else:
+        print ('No config file path provided')
+        exit()
+else:
+    config = Config(sys.argv[1])
 
 # Connect to the arduino over USB and wait for connection to settle
 arduino = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200, timeout = 1)
