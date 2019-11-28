@@ -3,6 +3,7 @@ CVSensorSimulator
 *.json
 !CVSensorSimulator/example_config.json
 !MUSVController/src/mUSV/example_config.json
+!MUSVController/src/mUSV/ControllerHistory/*.json
 .settings/
 .vscode/
 *.pyc
