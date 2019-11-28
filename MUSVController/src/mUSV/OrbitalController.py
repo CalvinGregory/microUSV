@@ -46,7 +46,17 @@ class OrbitalController(Controller):
         self._orbit_veer = config.orbit_veer
         self._speed_PI_gains = (config.P_speed, config.I_speed)
         self._speed_error_sum = 0
-        self._heading_error_tolerance = math.pi/90
+        self._heading_error_tolerance = math.pi/180*5
+        self._cluster_point = (0,0)
+        
+        FoV_deg = 78
+        FoV_diag_hyp = config.tag_plane_dist*1000 / 4.66755 / math.cos(FoV_deg/2)
+        FoV_diag_in_plane = FoV_diag_hyp * math.sin(FoV_deg/2)
+        alpha = math.atan(720.0/1280.0)
+        # Since origin is at center of the frame, max values are 1/2 of frame width. Full measurement range is [-max, +max].
+        x_max_measurement = FoV_diag_in_plane * math.cos(alpha)
+        y_max_measurement = FoV_diag_in_plane * math.sin(alpha)
+
 
     def get_motor_speeds(self, sensorData):
         '''
@@ -86,10 +96,14 @@ class OrbitalController(Controller):
             if self._last_timestamp > 0:
                 dt = msg_timestamp - self._last_timestamp
                 self._speed = math.sqrt((pose.x - self._lastPose.x)**2 + (pose.y - self._lastPose.y)**2) / dt
-                speed_error = self._orbit_speed - self._speed
-                self._speed_error_sum = 0.9*self._speed_error_sum + speed_error*dt
 
-                # print (self._speed_error_sum)
+                print('speed', self._speed)
+                
+                speed_error = self._orbit_speed - self._speed
+
+                print('speed_error', speed_error)
+
+                self._speed_error_sum = 0.9*self._speed_error_sum + speed_error*dt
 
                 # PI Controller
                 speed_control_value = self._speed_PI_gains[0]*speed_error + self._speed_PI_gains[1]*self._speed_error_sum
@@ -98,34 +112,70 @@ class OrbitalController(Controller):
                 
                 port = self._speed_limit_upper*(speed_control_value - self._bias/100)
                 starboard = self._speed_limit_upper*(speed_control_value + self._bias/100)
+                (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)
                 
-                # if inside cluster area
-                if sensorData.clusterPoint.range < self._orbit_threshold:
-                    # veer left
-                    port = port - self._orbit_veer/100*self._speed_limit_upper
-                    starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
-                # if target detected to port
-                elif (sensorData.target_sensors[0]):
-                    # veer left
-                    port = port - self._orbit_veer/100*self._speed_limit_upper
-                    starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
-                # if not perpendicular to cluster center point
-                elif heading_error < math.pi/2 - self._heading_error_tolerance:
-                    # veer left
-                    port = port - self._orbit_veer/100*self._speed_limit_upper
-                    starboard = starboard + self._orbit_veer/100*self._speed_limit_upper
-                elif heading_error > math.pi/2 + self._heading_error_tolerance:
-                    # veer right
-                    port = port + self._orbit_veer/100*self._speed_limit_upper
-                    starboard = starboard - self._orbit_veer/100*self._speed_limit_upper
-                # else go straight
+                #TODO make puck seeking optional (wrapped in if statement with flag)
+                # if aligned
+                if heading_error > math.pi/2 - self._heading_error_tolerance and heading_error <= math.pi/2 + self._heading_error_tolerance:
+                    if sensorData.clusterPoint.range < self._orbit_threshold:
+                        # slight veer left
+                        print ('slight veer left')
+                        if math.copysign(1,speed_control_value) > 0:
+                            port = int(round(0.4*port))
+                        else:
+                            starboard = int(round(0.4*starboard))
+                    else:
+                        # slight veer right
+                        print ('slight veer right')
+                        if math.copysign(1,speed_control_value) > 0:
+                            starboard = int(round(0.4*starboard))
+                        else:
+                            port = int(round(0.4*port))
+                # if heading uphill
+                elif heading_error <= math.pi/2 - self._heading_error_tolerance:
+                    print ('veer left')
+                    if math.copysign(1,speed_control_value) > 0:
+                        port = 0
+                    else:
+                        starboard = 0
+                # if heading downhill
+                else:
+                    print('veer right')
+                    if math.copysign(1,speed_control_value) > 0:
+                        starboard = 0
+                    else:
+                        port = 0
+
+
+
+
+
+
+
+                
+                # # if inside cluster area
+                # if sensorData.clusterPoint.range < self._orbit_threshold:
+                #     # veer left
+                #     port = 0
+                # # if target detected to port
+                # elif (sensorData.target_sensors[0]):
+                #     # veer left
+                #     port = 0
+                # # if not perpendicular to cluster center point
+                # elif heading_error < math.pi/2 - self._heading_error_tolerance:
+                #     # veer left
+                #     port = 0
+                # else:
+                #     # veer right
+                #     starboard = 0
+                # # else go straight
                     
             
-            (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)
+            
             
             self._motor_speeds = (self._portPropSpin*port, self._starPropSpin*starboard) 
             self._lastPose = pose
             self._last_timestamp = msg_timestamp
 
-        # print('motor speeds', self._motor_speeds)
+        print('motor speeds', self._motor_speeds)
         return self._motor_speeds
