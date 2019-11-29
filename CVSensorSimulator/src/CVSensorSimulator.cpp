@@ -343,6 +343,8 @@ int main(int argc, char* argv[]) {
 			sensorData.mutable_pose()->set_x(sensorValues.pose.x);
 			sensorData.mutable_pose()->set_y(sensorValues.pose.y);
 			sensorData.mutable_pose()->set_yaw(sensorValues.pose.yaw);
+			sensorData.mutable_pose()->set_xpx(sensorValues.pose.x_px);
+			sensorData.mutable_pose()->set_ypx(sensorValues.pose.y_px);
 			// sensorData.add_obstacle_sensors(0);
 			for(int i = 0 ; i < sensorValues.targetSensors.size(); i++) {
 				sensorData.add_target_sensors(sensorValues.targetSensors.at(i));
