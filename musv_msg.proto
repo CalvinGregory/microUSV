@@ -13,6 +13,8 @@ message SensorData {
 		float x = 1;
 		float y = 2;
 		float yaw = 3;
+		int32 xpx = 4;
+		int32 ypx = 5;
 	}
 	Pose2D pose = 1;
 	repeated int32 obstacle_sensors = 2 [packed=true];

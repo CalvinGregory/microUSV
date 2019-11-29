@@ -311,6 +311,18 @@ class SensorData_Pose2D :
   float yaw() const;
   void set_yaw(float value);
 
+  // int32 xpx = 4;
+  void clear_xpx();
+  static const int kXpxFieldNumber = 4;
+  ::google::protobuf::int32 xpx() const;
+  void set_xpx(::google::protobuf::int32 value);
+
+  // int32 ypx = 5;
+  void clear_ypx();
+  static const int kYpxFieldNumber = 5;
+  ::google::protobuf::int32 ypx() const;
+  void set_ypx(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:mUSV.SensorData.Pose2D)
  private:
   class HasBitSetters;
@@ -319,6 +331,8 @@ class SensorData_Pose2D :
   float x_;
   float y_;
   float yaw_;
+  ::google::protobuf::int32 xpx_;
+  ::google::protobuf::int32 ypx_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_musv_5fmsg_2eproto;
 };
@@ -830,6 +844,34 @@ inline void SensorData_Pose2D::set_yaw(float value) {
   
   yaw_ = value;
   // @@protoc_insertion_point(field_set:mUSV.SensorData.Pose2D.yaw)
+}
+
+// int32 xpx = 4;
+inline void SensorData_Pose2D::clear_xpx() {
+  xpx_ = 0;
+}
+inline ::google::protobuf::int32 SensorData_Pose2D::xpx() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.Pose2D.xpx)
+  return xpx_;
+}
+inline void SensorData_Pose2D::set_xpx(::google::protobuf::int32 value) {
+  
+  xpx_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.Pose2D.xpx)
+}
+
+// int32 ypx = 5;
+inline void SensorData_Pose2D::clear_ypx() {
+  ypx_ = 0;
+}
+inline ::google::protobuf::int32 SensorData_Pose2D::ypx() const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.Pose2D.ypx)
+  return ypx_;
+}
+inline void SensorData_Pose2D::set_ypx(::google::protobuf::int32 value) {
+  
+  ypx_ = value;
+  // @@protoc_insertion_point(field_set:mUSV.SensorData.Pose2D.ypx)
 }
 
 // -------------------------------------------------------------------

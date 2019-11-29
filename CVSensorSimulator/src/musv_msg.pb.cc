@@ -144,6 +144,8 @@ const ::google::protobuf::uint32 TableStruct_musv_5fmsg_2eproto::offsets[] PROTO
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData_Pose2D, x_),
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData_Pose2D, y_),
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData_Pose2D, yaw_),
+  PROTOBUF_FIELD_OFFSET(::mUSV::SensorData_Pose2D, xpx_),
+  PROTOBUF_FIELD_OFFSET(::mUSV::SensorData_Pose2D, ypx_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::mUSV::SensorData_Waypoint, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -174,9 +176,9 @@ const ::google::protobuf::uint32 TableStruct_musv_5fmsg_2eproto::offsets[] PROTO
 static const ::google::protobuf::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::mUSV::RequestData)},
   { 7, -1, sizeof(::mUSV::SensorData_Pose2D)},
-  { 15, -1, sizeof(::mUSV::SensorData_Waypoint)},
-  { 22, -1, sizeof(::mUSV::SensorData_ClusterPoint)},
-  { 29, -1, sizeof(::mUSV::SensorData)},
+  { 17, -1, sizeof(::mUSV::SensorData_Waypoint)},
+  { 24, -1, sizeof(::mUSV::SensorData_ClusterPoint)},
+  { 31, -1, sizeof(::mUSV::SensorData)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -196,23 +198,23 @@ static ::google::protobuf::Message const * const file_default_instances[] = {
 const char descriptor_table_protodef_musv_5fmsg_2eproto[] =
   "\n\016musv_msg.proto\022\004mUSV\032\037google/protobuf/"
   "timestamp.proto\"8\n\013RequestData\022\016\n\006tag_id"
-  "\030\001 \001(\005\022\031\n\021request_waypoints\030\002 \001(\010\"\226\003\n\nSe"
+  "\030\001 \001(\005\022\031\n\021request_waypoints\030\002 \001(\010\"\260\003\n\nSe"
   "nsorData\022%\n\004pose\030\001 \001(\0132\027.mUSV.SensorData"
   ".Pose2D\022\034\n\020obstacle_sensors\030\002 \003(\005B\002\020\001\022\032\n"
   "\016target_sensors\030\003 \003(\005B\002\020\001\022-\n\ttimestamp\030\004"
   " \001(\0132\032.google.protobuf.Timestamp\022,\n\twayp"
   "oints\030\005 \003(\0132\031.mUSV.SensorData.Waypoint\022\026"
   "\n\016loop_waypoints\030\006 \001(\010\0223\n\014clusterPoint\030\007"
-  " \001(\0132\035.mUSV.SensorData.ClusterPoint\032+\n\006P"
+  " \001(\0132\035.mUSV.SensorData.ClusterPoint\032E\n\006P"
   "ose2D\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\022\013\n\003yaw\030\003 \001(\002"
-  "\032 \n\010Waypoint\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\032.\n\014Cl"
-  "usterPoint\022\r\n\005range\030\001 \001(\002\022\017\n\007heading\030\002 \001"
-  "(\002b\006proto3"
+  "\022\013\n\003xpx\030\004 \001(\005\022\013\n\003ypx\030\005 \001(\005\032 \n\010Waypoint\022\t"
+  "\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\032.\n\014ClusterPoint\022\r\n\005"
+  "range\030\001 \001(\002\022\017\n\007heading\030\002 \001(\002b\006proto3"
   ;
 ::google::protobuf::internal::DescriptorTable descriptor_table_musv_5fmsg_2eproto = {
   false, InitDefaults_musv_5fmsg_2eproto, 
   descriptor_table_protodef_musv_5fmsg_2eproto,
-  "musv_msg.proto", &assign_descriptors_table_musv_5fmsg_2eproto, 530,
+  "musv_msg.proto", &assign_descriptors_table_musv_5fmsg_2eproto, 556,
 };
 
 void AddDescriptors_musv_5fmsg_2eproto() {
@@ -545,6 +547,8 @@ class SensorData_Pose2D::HasBitSetters {
 const int SensorData_Pose2D::kXFieldNumber;
 const int SensorData_Pose2D::kYFieldNumber;
 const int SensorData_Pose2D::kYawFieldNumber;
+const int SensorData_Pose2D::kXpxFieldNumber;
+const int SensorData_Pose2D::kYpxFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 SensorData_Pose2D::SensorData_Pose2D()
@@ -557,15 +561,15 @@ SensorData_Pose2D::SensorData_Pose2D(const SensorData_Pose2D& from)
       _internal_metadata_(nullptr) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   ::memcpy(&x_, &from.x_,
-    static_cast<size_t>(reinterpret_cast<char*>(&yaw_) -
-    reinterpret_cast<char*>(&x_)) + sizeof(yaw_));
+    static_cast<size_t>(reinterpret_cast<char*>(&ypx_) -
+    reinterpret_cast<char*>(&x_)) + sizeof(ypx_));
   // @@protoc_insertion_point(copy_constructor:mUSV.SensorData.Pose2D)
 }
 
 void SensorData_Pose2D::SharedCtor() {
   ::memset(&x_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&yaw_) -
-      reinterpret_cast<char*>(&x_)) + sizeof(yaw_));
+      reinterpret_cast<char*>(&ypx_) -
+      reinterpret_cast<char*>(&x_)) + sizeof(ypx_));
 }
 
 SensorData_Pose2D::~SensorData_Pose2D() {
@@ -592,8 +596,8 @@ void SensorData_Pose2D::Clear() {
   (void) cached_has_bits;
 
   ::memset(&x_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&yaw_) -
-      reinterpret_cast<char*>(&x_)) + sizeof(yaw_));
+      reinterpret_cast<char*>(&ypx_) -
+      reinterpret_cast<char*>(&x_)) + sizeof(ypx_));
   _internal_metadata_.Clear();
 }
 
@@ -629,6 +633,20 @@ const char* SensorData_Pose2D::_InternalParse(const char* begin, const char* end
         if (static_cast<::google::protobuf::uint8>(tag) != 29) goto handle_unusual;
         msg->set_yaw(::google::protobuf::io::UnalignedLoad<float>(ptr));
         ptr += sizeof(float);
+        break;
+      }
+      // int32 xpx = 4;
+      case 4: {
+        if (static_cast<::google::protobuf::uint8>(tag) != 32) goto handle_unusual;
+        msg->set_xpx(::google::protobuf::internal::ReadVarint(&ptr));
+        GOOGLE_PROTOBUF_PARSER_ASSERT(ptr);
+        break;
+      }
+      // int32 ypx = 5;
+      case 5: {
+        if (static_cast<::google::protobuf::uint8>(tag) != 40) goto handle_unusual;
+        msg->set_ypx(::google::protobuf::internal::ReadVarint(&ptr));
+        GOOGLE_PROTOBUF_PARSER_ASSERT(ptr);
         break;
       }
       default: {
@@ -697,6 +715,32 @@ bool SensorData_Pose2D::MergePartialFromCodedStream(
         break;
       }
 
+      // int32 xpx = 4;
+      case 4: {
+        if (static_cast< ::google::protobuf::uint8>(tag) == (32 & 0xFF)) {
+
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &xpx_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // int32 ypx = 5;
+      case 5: {
+        if (static_cast< ::google::protobuf::uint8>(tag) == (40 & 0xFF)) {
+
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &ypx_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -739,6 +783,16 @@ void SensorData_Pose2D::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFloat(3, this->yaw(), output);
   }
 
+  // int32 xpx = 4;
+  if (this->xpx() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->xpx(), output);
+  }
+
+  // int32 ypx = 5;
+  if (this->ypx() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->ypx(), output);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         _internal_metadata_.unknown_fields(), output);
@@ -765,6 +819,16 @@ void SensorData_Pose2D::SerializeWithCachedSizes(
   // float yaw = 3;
   if (this->yaw() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(3, this->yaw(), target);
+  }
+
+  // int32 xpx = 4;
+  if (this->xpx() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->xpx(), target);
+  }
+
+  // int32 ypx = 5;
+  if (this->ypx() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->ypx(), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -803,6 +867,20 @@ size_t SensorData_Pose2D::ByteSizeLong() const {
     total_size += 1 + 4;
   }
 
+  // int32 xpx = 4;
+  if (this->xpx() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->xpx());
+  }
+
+  // int32 ypx = 5;
+  if (this->ypx() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->ypx());
+  }
+
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
   SetCachedSize(cached_size);
   return total_size;
@@ -839,6 +917,12 @@ void SensorData_Pose2D::MergeFrom(const SensorData_Pose2D& from) {
   if (from.yaw() != 0) {
     set_yaw(from.yaw());
   }
+  if (from.xpx() != 0) {
+    set_xpx(from.xpx());
+  }
+  if (from.ypx() != 0) {
+    set_ypx(from.ypx());
+  }
 }
 
 void SensorData_Pose2D::CopyFrom(const ::google::protobuf::Message& from) {
@@ -869,6 +953,8 @@ void SensorData_Pose2D::InternalSwap(SensorData_Pose2D* other) {
   swap(x_, other->x_);
   swap(y_, other->y_);
   swap(yaw_, other->yaw_);
+  swap(xpx_, other->xpx_);
+  swap(ypx_, other->ypx_);
 }
 
 ::google::protobuf::Metadata SensorData_Pose2D::GetMetadata() const {
