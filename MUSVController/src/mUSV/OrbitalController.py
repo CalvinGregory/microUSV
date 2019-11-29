@@ -19,6 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
 
 from Controller import Controller
 from pose2D import pose2D
+from PIL import Image
 import math
 
 class OrbitalController(Controller):
@@ -44,19 +45,29 @@ class OrbitalController(Controller):
         self._orbit_threshold = config.orbit_threshold
         self._orbit_speed = config.orbit_speed
         self._orbit_veer = config.orbit_veer
-        self._speed_PI_gains = (config.P_speed, config.I_speed)
-        self._speed_error_sum = 0
-        self._heading_error_tolerance = math.pi/180*5
-        self._cluster_point = (0,0)
+        self._cluster_point = (0.0, 0.0)
+        #TODO add if statement to select 720p vs 1080p
+        scalar_field = Image.open('simple_field_720p.png', 'r')
+        self._x_res = scalar_field.size[0]
+        self._y_res = scalar_field.size[1]
+        self._scalar_field_values = scalar_field.load()
+
+        self._puck_mask = 13
+        self._align_mask = 18
         
         FoV_deg = 78
-        FoV_diag_hyp = config.tag_plane_dist*1000 / 4.66755 / math.cos(FoV_deg/2)
+        FoV_diag_hyp = config.tag_plane_distance*1000 / 4.66755 / math.cos(FoV_deg/2)
         FoV_diag_in_plane = FoV_diag_hyp * math.sin(FoV_deg/2)
         alpha = math.atan(720.0/1280.0)
         # Since origin is at center of the frame, max values are 1/2 of frame width. Full measurement range is [-max, +max].
         x_max_measurement = FoV_diag_in_plane * math.cos(alpha)
-        y_max_measurement = FoV_diag_in_plane * math.sin(alpha)
+        # y_max_measurement = FoV_diag_in_plane * math.sin(alpha)
+        self._px_per_mm = x_max_measurement/1280.0/2
 
+        # left and right scalar field sensors are each X mm away from the vessel's apriltag center point
+        self._scalar_field_LR_sensor_offsets = 30
+        # the center scalar field sensor is X mm ahead of the vessel's apriltag center point
+        self._scalar_field_C_sensor_offset = 30
 
     def get_motor_speeds(self, sensorData):
         '''
@@ -75,106 +86,87 @@ class OrbitalController(Controller):
                                 
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
-            # Apply tag offset transform
-            x_offset_tagFrame = math.cos(self._tag_offset_yaw)*self._tag_offset_x + math.sin(self._tag_offset_yaw)*self._tag_offset_y
-            y_offset_tagFrame = -math.sin(self._tag_offset_yaw)*self._tag_offset_x + math.cos(self._tag_offset_yaw)*self._tag_offset_y
-            # Apply yaw transform
-            x_offset_worldFrame = math.cos(sensorData.pose.yaw)*x_offset_tagFrame + math.sin(sensorData.pose.yaw)*y_offset_tagFrame
-            y_offset_worldFrame = -math.sin(sensorData.pose.yaw)*x_offset_tagFrame + math.cos(sensorData.pose.yaw)*y_offset_tagFrame
-            
-            x = sensorData.pose.x + x_offset_worldFrame
-            y = sensorData.pose.y + y_offset_worldFrame
-            yaw = super(OrbitalController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)
-            
-            pose = pose2D(x, y, yaw)
-            heading_error = super(OrbitalController,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, 2*math.pi, 0)
-            
             port = 0
             starboard = 0
 
-            # If not first message
-            if self._last_timestamp > 0:
-                dt = msg_timestamp - self._last_timestamp
-                self._speed = math.sqrt((pose.x - self._lastPose.x)**2 + (pose.y - self._lastPose.y)**2) / dt
+            # Calculate scalar field sensor values
+            #C
+            xpx = sensorData.pose.xpx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.sin(sensorData.pose.yaw)))
+            if xpx > self._x_res - 1:
+                xpx = self._x_res -1
+            elif xpx < 0:
+                xpx = 0
+            ypx = sensorData.pose.ypx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.cos(sensorData.pose.yaw)))
+            if ypx > self._y_res - 1:
+                ypx = self._y_res -1
+            elif ypx < 0:
+                ypx = 0
+            C = self._scalar_field_values[xpx, ypx]
 
-                print('speed', self._speed)
-                
-                speed_error = self._orbit_speed - self._speed
+            #R
+            xpx = sensorData.pose.xpx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.sin(sensorData.pose.yaw + math.pi/2)))
+            if xpx > self._x_res - 1:
+                xpx = self._x_res -1
+            elif xpx < 0:
+                xpx = 0
+            ypx = sensorData.pose.ypx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.cos(sensorData.pose.yaw + math.pi/2)))
+            if ypx > self._y_res - 1:
+                ypx = self._y_res -1
+            elif ypx < 0:
+                ypx = 0
+            R = self._scalar_field_values[xpx, ypx]
 
-                print('speed_error', speed_error)
+            #L
+            xpx = sensorData.pose.xpx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.sin(sensorData.pose.yaw - math.pi/2)))
+            if xpx > self._x_res - 1:
+                xpx = self._x_res -1
+            elif xpx < 0:
+                xpx = 0
+            ypx = sensorData.pose.ypx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.cos(sensorData.pose.yaw - math.pi/2)))
+            if ypx > self._y_res - 1:
+                ypx = self._y_res -1
+            elif ypx < 0:
+                ypx = 0
+            L = self._scalar_field_values[xpx, ypx]
 
-                self._speed_error_sum = 0.9*self._speed_error_sum + speed_error*dt
+            # Set order as a binary number
+            if C >= R and R >= L:
+                order = 1
+            elif R >= C and C >= L:
+                order = 2
+            elif C >= L and L >= R:
+                order = 4
+            elif L >= C and C >= R:
+                order = 8
+            elif R >= L and L >= C:
+                order = 16
+            else: # L >= R and R >= C
+                order = 32
 
-                # PI Controller
-                speed_control_value = self._speed_PI_gains[0]*speed_error + self._speed_PI_gains[1]*self._speed_error_sum
-                
-                # print ('speed_control_value', speed_control_value)
-                
-                port = self._speed_limit_upper*(speed_control_value - self._bias/100)
-                starboard = self._speed_limit_upper*(speed_control_value + self._bias/100)
-                (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)
-                
-                #TODO make puck seeking optional (wrapped in if statement with flag)
-                # if aligned
-                if heading_error > math.pi/2 - self._heading_error_tolerance and heading_error <= math.pi/2 + self._heading_error_tolerance:
-                    if sensorData.clusterPoint.range < self._orbit_threshold:
-                        # slight veer left
-                        print ('slight veer left')
-                        if math.copysign(1,speed_control_value) > 0:
-                            port = int(round(0.4*port))
-                        else:
-                            starboard = int(round(0.4*starboard))
-                    else:
-                        # slight veer right
-                        print ('slight veer right')
-                        if math.copysign(1,speed_control_value) > 0:
-                            starboard = int(round(0.4*starboard))
-                        else:
-                            port = int(round(0.4*port))
-                # if heading uphill
-                elif heading_error <= math.pi/2 - self._heading_error_tolerance:
-                    print ('veer left')
-                    if math.copysign(1,speed_control_value) > 0:
-                        port = 0
-                    else:
-                        starboard = 0
-                # if heading downhill
-                else:
-                    print('veer right')
-                    if math.copysign(1,speed_control_value) > 0:
-                        starboard = 0
-                    else:
-                        port = 0
+            # Choose action
+            if sensorData.clusterPoint.range < self._orbit_threshold:
+                # veer left
+                port = 0
+                starboard = self._orbit_speed/100*self._speed_limit_upper
+            elif (self._puck_mask & order != 0) and sensorData.target_sensors[0]:
+                # veer left
+                port = 0
+                starboard = self._orbit_speed/100*self._speed_limit_upper
+            elif (self._align_mask & order != 0):
+                # veer left
+                port = 0
+                starboard = self._orbit_speed/100*self._speed_limit_upper
+            else: 
+                # veer right
+                port = self._orbit_speed/100*self._speed_limit_upper
+                starboard = 0
 
-
-
-
-
-
-
-                
-                # # if inside cluster area
-                # if sensorData.clusterPoint.range < self._orbit_threshold:
-                #     # veer left
-                #     port = 0
-                # # if target detected to port
-                # elif (sensorData.target_sensors[0]):
-                #     # veer left
-                #     port = 0
-                # # if not perpendicular to cluster center point
-                # elif heading_error < math.pi/2 - self._heading_error_tolerance:
-                #     # veer left
-                #     port = 0
-                # else:
-                #     # veer right
-                #     starboard = 0
-                # # else go straight
-                    
-            
-            
+            port = port - self._bias/100
+            starboard = starboard + self._bias/100
+            (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)                                  
             
             self._motor_speeds = (self._portPropSpin*port, self._starPropSpin*starboard) 
-            self._lastPose = pose
+            self._lastPose = sensorData.pose
             self._last_timestamp = msg_timestamp
 
         print('motor speeds', self._motor_speeds)
