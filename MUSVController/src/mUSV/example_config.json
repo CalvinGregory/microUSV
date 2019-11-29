@@ -36,7 +36,7 @@
 	
 	"orbit_threshold": 250.0,
 
-	"orbit_speed": 200.0,
+	"orbit_speed": 100.0,
 
 	"orbit_veer": 20.0, 
 
