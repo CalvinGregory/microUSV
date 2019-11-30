@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <chrono>
 #include "opencv2/opencv.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <google/protobuf/util/time_util.h>
@@ -92,6 +93,7 @@ void apriltag_detector_thread(PoseDetector& pd) {
 	imshow("CVSensorSimulator", temp_frame);
 
 	while (running) {
+		auto start = chrono::steady_clock::now();
 		frameAcquisitionBarrier->await();
 		pd.updatePoseEstimates(frame); 
 		if(visualize) {
@@ -102,6 +104,9 @@ void apriltag_detector_thread(PoseDetector& pd) {
 		if (waitKey(1) == 27) {
 			running = false;
 		}
+		auto end = chrono::steady_clock::now();
+		double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
+		cout << "Apriltag Detector Thread time " << time << " ns" << endl;
 		detectorBarrier0->await();
 		detectorBarrier1->await();
 	}
@@ -177,6 +182,8 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 		detectorBarrier0->await();
 		detectorBarrier0->reset();
 
+		auto start = chrono::steady_clock::now();
+
 		targets = targetMask.clone();
 		vector<pose2D> robot_poses;
 		for (int i = 0; i < robots.size(); i++) {
@@ -201,6 +208,9 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 				csv[i].newRow() << pose.x << pose.y << pose.yaw;
 			}
 		}
+		auto end = chrono::steady_clock::now();
+		double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
+		cout << "Post Processor Thread time " << time << " ns" << endl;
 	}
 
 	// Cleanup barrier objects
