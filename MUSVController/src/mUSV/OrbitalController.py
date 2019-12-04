@@ -52,8 +52,9 @@ class OrbitalController(Controller):
         self._y_res = scalar_field.size[1]
         self._scalar_field_values = scalar_field.load()
 
-        self._puck_mask = 13
-        self._align_mask = 18
+        self._puck_mask = 13 # b 001101
+        # self._align_mask = 18 # b 010010
+        self._align_mask = 5 # b 000101
         
         FoV_deg = 78
         FoV_diag_hyp = config.tag_plane_distance*1000 / 4.66755 / math.cos(FoV_deg/2)
@@ -65,9 +66,9 @@ class OrbitalController(Controller):
         self._px_per_mm = x_max_measurement/1280.0/2
 
         # left and right scalar field sensors are each X mm away from the vessel's apriltag center point
-        self._scalar_field_LR_sensor_offsets = 30
+        self._scalar_field_LR_sensor_offsets = 50
         # the center scalar field sensor is X mm ahead of the vessel's apriltag center point
-        self._scalar_field_C_sensor_offset = 30
+        self._scalar_field_C_sensor_offset = 100
 
     def get_motor_speeds(self, sensorData):
         '''
@@ -104,12 +105,12 @@ class OrbitalController(Controller):
             C = self._scalar_field_values[xpx, ypx]
 
             #R
-            xpx = sensorData.pose.xpx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.sin(sensorData.pose.yaw + math.pi/2)))
+            xpx = sensorData.pose.xpx + int(round(self._scalar_field_LR_sensor_offsets*self._px_per_mm*math.sin(sensorData.pose.yaw + math.pi/2)))
             if xpx > self._x_res - 1:
                 xpx = self._x_res -1
             elif xpx < 0:
                 xpx = 0
-            ypx = sensorData.pose.ypx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.cos(sensorData.pose.yaw + math.pi/2)))
+            ypx = sensorData.pose.ypx + int(round(self._scalar_field_LR_sensor_offsets*self._px_per_mm*math.cos(sensorData.pose.yaw + math.pi/2)))
             if ypx > self._y_res - 1:
                 ypx = self._y_res -1
             elif ypx < 0:
@@ -117,46 +118,62 @@ class OrbitalController(Controller):
             R = self._scalar_field_values[xpx, ypx]
 
             #L
-            xpx = sensorData.pose.xpx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.sin(sensorData.pose.yaw - math.pi/2)))
+            xpx = sensorData.pose.xpx + int(round(self._scalar_field_LR_sensor_offsets*self._px_per_mm*math.sin(sensorData.pose.yaw - math.pi/2)))
             if xpx > self._x_res - 1:
                 xpx = self._x_res -1
             elif xpx < 0:
                 xpx = 0
-            ypx = sensorData.pose.ypx + int(round(self._scalar_field_C_sensor_offset*self._px_per_mm*math.cos(sensorData.pose.yaw - math.pi/2)))
+            ypx = sensorData.pose.ypx + int(round(self._scalar_field_LR_sensor_offsets*self._px_per_mm*math.cos(sensorData.pose.yaw - math.pi/2)))
             if ypx > self._y_res - 1:
                 ypx = self._y_res -1
             elif ypx < 0:
                 ypx = 0
             L = self._scalar_field_values[xpx, ypx]
 
+            #DEBUG
+            # L = 68
+            # C = 55
+            # R = 74
+            print ('LCR', L, C, R)
+
             # Set order as a binary number
-            if C >= R and R >= L:
-                order = 1
-            elif R >= C and C >= L:
-                order = 2
-            elif C >= L and L >= R:
-                order = 4
+            if C >= R and R >= L: # turn left
+                print ('CRL')
+                order = 1  # b 000001
+            elif R >= C and C >= L: 
+                print('RCL')
+                order = 2  # b 000010
+            elif C >= L and L >= R: # turn left
+                print('CLR')
+                order = 4  # b 000100
             elif L >= C and C >= R:
-                order = 8
-            elif R >= L and L >= C:
-                order = 16
-            else: # L >= R and R >= C
-                order = 32
+                print('LCR')
+                order = 8  # b 001000
+            elif R >= L and L >= C: 
+                print('RLC')
+                order = 16 # b 010000
+            else: # L >= R and R >= C 
+                print('LRC')
+                order = 32 # b 100000
 
             # Choose action
-            if sensorData.clusterPoint.range < self._orbit_threshold:
+            if sensorData.clusterPoint.range < self._orbit_threshold and R >= L:
+                print('inside threshold')
                 # veer left
                 port = 0
                 starboard = self._orbit_speed/100*self._speed_limit_upper
             elif (self._puck_mask & order != 0) and sensorData.target_sensors[0]:
+                print('puck detected')
                 # veer left
                 port = 0
                 starboard = self._orbit_speed/100*self._speed_limit_upper
             elif (self._align_mask & order != 0):
+                print('align to left')
                 # veer left
                 port = 0
                 starboard = self._orbit_speed/100*self._speed_limit_upper
             else: 
+                print('align to right')
                 # veer right
                 port = self._orbit_speed/100*self._speed_limit_upper
                 starboard = 0
@@ -169,5 +186,5 @@ class OrbitalController(Controller):
             self._lastPose = sensorData.pose
             self._last_timestamp = msg_timestamp
 
-        print('motor speeds', self._motor_speeds)
+        # print('motor speeds', self._motor_speeds)
         return self._motor_speeds
