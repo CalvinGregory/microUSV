@@ -93,7 +93,7 @@ void apriltag_detector_thread(PoseDetector& pd) {
 	imshow("CVSensorSimulator", temp_frame);
 
 	while (running) {
-		auto start = chrono::steady_clock::now();
+		// auto start = chrono::steady_clock::now();
 		frameAcquisitionBarrier->await();
 		pd.updatePoseEstimates(frame); 
 		if(visualize) {
@@ -104,9 +104,9 @@ void apriltag_detector_thread(PoseDetector& pd) {
 		if (waitKey(1) == 27) {
 			running = false;
 		}
-		auto end = chrono::steady_clock::now();
-		double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
-		cout << "Apriltag Detector Thread time " << time << " ns" << endl;
+		// auto end = chrono::steady_clock::now();
+		// double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
+		// cout << "Apriltag Detector Thread time " << time << " ns" << endl;
 		detectorBarrier0->await();
 		detectorBarrier1->await();
 	}
@@ -121,6 +121,7 @@ void apriltag_detector_thread(PoseDetector& pd) {
 void target_detector_thread(FrameBuffer& fb) {
 	Mat hsv;
 	while (running) {
+		// auto start = chrono::steady_clock::now();
 		frame = fb.getFrame();
 		if (!frame->empty()) {
 			cvtColor(*frame, hsv, COLOR_BGR2HSV);
@@ -152,6 +153,9 @@ void target_detector_thread(FrameBuffer& fb) {
 		waitKey(1);
 */
 		medianBlur(targetMask, targetMask, 7);
+		// auto end = chrono::steady_clock::now();
+		// double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
+		// cout << "Apriltag Detector Thread time " << time << " ns" << endl;
 
 		detectorBarrier0->await();
 		detectorBarrier1->await();
@@ -182,7 +186,7 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 		detectorBarrier0->await();
 		detectorBarrier0->reset();
 
-		auto start = chrono::steady_clock::now();
+		// auto start = chrono::steady_clock::now();
 
 		targets = targetMask.clone();
 		vector<pose2D> robot_poses;
@@ -208,9 +212,9 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 				csv[i].newRow() << pose.x << pose.y << pose.yaw;
 			}
 		}
-		auto end = chrono::steady_clock::now();
-		double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
-		cout << "Post Processor Thread time " << time << " ns" << endl;
+		// auto end = chrono::steady_clock::now();
+		// double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
+		// cout << "Post Processor Thread time " << time << " ns" << endl;
 	}
 
 	// Cleanup barrier objects
