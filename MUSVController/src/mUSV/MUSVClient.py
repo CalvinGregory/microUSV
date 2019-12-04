@@ -27,6 +27,7 @@ import musv_msg_pb2
 from Config import Config
 from PIDController import PIDController
 from OrbitalController import OrbitalController
+from PurePursuitController import PurePursuitController
 
 port = 8078
 
@@ -67,8 +68,10 @@ if __name__ == '__main__':
     tagID = config.tagID
     
     # Build controller object
-    if config.controller_type == "orbital":
+    if config.controller_type == 'orbital':
         controller = OrbitalController(config)
+    elif config.controller_type == 'pursuit':
+        controller = PurePursuitController(config)
     else:
         controller = PIDController(config)
     
