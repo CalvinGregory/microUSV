@@ -10,35 +10,34 @@ class PurePursuitController(Controller):
         self._last_error = (0, 0)
         self._dist_error_sum = 0
         self._ang_error_sum = 0
-        self._look_ahead_distance = 0 #FIXME
+        self._orbit_threshold = config.orbit_threshold
+        self._look_ahead_distance = 100.0
+        self._lookAheadPoint = pose2D(self._orbit_threshold,0,0)
         
     def get_motor_speeds(self, sensorData):
         msg_timestamp = sensorData.timestamp.seconds + sensorData.timestamp.nanos*1e-9
                 
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
-            # Apply tag offset transform
-            x_offset_tagFrame = math.cos(self._tag_offset_yaw)*self._tag_offset_x + math.sin(self._tag_offset_yaw)*self._tag_offset_y
-            y_offset_tagFrame = -math.sin(self._tag_offset_yaw)*self._tag_offset_x + math.cos(self._tag_offset_yaw)*self._tag_offset_y
-            # Apply yaw transform
-            x_offset_worldFrame = math.cos(sensorData.pose.yaw)*x_offset_tagFrame + math.sin(sensorData.pose.yaw)*y_offset_tagFrame
-            y_offset_worldFrame = -math.sin(sensorData.pose.yaw)*x_offset_tagFrame + math.cos(sensorData.pose.yaw)*y_offset_tagFrame
+            # # Apply tag offset transform
+            # x_offset_tagFrame = math.cos(self._tag_offset_yaw)*self._tag_offset_x + math.sin(self._tag_offset_yaw)*self._tag_offset_y
+            # y_offset_tagFrame = -math.sin(self._tag_offset_yaw)*self._tag_offset_x + math.cos(self._tag_offset_yaw)*self._tag_offset_y
+            # # Apply yaw transform
+            # x_offset_worldFrame = math.cos(sensorData.pose.yaw)*x_offset_tagFrame + math.sin(sensorData.pose.yaw)*y_offset_tagFrame
+            # y_offset_worldFrame = -math.sin(sensorData.pose.yaw)*x_offset_tagFrame + math.cos(sensorData.pose.yaw)*y_offset_tagFrame
             
-            x = sensorData.pose.x + x_offset_worldFrame
-            y = sensorData.pose.y + y_offset_worldFrame
-            yaw = super(PurePursuitController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)            
+            # x = sensorData.pose.x + x_offset_worldFrame
+            # y = sensorData.pose.y + y_offset_worldFrame
+            # yaw = super(PurePursuitController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)            
 
-            pose = pose2D(x, y, yaw)
+            pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
 
-            #TODO
-            # Pure Pursuit alg
-            # tangent line to orbit.
-            # lookAheadDistance -> waypoint
-            # dist & ang error to new waypoint
-            # execute PID
+            if sensorData.clusterPoint.range > self._orbit_threshold:
+                tangent_line_heading = sensorData.clusterPoint.heading - math.asin(self._orbit_threshold/sensorData.clusterPoint.range)
+                self._lookAheadPoint.x = sensorData.pose.x + self._look_ahead_distance*math.sin(tangent_line_heading)
+                self._lookAheadPoint.y = sensorData.pose.y - self._look_ahead_distance*math.cos(tangent_line_heading)
 
-            lookAheadPoint = pose2D(0,0,0)
-            (distance_error, angular_error) = self._get_error(pose, lookAheadPoint)
+            (distance_error, angular_error) = self._get_error(pose, self._lookAheadPoint)
 
             # Apply Proportional gains 
             distance_control_value = self._distance_PID_gains[0]*distance_error
@@ -71,10 +70,11 @@ class PurePursuitController(Controller):
             (port, starboard) = super(PurePursuitController, self)._bounded_motor_speeds(port, starboard)
             
             self._motor_speeds = (self._portPropSpin*port, self._starPropSpin*starboard) 
-            self._lastPose = pose
+            # self._lastPose = pose
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
         
+        print (self._motor_speeds)
         return self._motor_speeds
 
     def _get_error(self, robot_pose, goal_pose):
