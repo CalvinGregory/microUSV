@@ -22,6 +22,7 @@
 
 
 #include <mutex>
+#include <memory>
 #include "opencv2/opencv.hpp"
 
 /**
@@ -42,26 +43,22 @@ typedef struct {
  *
  * FrameBuffer is meant to be run in a loop calling updateFrame() in its own thread.
  *
- * FrameBuffer stores two frames: the active frame and the inactive frame. The active frame is overwritten
- * each time updateFrame() is called. When getFrame() is called the active frame is returned and the active
- * frame and inactive frame switch roles. The inactive frame is not modified until getFrame is called again.
- * This allows the active frame to be updated continuously until it is needed, ensuring the caller of
- * getFrame() will receive the newest frame data.
+ * FrameBuffer contains three frames: a reader frame, writer frame, and buffer frame. When updateFrame()
+ * is called, a new frame is pulled from the camera into the writer frame. Once the frame grab is finished,
+ * the new writer frame is moved into the frame buffer. When another thread calls getFrame(), if a new frame 
+ * is available the buffer frame is moved into the reader frame which is then returned to the caller. 
+ * 
+ * The buffer frame is continuously overwritten to ensure the an eventual getFrame() call will receive the most
+ * recent frame data. 
  */
 class FrameBuffer{
 private:
 	cv::VideoCapture cap;
-	int activeIndex;
-	std::mutex index_lock;
-	cv::Mat frames[2];
-	std::mutex frame_lock[2];
-
-	/**
-	 * Gets the opposite of the current active index.
-	 *
-	 * @return The opposite index of the current active index (if 0 then 1 and vice versa).
-	 */
-	int otherIndex();
+	std::shared_ptr<cv::Mat> readFrame;
+	std::shared_ptr<cv::Mat> writeFrame;
+	std::shared_ptr<cv::Mat> bufferFrame;
+	std::mutex new_frame_lock;
+	std::mutex buffer_lock;
 public:
 	FrameBuffer();
 
@@ -73,17 +70,17 @@ public:
 	~FrameBuffer();
 
 	/**
-	 * Store the most recent camera frame data into the active frame.
+	 * Grabs a camera frame then stores it in bufferFrame.
 	 */
 	void updateFrame();
 
 	/**
-	 * Return the contents of the active frame (the most recent frame data). Set the inactive
-	 * frame as the new active frame.
+	 * Returns the most recently captured camera frame, i.e. the frame most recently stored in bufferFrame. 
+	 * getFrame is a blocking operation. It will wait until a new frame is available in bufferFrame before returning.
 	 *
-	 * @return Pointer to the output frame.
+	 * @return The output frame.
 	 */
-	cv::Mat *getFrame();
+	cv::Mat getFrame();
 };
 
 

@@ -57,7 +57,7 @@ using google::protobuf::util::TimeUtil;
 bool running;
 bool visualize;
 ConfigParser::Config config;
-Mat* frame;
+Mat frame;
 Mat targetMask;
 
 // Build global barriers
@@ -87,26 +87,28 @@ void video_capture_thread(FrameBuffer& fb) {
  * recent frame data from the FrameBuffer. Generates visualization video feed.
  *
  * @param pd The PoseDetector object which performs detections.
+ * @param fb The FrameBuffer object to query for new camera frames.
  */
-void apriltag_detector_thread(PoseDetector& pd) {
-	Mat temp_frame(100, 100, CV_8UC3, Scalar(0,0,0));
-	imshow("CVSensorSimulator", temp_frame);
-
+void apriltag_detector_thread(PoseDetector& pd, FrameBuffer& fb) {
+	Mat apriltag_frame(100, 100, CV_8UC3, Scalar(0,0,0));
+	imshow("CVSensorSimulator", apriltag_frame);
 	while (running) {
-		// auto start = chrono::steady_clock::now();
+		frame = fb.getFrame();
+		apriltag_frame = frame;
 		frameAcquisitionBarrier->await();
-		pd.updatePoseEstimates(frame); 
-		if(visualize) {
-			Mat* labelledFrame = pd.getLabelledFrame(config);
-			imshow("CVSensorSimulator", *labelledFrame);
+
+		if (!apriltag_frame.empty()) {
+			pd.updatePoseEstimates(&apriltag_frame); 
+			if(visualize) {
+				Mat* labelledFrame = pd.getLabelledFrame(config);
+				imshow("CVSensorSimulator", *labelledFrame);
+			}
+			// ESC key to exit
+			if (waitKey(1) == 27) {
+				running = false;
+			}
 		}
-		// ESC key to exit
-		if (waitKey(1) == 27) {
-			running = false;
-		}
-		// auto end = chrono::steady_clock::now();
-		// double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
-		// cout << "Apriltag Detector Thread time " << time << " ns" << endl;
+		
 		detectorBarrier0->await();
 		detectorBarrier1->await();
 	}
@@ -115,48 +117,18 @@ void apriltag_detector_thread(PoseDetector& pd) {
 /**
  * Target detector thread function. Detects colored targets in the camera frame. 
  * Saves a global mask image indicating which pixels are the targeted color. 
- * 
- * @param fb The FrameBuffer object to update.
  */
-void target_detector_thread(FrameBuffer& fb) {
+void target_detector_thread() {
 	Mat hsv;
 	while (running) {
-		// auto start = chrono::steady_clock::now();
-		frame = fb.getFrame();
-		if (!frame->empty()) {
-			cvtColor(*frame, hsv, COLOR_BGR2HSV);
-		}
-		frameAcquisitionBarrier->await();		
-
-		cv::inRange(hsv, config.target_thresh_low, config.target_thresh_high, targetMask);
-
-//TODO re-test w/ deep tank lighting conditions. 
-/*
-		int morph_size = 2;
-		Mat kernel = getStructuringElement(MORPH_RECT, Size(2*morph_size + 1, 2*morph_size + 1), Point(morph_size, morph_size));
-		Mat hsv_closed;
-		morphologyEx(targetMask, hsv_closed, MORPH_CLOSE, kernel);
-		Mat hsv_opened_nc;
-		Mat hsv_mBlur_nc;
-		Mat hsv_opened_c;
-		Mat hsv_mBlur_c;
-		morphologyEx(targetMask, hsv_opened_nc, MORPH_OPEN, kernel);
-		morphologyEx(hsv_closed, hsv_opened_c, MORPH_OPEN, kernel);
-		medianBlur(targetMask, hsv_mBlur_nc, 7);
-		medianBlur(hsv_closed, hsv_mBlur_c, 7);
-
-		imshow("unfiltered", targetMask);
-		imshow("opened w/o closing", hsv_opened_nc);
-		imshow("opened w/ closing", hsv_opened_c);
-		imshow("blurred w/o closing", hsv_mBlur_nc);
-		imshow("blurred w/ closing", hsv_mBlur_c);
-		waitKey(1);
-*/
-		medianBlur(targetMask, targetMask, 7);
-		// auto end = chrono::steady_clock::now();
-		// double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
-		// cout << "Apriltag Detector Thread time " << time << " ns" << endl;
-
+		frameAcquisitionBarrier->await();
+		try {
+			cvtColor(frame, hsv, COLOR_BGR2HSV);
+			cv::inRange(hsv, config.target_thresh_low, config.target_thresh_high, targetMask);
+			medianBlur(targetMask, targetMask, 7);
+		} 
+		catch(cv::Exception) {} // Handles 0.56% chance cvtColor will throw cv::Exception error due to empty frame
+		
 		detectorBarrier0->await();
 		detectorBarrier1->await();
 	}
@@ -186,8 +158,6 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 		detectorBarrier0->await();
 		detectorBarrier0->reset();
 
-		// auto start = chrono::steady_clock::now();
-
 		targets = targetMask.clone();
 		vector<pose2D> robot_poses;
 		for (int i = 0; i < robots.size(); i++) {
@@ -200,11 +170,6 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 		for (int i = 0; i < robots.size(); i++) {
 			robots.at(i)->updateSensorValues(targets, robot_poses, i, config.cInfo.x_res/x_max_measurement/2);
 		}
-//DEBUG		
-		// SensorValues temp = robots.at(0)->getSensorValues();
-		// std::cout << "targetSensor: " << temp.targetSensors.at(0) << " " << temp.targetSensors.at(1) << endl;
-		// cout << "x_max_measurement: " << x_max_measurement << endl;
-		// std::cout << "pose: " << temp.pose.x << " " << temp.pose.y << " " << temp.pose.yaw << endl;
 
 		if (output_csv) {
 			for(uint i = 0; i < csv.size(); i++) {
@@ -212,9 +177,6 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 				csv[i].newRow() << pose.x << pose.y << pose.yaw;
 			}
 		}
-		// auto end = chrono::steady_clock::now();
-		// double time = chrono::duration_cast<chrono::nanoseconds>(end-start).count();
-		// cout << "Post Processor Thread time " << time << " ns" << endl;
 	}
 
 	// Cleanup barrier objects
@@ -273,8 +235,8 @@ int main(int argc, char* argv[]) {
 	// Start threads
 	thread threads[4];
 	threads[0] = thread(video_capture_thread, ref(fb));
-	threads[1] = thread(apriltag_detector_thread, ref(pd));
-	threads[2] = thread(target_detector_thread, ref(fb));
+	threads[1] = thread(apriltag_detector_thread, ref(pd), ref(fb));
+	threads[2] = thread(target_detector_thread);
 	threads[3] = thread(detection_processor_thread, ref(config), ref(robots), ref(csv), config.output_csv);
 
 	for (int i = 0; i < 4; i++) {

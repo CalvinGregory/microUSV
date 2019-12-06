@@ -18,13 +18,17 @@
  */
 
 #include "FrameBuffer.h"
+#include <chrono>
 using namespace cv;
 
 FrameBuffer::FrameBuffer() {
 	cap.open(0);
 	if (!cap.isOpened())
 		std::cerr << "Couldn't open video capture device" << std::endl;
-	activeIndex = 0;
+	readFrame = std::make_shared<Mat>();
+	writeFrame = std::make_shared<Mat>();
+	bufferFrame = std::make_shared<Mat>();
+	new_frame_lock.lock();
 }
 
 FrameBuffer::FrameBuffer(VidCapSettings settings) {
@@ -33,7 +37,10 @@ FrameBuffer::FrameBuffer(VidCapSettings settings) {
 		std::cerr << "Couldn't open video capture device" << std::endl;
 	cap.set(CAP_PROP_FRAME_WIDTH, settings.x_res);
 	cap.set(CAP_PROP_FRAME_HEIGHT, settings.y_res);
-	activeIndex = 0;
+	readFrame = std::make_shared<Mat>();
+	writeFrame = std::make_shared<Mat>();
+	bufferFrame = std::make_shared<Mat>();
+	new_frame_lock.lock();
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -41,30 +48,17 @@ FrameBuffer::~FrameBuffer() {
 }
 
 void FrameBuffer::updateFrame() {
-	int index;
-
-	index_lock.lock();
-	index = activeIndex;
-	std::lock_guard<std::mutex> lock(frame_lock[index]);
-	index_lock.unlock();
-
-	cap >> frames[index];
+	cap >> *writeFrame;
+	std::lock_guard<std::mutex> lock(buffer_lock);
+	writeFrame.swap(bufferFrame);
+	new_frame_lock.try_lock();
+	new_frame_lock.unlock();
 }
 
-Mat *FrameBuffer::getFrame() {
-	int index;
-	Mat* frame;
+Mat FrameBuffer::getFrame() {	
+	new_frame_lock.lock();
+	std::lock_guard<std::mutex> lock(buffer_lock);
+	readFrame.swap(bufferFrame);
 
-	index_lock.lock();
-	index = activeIndex;
-	activeIndex = otherIndex();
-	std::lock_guard<std::mutex> lock(frame_lock[index]);
-	index_lock.unlock();
-
-	frame = &frames[index];
-	return frame;
-}
-
-int FrameBuffer::otherIndex() {
-	return abs(activeIndex - 1);
+	return *readFrame;
 }
