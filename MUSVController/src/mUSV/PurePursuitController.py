@@ -11,7 +11,7 @@ class PurePursuitController(Controller):
         self._dist_error_sum = 0
         self._ang_error_sum = 0
         self._orbit_threshold = config.orbit_threshold
-        self._look_ahead_distance = 100.0
+        self._look_ahead_distance = 150.0
         self._lookAheadPoint = pose2D(self._orbit_threshold,0,0)
         
     def get_motor_speeds(self, sensorData):
@@ -19,24 +19,14 @@ class PurePursuitController(Controller):
                 
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
-            # # Apply tag offset transform
-            # x_offset_tagFrame = math.cos(self._tag_offset_yaw)*self._tag_offset_x + math.sin(self._tag_offset_yaw)*self._tag_offset_y
-            # y_offset_tagFrame = -math.sin(self._tag_offset_yaw)*self._tag_offset_x + math.cos(self._tag_offset_yaw)*self._tag_offset_y
-            # # Apply yaw transform
-            # x_offset_worldFrame = math.cos(sensorData.pose.yaw)*x_offset_tagFrame + math.sin(sensorData.pose.yaw)*y_offset_tagFrame
-            # y_offset_worldFrame = -math.sin(sensorData.pose.yaw)*x_offset_tagFrame + math.cos(sensorData.pose.yaw)*y_offset_tagFrame
-            
-            # x = sensorData.pose.x + x_offset_worldFrame
-            # y = sensorData.pose.y + y_offset_worldFrame
-            # yaw = super(PurePursuitController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)            
-
             pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
-
+            
             if sensorData.clusterPoint.range > self._orbit_threshold:
                 tangent_line_heading = sensorData.clusterPoint.heading - math.asin(self._orbit_threshold/sensorData.clusterPoint.range)
+                # tangent_point_dist = math.sqrt(sensorData.clusterPoint.range**2 - self._orbit_threshold**2)
                 self._lookAheadPoint.x = sensorData.pose.x + self._look_ahead_distance*math.sin(tangent_line_heading)
                 self._lookAheadPoint.y = sensorData.pose.y - self._look_ahead_distance*math.cos(tangent_line_heading)
-
+                
             (distance_error, angular_error) = self._get_error(pose, self._lookAheadPoint)
 
             # Apply Proportional gains 
@@ -63,9 +53,9 @@ class PurePursuitController(Controller):
             
 
             #TODO Check bias math for negative thruster outputs
-            port = (forward_speed - turn)/2
+            port = (forward_speed + turn)/2
             port = port - (self._bias)/100
-            starboard = (forward_speed + turn)/2
+            starboard = (forward_speed - turn)/2
             starboard = starboard + (self._bias)/100
             (port, starboard) = super(PurePursuitController, self)._bounded_motor_speeds(port, starboard)
             
@@ -74,7 +64,6 @@ class PurePursuitController(Controller):
             self._last_timestamp = msg_timestamp
             self._last_error = (distance_error, angular_error)
         
-        print (self._motor_speeds)
         return self._motor_speeds
 
     def _get_error(self, robot_pose, goal_pose):
@@ -82,8 +71,8 @@ class PurePursuitController(Controller):
         dy = goal_pose.y - robot_pose.y
         
         distance_error = math.sqrt(dx**2 + dy**2)
-        
-        goal_angle = math.atan2(dy, dx)
-        angular_error = super(PurePursuitController, self)._bounded_angle(robot_pose.yaw - goal_angle, math.pi, -math.pi)
+         
+        goal_angle = math.atan2(dx, -dy) 
+        angular_error = super(PurePursuitController, self)._bounded_angle(goal_angle - robot_pose.yaw, math.pi, -math.pi)
                 
         return (distance_error, angular_error)
