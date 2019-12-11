@@ -147,8 +147,8 @@ void target_detector_thread() {
 void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<Robot>>& robots, vector<CSVWriter>& csv, bool output_csv) {
 	Mat targets;
 	// Estimate range of possible detection values in both axes (mm).
-	double FoV_diag_hyp = config.tag_plane_dist*1000 / 4.66755 / cos(config.cInfo.FoV_deg/2); // Correction factor determined by trial and error. ¯\_(ツ)_/¯
-	double FoV_diag_in_plane = FoV_diag_hyp * sin(config.cInfo.FoV_deg/2);
+	double FoV_diag_hyp = config.tag_plane_dist*1000 / 1.298125 / cos(config.cInfo.FoV_deg/2*M_PI/180); // Correction factor determined by trial and error. Unique to camera. ¯\_(ツ)_/¯
+	double FoV_diag_in_plane = FoV_diag_hyp * sin(config.cInfo.FoV_deg/2*M_PI/180);
 	double alpha = atan((double)config.cInfo.y_res/config.cInfo.x_res);
 	// Since origin is at center of the frame, max values are 1/2 of frame width. Full measurement range is [-max, +max].
 	double x_max_measurement = FoV_diag_in_plane * cos(alpha); 

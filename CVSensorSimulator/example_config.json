@@ -2,17 +2,17 @@
 	"visualize": true,
 	
 	"cameraInfo": {
-		"cameraID": 1,
+		"cameraID": 6,
 		"x_res": 1280,
 		"y_res": 720,
-		"fx": 1440.4750657011593,
-		"fy": 1440.4750657011593,
+		"fx": 923.90574729558500,
+		"fy": 923.90574729558500,
 		"cx": 640,
-		"cy": 360,
-		"FoV_deg": 78
+		"cy": 360, 
+		"FoV_deg": 94
 	},
 	
-	"tagsize": 49.0,
+	"tagsize": 49.5,
 
 	"tag_plane_distance": 1.80,
 
