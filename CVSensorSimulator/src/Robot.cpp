@@ -122,5 +122,5 @@ double Robot::getTargetRange(pose2D my_pose, pose2D target_pose) {
 }
 
 double Robot::getTargetHeading(pose2D my_pose, pose2D target_pose) {
-	return atan2(target_pose.y - my_pose.y, target_pose.x - my_pose.x);
+	return atan2(target_pose.x - my_pose.x, -(target_pose.y - my_pose.y));
 }
