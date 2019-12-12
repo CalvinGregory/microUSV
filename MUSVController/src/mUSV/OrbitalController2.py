@@ -22,9 +22,9 @@ from pose2D import pose2D
 from PIL import Image
 import math
 
-class OrbitalController(Controller):
+class OrbitalController2(Controller):
     '''
-    The OrbitalController class implements the algorithm described in OC2: A Swarm of Simple Robots Constructing Planar Shapes by Andrew Vardy. 
+    The OrbitalController2 class implements the algorithm described in OC2: A Swarm of Simple Robots Constructing Planar Shapes by Andrew Vardy. 
     Each vessel orbits clockwise around a point, gathering nearby targets outside of the orbit into a cluster at that point. 
 
     Attributes:
@@ -40,7 +40,7 @@ class OrbitalController(Controller):
         Args:
             config (mUSV/Config): Config file object containing controller initialization constants. 
         '''
-        super(OrbitalController, self).__init__(config)
+        super(OrbitalController2, self).__init__(config)
         self._speed = 0.0
         self._orbit_threshold = config.orbit_threshold
         self._orbit_speed = config.orbit_speed
@@ -180,7 +180,7 @@ class OrbitalController(Controller):
 
             port = port - self._bias/100
             starboard = starboard + self._bias/100
-            (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)                                  
+            (port, starboard) = super(OrbitalController2, self)._bounded_motor_speeds(port, starboard)                                  
             
             self._motor_speeds = (self._portPropSpin*port, self._starPropSpin*starboard) 
             self._lastPose = sensorData.pose

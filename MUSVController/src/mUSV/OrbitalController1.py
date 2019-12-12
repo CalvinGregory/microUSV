@@ -21,9 +21,9 @@ from Controller import Controller
 from pose2D import pose2D
 import math
 
-class OrbitalController_bang_bang(Controller):
+class OrbitalController1(Controller):
     '''
-    The OrbitalController class implements the algorithm described in OC2: A Swarm of Simple Robots Constructing Planar Shapes by Andrew Vardy. 
+    The OrbitalController1 class implements the algorithm described in Orbital Construction: Swarms of Simple Robots Building Enclosures by Andrew Vardy. 
     Each vessel orbits clockwise around a point, gathering nearby targets outside of the orbit into a cluster at that point. 
 
     Attributes:
@@ -39,7 +39,7 @@ class OrbitalController_bang_bang(Controller):
         Args:
             config (mUSV/Config): Config file object containing controller initialization constants. 
         '''
-        super(OrbitalController, self).__init__(config)
+        super(OrbitalController1, self).__init__(config)
         self._speed = 0.0
         self._orbit_threshold = config.orbit_threshold
         self._orbit_speed = config.orbit_speed
@@ -75,10 +75,10 @@ class OrbitalController_bang_bang(Controller):
             
             x = sensorData.pose.x + x_offset_worldFrame
             y = sensorData.pose.y + y_offset_worldFrame
-            yaw = super(OrbitalController, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)
+            yaw = super(OrbitalController1, self)._bounded_angle(sensorData.pose.yaw - self._tag_offset_yaw, math.pi, -math.pi)
             
             pose = pose2D(x, y, yaw)
-            heading_error = super(OrbitalController,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, 2*math.pi, 0)
+            heading_error = super(OrbitalController1,self)._bounded_angle(sensorData.clusterPoint.heading - pose.yaw, 2*math.pi, 0)
             
             port = 0
             starboard = 0
@@ -103,7 +103,7 @@ class OrbitalController_bang_bang(Controller):
                 
                 port = self._speed_limit_upper*(speed_control_value - self._bias/100)
                 starboard = self._speed_limit_upper*(speed_control_value + self._bias/100)
-                (port, starboard) = super(OrbitalController, self)._bounded_motor_speeds(port, starboard)
+                (port, starboard) = super(OrbitalController1, self)._bounded_motor_speeds(port, starboard)
                 
                 #TODO make puck seeking optional (wrapped in if statement with flag)
                 # if aligned
