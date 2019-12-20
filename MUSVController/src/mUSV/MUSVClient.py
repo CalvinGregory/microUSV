@@ -126,7 +126,7 @@ if __name__ == '__main__':
                         send_speeds(arduino, motorSpeeds[0], motorSpeeds[1])
                 lastSpeeds = motorSpeeds
                 
-                time.sleep(0.1)
+                time.sleep(0.05)
 
     finally:
         if not config.debug_mode:
