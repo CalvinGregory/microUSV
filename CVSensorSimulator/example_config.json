@@ -16,9 +16,9 @@
 
 	"tag_plane_distance": 1.80,
 
-	"target_hsv_thresh_low": {"h": 149, "s": 133, "v": 0},
+	"target_hsv_thresh_low": {"h": 80, "s": 40, "v": 0},
 
-	"target_hsv_thresh_high": {"h": 173, "s": 265, "v": 122},
+	"target_hsv_thresh_high": {"h": 105, "s": 85, "v": 107},
 	
 	"Robots": [
 		{"tagID": 1, "label": "Ora"},
