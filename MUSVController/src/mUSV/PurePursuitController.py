@@ -11,7 +11,7 @@ class PurePursuitController(Controller):
         self._dist_error_sum = 0
         self._ang_error_sum = 0
         self._orbit_threshold = config.orbit_threshold
-        self._look_ahead_distance = 150.0
+        self._look_ahead_distance = 120.0
         self._lookAheadPoint = pose2D(self._orbit_threshold,0,0)
         
     def get_motor_speeds(self, sensorData):
@@ -20,6 +20,7 @@ class PurePursuitController(Controller):
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp:
             pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
+            # print ('targetSensors', sensorData.target_sensors[0] or sensorData.target_sensors[1])
             
             if sensorData.clusterPoint.range > self._orbit_threshold:
                 tangent_line_heading = sensorData.clusterPoint.heading - math.asin(self._orbit_threshold/sensorData.clusterPoint.range)
@@ -28,41 +29,49 @@ class PurePursuitController(Controller):
                 self._lookAheadPoint.y = sensorData.pose.y - self._look_ahead_distance*math.cos(tangent_line_heading)
                 
             (distance_error, angular_error) = self._get_error(pose, self._lookAheadPoint)
+            
+            if (sensorData.target_sensors[0] > 0 or sensorData.target_sensors[1] > 0) and angular_error < math.pi*7/8 and angular_error > -math.pi*7/8: # if target detected to port or front and not facing completely wrong way
+                # veer left
+                port = -self._speed_limit_upper / 2
+                starboard = self._speed_limit_upper * 2/3
+                port = port - (self._bias)/100*self._speed_limit_upper
+                starboard = starboard + (self._bias)/100*self._speed_limit_upper
+                (port, starboard) = super(PurePursuitController, self)._bounded_motor_speeds(port, starboard)
+            else:
+                # Apply Proportional gains 
+                distance_control_value = self._distance_PID_gains[0]*distance_error
+                angle_control_value = self._angle_PID_gains[0]*angular_error
+                
+                # Apply Integral and Derivative gains if not first message
+                if self._last_timestamp > 0:
+                    dt = msg_timestamp - self._last_timestamp
+                    
+                    self._dist_error_sum = 0.9*self._dist_error_sum + distance_error*dt
+                    self._ang_error_sum = 0.9*self._ang_error_sum + angular_error*dt
+                    
+                    dist_I_val = self._distance_PID_gains[1]*self._dist_error_sum
+                    dist_D_val = self._distance_PID_gains[2]*(distance_error - self._last_error[0]) / dt
+                    distance_control_value = distance_control_value + dist_I_val + dist_D_val
+                    
+                    ang_I_val = self._angle_PID_gains[1]*self._ang_error_sum
+                    ang_D_val = self._angle_PID_gains[2]*(angular_error - self._last_error[1]) / dt
+                    angle_control_value = angle_control_value + ang_I_val + ang_D_val 
+                
+                forward_speed = self._speed_limit_upper*distance_control_value
+                turn = self._speed_limit_upper*angle_control_value
+                
+                self._last_error = (distance_error, angular_error)
 
-            # Apply Proportional gains 
-            distance_control_value = self._distance_PID_gains[0]*distance_error
-            angle_control_value = self._angle_PID_gains[0]*angular_error
-            
-            # Apply Integral and Derivative gains if not first message
-            if self._last_timestamp > 0:
-                dt = msg_timestamp - self._last_timestamp
-                
-                self._dist_error_sum = 0.9*self._dist_error_sum + distance_error*dt
-                self._ang_error_sum = 0.9*self._ang_error_sum + angular_error*dt
-                
-                dist_I_val = self._distance_PID_gains[1]*self._dist_error_sum
-                dist_D_val = self._distance_PID_gains[2]*(distance_error - self._last_error[0]) / dt
-                distance_control_value = distance_control_value + dist_I_val + dist_D_val
-                
-                ang_I_val = self._angle_PID_gains[1]*self._ang_error_sum
-                ang_D_val = self._angle_PID_gains[2]*(angular_error - self._last_error[1]) / dt
-                angle_control_value = angle_control_value + ang_I_val + ang_D_val 
-            
-            forward_speed = self._speed_limit_upper*distance_control_value
-            turn = self._speed_limit_upper*angle_control_value
-            
-
-            #TODO Check bias math for negative thruster outputs
-            port = (forward_speed + turn)/2
-            port = port - (self._bias)/100
-            starboard = (forward_speed - turn)/2
-            starboard = starboard + (self._bias)/100
-            (port, starboard) = super(PurePursuitController, self)._bounded_motor_speeds(port, starboard)
+                #TODO Check bias math for negative thruster outputs
+                port = (forward_speed + turn)/2
+                port = port - (self._bias)/100*self._speed_limit_upper
+                starboard = (forward_speed - turn)/2
+                starboard = starboard + (self._bias)/100*self._speed_limit_upper
+                (port, starboard) = super(PurePursuitController, self)._bounded_motor_speeds(port, starboard)
             
             self._motor_speeds = (self._portPropSpin*port, self._starPropSpin*starboard) 
             # self._lastPose = pose
             self._last_timestamp = msg_timestamp
-            self._last_error = (distance_error, angular_error)
         
         return self._motor_speeds
 
