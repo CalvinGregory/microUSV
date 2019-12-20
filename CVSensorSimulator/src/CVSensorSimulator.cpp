@@ -120,12 +120,22 @@ void apriltag_detector_thread(PoseDetector& pd, FrameBuffer& fb) {
  */
 void target_detector_thread() {
 	Mat hsv;
+	int dead_zone_thickness = 75;
+	Mat dead_zone_mask(720, 1280, CV_8U, Scalar(0,0,0));
+	rectangle(dead_zone_mask, Point(dead_zone_thickness, dead_zone_thickness), Point(1280 - dead_zone_thickness, 720 - dead_zone_thickness), Scalar(255,255,255), CV_FILLED);
+
 	while (running) {
 		frameAcquisitionBarrier->await();
+		frameAcquisitionBarrier->reset();
 		try {
 			cvtColor(frame, hsv, COLOR_BGR2HSV);
 			cv::inRange(hsv, config.target_thresh_low, config.target_thresh_high, targetMask);
 			medianBlur(targetMask, targetMask, 7);
+			bitwise_and(dead_zone_mask, targetMask, targetMask);
+
+			//DEBUG
+			// imshow("Targets", targetMask);
+			// waitKey(1);
 		} 
 		catch(cv::Exception) {} // Handles 0.56% chance cvtColor will throw cv::Exception error due to empty frame
 		
@@ -173,8 +183,7 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 
 		if (output_csv) {
 			for(uint i = 0; i < csv.size(); i++) {
-				pose2D pose = robots[i]->getPose();
-				csv[i].newRow() << pose.x << pose.y << pose.yaw;
+				csv[i].newRow() << robot_poses.at(i).x << robot_poses.at(i).y << robot_poses.at(i).yaw;
 			}
 		}
 	}
