@@ -32,18 +32,26 @@ Robot::Robot(int tagID, string label, int img_width, int img_height) {
 	this->y_res = img_height;
 
 	SensorZone left;
-	left.x_origin = -30;
-	left.y_origin = 70;
-	left.range = 300;
-	left.heading_ang = -M_PI/180*35;
-	left.fov_ang = M_PI/180*78;
-	SensorZone right;
-	right.x_origin = 30;
-	right.y_origin = 70;
-	right.range = 300;
-	right.heading_ang = M_PI/180*35;
-	right.fov_ang = M_PI/180*78;
-	sensors = {left, right};
+	left.x_origin = 0;
+	left.y_origin = 0;
+	left.range = 500;
+	left.heading_ang = -M_PI/180*30;
+	left.fov_ang = M_PI/180*40;
+	SensorZone centre;
+	centre.x_origin = 0;
+	centre.y_origin = 0;
+	centre.range = 475;
+	centre.heading_ang = 0;
+	centre.fov_ang = M_PI/180*20;
+	// centre.range = left.range * cos(centre.fov_ang/2) / cos(left.fov_ang/2);
+	// SensorZone right;
+	// right.x_origin = 0;
+	// right.y_origin = 0;
+	// right.range = 400;
+	// right.heading_ang = M_PI/180*30;
+	// right.fov_ang = M_PI/180*40;
+	// sensors = {left, centre, right};
+	sensors = {left, centre};
 
 	tagRGB = make_tuple(0, 0, 255);
 	gettimeofday(&this->pose.timestamp, NULL);
@@ -90,14 +98,15 @@ void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_i
 	vector<Mat> masks = getSensorMasks(sensorVals_incomplete.pose, px_per_mm);
 	
 //DEBUG
-	// if (my_index == 0) {
-	// 	Mat combined_masks;
-	// 	bitwise_or(masks.at(0), masks.at(1), combined_masks);
-	// 	char buffer [30];
-	// 	int n = sprintf(buffer, "sensor_mask_%d", my_index);
-	// 	imshow(buffer, combined_masks);
-	// 	waitKey(1);
-	// }
+	if (my_index == 0) {
+		Mat combined_masks;
+		bitwise_or(masks.at(0), masks.at(1), combined_masks);
+		bitwise_or(combined_masks, targets, combined_masks);
+		char buffer [30];
+		int n = sprintf(buffer, "sensor_mask_%d", my_index);
+		imshow(buffer, combined_masks);
+		waitKey(1);
+	}
 
 	for (int i = 0; i < masks.size(); i++) {
 		Mat detections;
