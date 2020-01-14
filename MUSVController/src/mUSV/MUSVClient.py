@@ -29,6 +29,7 @@ from PIDController import PIDController
 from OrbitalController1 import OrbitalController1
 from OrbitalController2 import OrbitalController2
 from PurePursuitController import PurePursuitController
+from PursuitRetrievalController import PursuitRetrievalController
 
 port = 8078
 
@@ -75,6 +76,8 @@ if __name__ == '__main__':
         controller = OrbitalController2(config)
     elif config.controller_type == 'pursuit':
         controller = PurePursuitController(config)
+    elif config.controller_type == 'retrieval':
+        controller = PursuitRetrievalController(config)
     else: # if controller_type == 'pid'
         controller = PIDController(config)
     

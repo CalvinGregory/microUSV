@@ -52,6 +52,10 @@ Robot::Robot(int tagID, string label, int img_width, int img_height) {
 	// right.fov_ang = M_PI/180*40;
 	// sensors = {left, centre, right};
 	sensors = {left, centre};
+	
+	captureSensor.height = 60;
+	captureSensor.width = 240;
+	captureSensor.y_offset = 40;
 
 	tagRGB = make_tuple(0, 0, 255);
 	gettimeofday(&this->pose.timestamp, NULL);
@@ -66,6 +70,7 @@ double* Robot::getBoundingBox() {
 
 vector<cv::Mat> Robot::getSensorMasks(pose2D pose, double px_per_mm) {
 	vector<cv::Mat> masks;
+	
 	for (int i = 0; i < sensors.size(); i++) {
 		Mat mask(y_res, x_res, CV_8U, Scalar(0,0,0));
 
@@ -86,6 +91,28 @@ vector<cv::Mat> Robot::getSensorMasks(pose2D pose, double px_per_mm) {
 
 		masks.push_back(mask);
 	}
+
+	// CaptureSensor is last index 
+	Mat mask(y_res, x_res, CV_8U, Scalar(0,0,0));
+	vector<Point> captureSensorFoV;
+	// Rectangle vertices
+	double x = cvRound(pose.x_px + px_per_mm*(captureSensor.width/2*cos(-pose.yaw) + captureSensor.height/2*sin(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*sin(-pose.yaw)));
+	double y = cvRound(pose.y_px + px_per_mm*(-captureSensor.width/2*sin(-pose.yaw) + captureSensor.height/2*cos(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*cos(-pose.yaw)));
+	captureSensorFoV.push_back(Point(x,y));
+	x = cvRound(pose.x_px + px_per_mm*(captureSensor.width/2*cos(-pose.yaw) - captureSensor.height/2*sin(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*sin(-pose.yaw)));
+	y = cvRound(pose.y_px + px_per_mm*(-captureSensor.width/2*sin(-pose.yaw) - captureSensor.height/2*cos(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*cos(-pose.yaw)));
+	captureSensorFoV.push_back(Point(x,y));
+	x = cvRound(pose.x_px + px_per_mm*(-captureSensor.width/2*cos(-pose.yaw) - captureSensor.height/2*sin(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*sin(-pose.yaw)));
+	y = cvRound(pose.y_px + px_per_mm*(captureSensor.width/2*sin(-pose.yaw) - captureSensor.height/2*cos(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*cos(-pose.yaw)));
+	captureSensorFoV.push_back(Point(x,y));
+	x = cvRound(pose.x_px + px_per_mm*(-captureSensor.width/2*cos(-pose.yaw) + captureSensor.height/2*sin(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*sin(-pose.yaw)));
+	y = cvRound(pose.y_px + px_per_mm*(captureSensor.width/2*sin(-pose.yaw) + captureSensor.height/2*cos(-pose.yaw)) - px_per_mm*(captureSensor.y_offset*cos(-pose.yaw)));
+	captureSensorFoV.push_back(Point(x,y));
+	
+	vector<vector<Point>> contours {captureSensorFoV};
+	fillPoly(mask, contours, Scalar(255,255,255));
+	masks.push_back(mask);
+
 	return masks;
 }
 
@@ -98,10 +125,11 @@ void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_i
 	vector<Mat> masks = getSensorMasks(sensorVals_incomplete.pose, px_per_mm);
 	
 //DEBUG
-	if (my_index == 0) {
+	if (my_index == 3) {
 		Mat combined_masks;
 		bitwise_or(masks.at(0), masks.at(1), combined_masks);
 		bitwise_or(combined_masks, targets, combined_masks);
+		// bitwise_or(masks.at(2), combined_masks, combined_masks);
 		char buffer [30];
 		int n = sprintf(buffer, "sensor_mask_%d", my_index);
 		imshow(buffer, combined_masks);

@@ -44,6 +44,13 @@ typedef struct {
 	double fov_ang = 0;
 } SensorZone;
 
+typedef struct {
+	double width = 0;
+	double height = 0;
+	double y_offset = 0;
+} CaptureSensorZone;
+
+
 /**
  * SensorValues is a struct containing all data contained in a SensorData message. 
  * 
@@ -57,6 +64,7 @@ typedef struct {
 	pose2D pose;
 	std::vector<bool> targetSensors;
 	std::vector<bool> obstacleSensors;
+	bool captureSensor;
 	double cluster_point_range;
 	double cluster_point_heading;
 } SensorValues;
@@ -73,6 +81,7 @@ protected:
 	SensorValues sensorVals_complete;
 	SensorValues sensorVals_incomplete;
 	std::vector<SensorZone> sensors;
+	CaptureSensorZone captureSensor;
 	/**
 	 * Function builds a vector of sensor mask images, one for each sensor, with the same dimensions as a camera frame. 
 	 * Each sensor mask is black with a white triangle. The triangle's dimensions and position in the mask
