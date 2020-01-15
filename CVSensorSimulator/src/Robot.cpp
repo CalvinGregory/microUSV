@@ -31,6 +31,16 @@ Robot::Robot(int tagID, string label, int img_width, int img_height) {
 	this->x_res = img_width;
 	this->y_res = img_height;
 
+	for (int i = 0; i < 6; i++) {
+		SensorZone sz;
+		sz.x_origin = 0;
+		sz.y_origin = 0;
+		sz.range = 600;
+		sz.fov_ang = -M_PI/180*10;
+		sz.heading_ang = sz.fov_ang*i;
+		sensors.push_back(sz);
+	}
+/*
 	SensorZone left;
 	left.x_origin = 0;
 	left.y_origin = 0;
@@ -52,10 +62,11 @@ Robot::Robot(int tagID, string label, int img_width, int img_height) {
 	// right.fov_ang = M_PI/180*40;
 	// sensors = {left, centre, right};
 	sensors = {left, centre};
+*/	
 	
-	captureSensor.height = 60;
-	captureSensor.width = 240;
-	captureSensor.y_offset = 40;
+	captureSensor.height = 50;
+	captureSensor.width = 220;
+	captureSensor.y_offset = 35;
 
 	tagRGB = make_tuple(0, 0, 255);
 	gettimeofday(&this->pose.timestamp, NULL);
@@ -128,8 +139,10 @@ void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_i
 	if (my_index == 3) {
 		Mat combined_masks;
 		bitwise_or(masks.at(0), masks.at(1), combined_masks);
+		for (int i = 2; i < masks.size(); i++) {
+			bitwise_or(combined_masks, masks.at(i), combined_masks);
+		}
 		bitwise_or(combined_masks, targets, combined_masks);
-		// bitwise_or(masks.at(2), combined_masks, combined_masks);
 		char buffer [30];
 		int n = sprintf(buffer, "sensor_mask_%d", my_index);
 		imshow(buffer, combined_masks);
