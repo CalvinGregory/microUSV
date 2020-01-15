@@ -34,7 +34,9 @@
 
 	"controller_type": "pid",
 	
-	"orbit_threshold": 250.0,
+	"orbit_threshold": 350.0,
+
+	"cluster_threshold": 250.0,
 
 	"orbit_speed": 100.0,
 

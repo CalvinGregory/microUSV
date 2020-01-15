@@ -84,6 +84,7 @@ class Config:
         self.tag_plane_distance = 1
         self.controller_type = 'pid'
         self.orbit_threshold = 0.0
+        self.cluster_threshold = 0.0
         self.orbit_speed = 0.0
         self.orbit_veer = 0.0
         self.debug_mode = False
@@ -121,6 +122,7 @@ class Config:
         self.tag_plane_distance = config['tag_plane_distance']
         self.controller_type = config['controller_type']
         self.orbit_threshold = config['orbit_threshold']
+        self.cluster_threshold = config['cluster_threshold']
         self.orbit_speed = config['orbit_speed']
         self.orbit_veer = config['orbit_veer']
         self.debug_mode = config['debug_mode']

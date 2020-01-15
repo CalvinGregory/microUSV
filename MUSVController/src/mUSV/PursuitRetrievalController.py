@@ -11,10 +11,11 @@ class PursuitRetrievalController(Controller):
         self._dist_error_sum = 0
         self._ang_error_sum = 0
         self._orbit_threshold = config.orbit_threshold
+        self._cluster_threshold = config.cluster_threshold
         self._look_ahead_distance = 120.0
         self._lookAheadPoint = pose2D(self._orbit_threshold,0,0)
         self._reverse_maneuver_start_time = -10.0
-        self._reverse_maneuver_duration = 2.0
+        self._reverse_maneuver_duration = 1.5
         self._speed_limit_lower = -127
         self._execute_PID = True
         
@@ -27,11 +28,12 @@ class PursuitRetrievalController(Controller):
             pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
             
             if sensorData.target_sensors[-1]: #if carrying target
-                if sensorData.clusterPoint.range > self._orbit_threshold:
+                if sensorData.clusterPoint.range > self._cluster_threshold:
                     clusterPoint = pose2D(0,0,0)
                     (distance_error, angular_error) = self._get_error(pose, clusterPoint)
+                    distance_error = self._look_ahead_distance * 1.5
                 else:
-                    # full reverse for 2 seconds
+                    # full reverse for X seconds
                     port = self._speed_limit_lower
                     starboard = self._speed_limit_lower
                     self._reverse_maneuver_start_time = msg_timestamp
@@ -40,19 +42,47 @@ class PursuitRetrievalController(Controller):
                 if sensorData.clusterPoint.range > self._orbit_threshold:
                     tangent_line_heading = sensorData.clusterPoint.heading - math.asin(self._orbit_threshold/sensorData.clusterPoint.range)
                     # tangent_point_dist = math.sqrt(sensorData.clusterPoint.range**2 - self._orbit_threshold**2)
-                    self._lookAheadPoint.x = sensorData.pose.x + self._look_ahead_distance*math.sin(tangent_line_heading)
-                    self._lookAheadPoint.y = sensorData.pose.y - self._look_ahead_distance*math.cos(tangent_line_heading)
+                else:
+                    tangent_line_heading = sensorData.clusterPoint.heading - math.pi/180 * 100
+                    
+                self._lookAheadPoint.x = sensorData.pose.x + self._look_ahead_distance*math.sin(tangent_line_heading)
+                self._lookAheadPoint.y = sensorData.pose.y - self._look_ahead_distance*math.cos(tangent_line_heading)
                     
                 (distance_error, angular_error) = self._get_error(pose, self._lookAheadPoint)
-            
-                if (sensorData.target_sensors[0] > 0 or sensorData.target_sensors[1] > 0) and angular_error < math.pi*7/8 and angular_error > -math.pi*7/8: # if target detected to port or front and not facing completely wrong way
-                    # veer left
-                    port = -self._speed_limit_upper / 2
-                    starboard = self._speed_limit_upper * 2/3
-                    port = port - (self._bias)/100*self._speed_limit_upper
-                    starboard = starboard + (self._bias)/100*self._speed_limit_upper
-                    (port, starboard) = super(PursuitRetrievalController, self)._bounded_motor_speeds(port, starboard)
-                    self._execute_PID = False
+
+                cluster_angle_error = super(PursuitRetrievalController, self)._bounded_angle(sensorData.clusterPoint.heading - sensorData.pose.yaw, math.pi, -math.pi)
+
+                if (sensorData.clusterPoint.range > (self._orbit_threshold + self._cluster_threshold)/2) and (cluster_angle_error > math.pi/4 or cluster_angle_error < -math.pi/4): # if not facing cluster center
+                # if angular_error < math.pi*7/8 and angular_error > -math.pi*7/8: # if not facing completely wrong way
+
+                    ## OLD VEER COMMAND
+                    # # veer left
+                    # port = -self._speed_limit_upper / 2
+                    # starboard = self._speed_limit_upper * 2/3
+                    # port = port - (self._bias)/100*self._speed_limit_upper
+                    # starboard = starboard + (self._bias)/100*self._speed_limit_upper
+                    # (port, starboard) = super(PursuitRetrievalController, self)._bounded_motor_speeds(port, starboard)
+                    # self._execute_PID = False
+
+
+                    if sensorData.target_sensors[0] > 0:
+                        distance_error = self._look_ahead_distance
+                        angular_error = -math.pi/180 * 5
+                    elif sensorData.target_sensors[1] > 0:
+                        distance_error = self._look_ahead_distance
+                        angular_error = -math.pi/180 * 15
+                    elif sensorData.target_sensors[2] > 0:
+                        distance_error = self._look_ahead_distance
+                        angular_error = -math.pi/180 * 25
+                    elif sensorData.target_sensors[3] > 0:
+                        distance_error = self._look_ahead_distance
+                        angular_error = -math.pi/180 * 35
+                    elif sensorData.target_sensors[4] > 0:
+                        distance_error = self._look_ahead_distance
+                        angular_error = -math.pi/180 * 45
+                    elif sensorData.target_sensors[5] > 0:
+                        distance_error = self._look_ahead_distance
+                        angular_error = -math.pi/180 * 55
             
             if self._execute_PID:
                 # Apply Proportional gains 
