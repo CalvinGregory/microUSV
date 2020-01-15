@@ -35,6 +35,7 @@ class PursuitRetrievalController(Controller):
                     port = self._speed_limit_lower
                     starboard = self._speed_limit_lower
                     self._reverse_maneuver_start_time = msg_timestamp
+                    self._execute_PID = False
             else:
                 if sensorData.clusterPoint.range > self._orbit_threshold:
                     tangent_line_heading = sensorData.clusterPoint.heading - math.asin(self._orbit_threshold/sensorData.clusterPoint.range)
