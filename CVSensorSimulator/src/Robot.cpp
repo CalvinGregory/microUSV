@@ -146,7 +146,6 @@ void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_i
 		char buffer [30];
 		int n = sprintf(buffer, "sensor_mask_%d", my_index);
 		imshow(buffer, combined_masks);
-		waitKey(1);
 	}
 
 	for (int i = 0; i < masks.size(); i++) {
