@@ -32,6 +32,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <google/protobuf/util/time_util.h>
+#include <sys/stat.h>
 
 #include "FrameBuffer.h"
 #include "PoseDetector.h"
@@ -58,6 +59,7 @@ bool running;
 bool visualize;
 ConfigParser::Config config;
 Mat frame;
+Mat labelledDetections;
 Mat targetMask;
 
 // Build global barriers
@@ -100,12 +102,7 @@ void apriltag_detector_thread(PoseDetector& pd, FrameBuffer& fb) {
 		if (!apriltag_frame.empty()) {
 			pd.updatePoseEstimates(&apriltag_frame); 
 			if(visualize) {
-				Mat* labelledFrame = pd.getLabelledFrame(config);
-				imshow("CVSensorSimulator", *labelledFrame);
-			}
-			// ESC key to exit
-			if (waitKey(1) == 27) {
-				running = false;
+				labelledDetections = *pd.getLabelledFrame(config);
 			}
 		}
 		
@@ -132,7 +129,7 @@ void target_detector_thread() {
 			cv::inRange(hsv, config.target_thresh_low, config.target_thresh_high, targetMask);
 			medianBlur(targetMask, targetMask, 7);
 			bitwise_and(dead_zone_mask, targetMask, targetMask);
-
+			
 			//DEBUG
 			// imshow("Targets", targetMask);
 			// waitKey(1);
@@ -155,7 +152,10 @@ void target_detector_thread() {
  * @param output_csv Flag indicating if robot pose data should be recorded to the csv files. 
  */
 void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<Robot>>& robots, vector<CSVWriter>& csv, bool output_csv) {
-	Mat targets;
+	auto start_time = chrono::steady_clock::now();
+	Mat targets, displayFrame;
+	Scalar TargetMarkerColor(255, 0 ,255);
+	int threshold = 30; //TODO TUNE ME
 	// Estimate range of possible detection values in both axes (mm).
 	double FoV_diag_hyp = config.tag_plane_dist*1000 / 1.298125 / cos(config.cInfo.FoV_deg/2*M_PI/180); // Correction factor determined by trial and error. Unique to camera. ¯\_(ツ)_/¯
 	double FoV_diag_in_plane = FoV_diag_hyp * sin(config.cInfo.FoV_deg/2*M_PI/180);
@@ -167,8 +167,12 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 	while (running) {
 		detectorBarrier0->await();
 		detectorBarrier0->reset();
-
+		
+		auto current_time = chrono::steady_clock::now();
 		targets = targetMask.clone();
+		if(visualize) {
+			displayFrame = labelledDetections.clone();
+		}
 		vector<pose2D> robot_poses;
 		for (int i = 0; i < robots.size(); i++) {
 			robot_poses.push_back(robots.at(i)->getPose());
@@ -176,14 +180,44 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 		
 		detectorBarrier1->await(); 
 		detectorBarrier1->reset();
-
+		
 		for (int i = 0; i < robots.size(); i++) {
 			robots.at(i)->updateSensorValues(targets, robot_poses, i, config.cInfo.x_res/x_max_measurement/2);
 		}
 
+		Mat labelImage(targetMask.size(), CV_32S);
+		Mat stats, centroids;
+		int nLabels = connectedComponentsWithStats(targetMask, labelImage, stats, centroids, 4, CV_32S);
+
+		vector<Point> clusterCentroids;
+		
+		for (int i = 2; i <= nLabels; i++) {
+			if (stats.at<int>(i-1, cv::CC_STAT_AREA) > threshold) {
+				int x = cvRound(centroids.at<double>(i-1, 0));
+				int y = cvRound(centroids.at<double>(i-1, 1));
+				clusterCentroids.push_back(Point(x,y));
+			}
+		}
+		for(int i = 0; i < clusterCentroids.size(); i++) {
+			circle(displayFrame, clusterCentroids.at(i), 20, TargetMarkerColor, 2);
+		}
+
+		if (visualize) {
+			imshow("CVSensorSimulator", displayFrame);
+		}
+		// ESC key to exit
+		if (waitKey(1) == 27) {
+			running = false;
+		}
+
 		if (output_csv) {
-			for(uint i = 0; i < csv.size(); i++) {
-				csv[i].newRow() << robot_poses.at(i).x << robot_poses.at(i).y << robot_poses.at(i).yaw;
+			double timestamp = chrono::duration_cast<chrono::nanoseconds>(current_time - start_time).count();
+			for(uint i = 0; i < csv.size() - 1; i++) {
+				csv[i].newRow() << timestamp << robot_poses.at(i).x << robot_poses.at(i).y << robot_poses.at(i).yaw;
+			}
+			csv[csv.size() - 1].newRow() << timestamp << clusterCentroids.size();
+			for(uint i = 0; i < clusterCentroids.size(); i++) {
+				csv[csv.size() - 1] << "" << clusterCentroids.at(i).x << clusterCentroids.at(i).y;
 			}
 		}
 	}
@@ -228,12 +262,13 @@ int main(int argc, char* argv[]) {
 
 	int size = config.robots.size(); 
 	vector<shared_ptr<Robot>> robots(config.robots);
-	vector<CSVWriter> csv(config.robots.size());
+	vector<CSVWriter> csv(config.robots.size() + 1);
 
 	if (config.output_csv) {
-		for (uint i = 0; i < csv.size(); i++) {
-			csv[i].newRow() << "X" << "Y" << "Yaw";
+		for (uint i = 0; i < csv.size() - 1; i++) {
+			csv[i].newRow() << "Timestamp [ns]" << "X [mm]" << "Y [mm]" << "Yaw [rad]";
 		}
+		csv[csv.size() - 1].newRow() << "Timestamp [ns]" << "Number of Targets" << "" << "Target Positions X & Y [px]" << "" << "" << "etc.";
 	}
 
 	// Build thread parameter objects.
@@ -362,16 +397,29 @@ int main(int argc, char* argv[]) {
 	destroyAllWindows();
 
 	if (config.output_csv) {
-		for (uint i = 0; i < csv.size(); i++) {
+		auto t = std::time(nullptr);
+		auto tm = *localtime(&t);
+		stringstream dirName;
+		dirName << "cvss_data_";
+		dirName << put_time(&tm, "%Y-%m-%d_%H:%M");
+		mkdir(dirName.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		for (uint i = 0; i < csv.size() - 1; i++) {
 			stringstream fileName;
+			fileName << dirName.str();
+			fileName << "/";
 			fileName << robots[i]->getLabel();
 			fileName << "_pose_data_";
-			auto t = std::time(nullptr);
-			auto tm = *localtime(&t);
 			fileName << put_time(&tm, "%Y-%m-%d_%H:%M");
 			fileName << ".csv";
 			csv[i].writeToFile(fileName.str());
 		}
+		stringstream fileName;
+		fileName << dirName.str();
+		fileName << "/";
+		fileName << "Target_position_data_";
+		fileName << put_time(&tm, "%Y-%m-%d_%H:%M");
+		fileName << ".csv";
+		csv[csv.size() - 1].writeToFile(fileName.str());
 	}
 	
 	return 0;
