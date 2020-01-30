@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='mUSV',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0emusv_msg.proto\x12\x04mUSV\x1a\x1fgoogle/protobuf/timestamp.proto\"8\n\x0bRequestData\x12\x0e\n\x06tag_id\x18\x01 \x01(\x05\x12\x19\n\x11request_waypoints\x18\x02 \x01(\x08\"\xb0\x03\n\nSensorData\x12%\n\x04pose\x18\x01 \x01(\x0b\x32\x17.mUSV.SensorData.Pose2D\x12\x1c\n\x10obstacle_sensors\x18\x02 \x03(\x05\x42\x02\x10\x01\x12\x1a\n\x0etarget_sensors\x18\x03 \x03(\x05\x42\x02\x10\x01\x12-\n\ttimestamp\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\twaypoints\x18\x05 \x03(\x0b\x32\x19.mUSV.SensorData.Waypoint\x12\x16\n\x0eloop_waypoints\x18\x06 \x01(\x08\x12\x33\n\x0c\x63lusterPoint\x18\x07 \x01(\x0b\x32\x1d.mUSV.SensorData.ClusterPoint\x1a\x45\n\x06Pose2D\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\x0b\n\x03yaw\x18\x03 \x01(\x02\x12\x0b\n\x03xpx\x18\x04 \x01(\x05\x12\x0b\n\x03ypx\x18\x05 \x01(\x05\x1a \n\x08Waypoint\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x1a.\n\x0c\x43lusterPoint\x12\r\n\x05range\x18\x01 \x01(\x02\x12\x0f\n\x07heading\x18\x02 \x01(\x02\x62\x06proto3')
+  serialized_pb=_b('\n\x0emusv_msg.proto\x12\x04mUSV\x1a\x1fgoogle/protobuf/timestamp.proto\"8\n\x0bRequestData\x12\x0e\n\x06tag_id\x18\x01 \x01(\x05\x12\x19\n\x11request_waypoints\x18\x02 \x01(\x08\"\xc8\x03\n\nSensorData\x12%\n\x04pose\x18\x01 \x01(\x0b\x32\x17.mUSV.SensorData.Pose2D\x12\x34\n\x13nearby_vessel_poses\x18\x02 \x03(\x0b\x32\x17.mUSV.SensorData.Pose2D\x12\x1a\n\x0etarget_sensors\x18\x03 \x03(\x05\x42\x02\x10\x01\x12-\n\ttimestamp\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\twaypoints\x18\x05 \x03(\x0b\x32\x19.mUSV.SensorData.Waypoint\x12\x16\n\x0eloop_waypoints\x18\x06 \x01(\x08\x12\x33\n\x0c\x63lusterPoint\x18\x07 \x01(\x0b\x32\x1d.mUSV.SensorData.ClusterPoint\x1a\x45\n\x06Pose2D\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\x0b\n\x03yaw\x18\x03 \x01(\x02\x12\x0b\n\x03xpx\x18\x04 \x01(\x05\x12\x0b\n\x03ypx\x18\x05 \x01(\x05\x1a \n\x08Waypoint\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x1a.\n\x0c\x43lusterPoint\x12\r\n\x05range\x18\x01 \x01(\x02\x12\x0f\n\x07heading\x18\x02 \x01(\x02\x62\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -120,8 +120,8 @@ _SENSORDATA_POSE2D = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=397,
-  serialized_end=466,
+  serialized_start=421,
+  serialized_end=490,
 )
 
 _SENSORDATA_WAYPOINT = _descriptor.Descriptor(
@@ -157,8 +157,8 @@ _SENSORDATA_WAYPOINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=468,
-  serialized_end=500,
+  serialized_start=492,
+  serialized_end=524,
 )
 
 _SENSORDATA_CLUSTERPOINT = _descriptor.Descriptor(
@@ -194,8 +194,8 @@ _SENSORDATA_CLUSTERPOINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=502,
-  serialized_end=548,
+  serialized_start=526,
+  serialized_end=572,
 )
 
 _SENSORDATA = _descriptor.Descriptor(
@@ -213,12 +213,12 @@ _SENSORDATA = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='obstacle_sensors', full_name='mUSV.SensorData.obstacle_sensors', index=1,
-      number=2, type=5, cpp_type=1, label=3,
+      name='nearby_vessel_poses', full_name='mUSV.SensorData.nearby_vessel_poses', index=1,
+      number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=_b('\020\001'), file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='target_sensors', full_name='mUSV.SensorData.target_sensors', index=2,
       number=3, type=5, cpp_type=1, label=3,
@@ -267,13 +267,14 @@ _SENSORDATA = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=116,
-  serialized_end=548,
+  serialized_end=572,
 )
 
 _SENSORDATA_POSE2D.containing_type = _SENSORDATA
 _SENSORDATA_WAYPOINT.containing_type = _SENSORDATA
 _SENSORDATA_CLUSTERPOINT.containing_type = _SENSORDATA
 _SENSORDATA.fields_by_name['pose'].message_type = _SENSORDATA_POSE2D
+_SENSORDATA.fields_by_name['nearby_vessel_poses'].message_type = _SENSORDATA_POSE2D
 _SENSORDATA.fields_by_name['timestamp'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _SENSORDATA.fields_by_name['waypoints'].message_type = _SENSORDATA_WAYPOINT
 _SENSORDATA.fields_by_name['clusterPoint'].message_type = _SENSORDATA_CLUSTERPOINT
@@ -320,6 +321,5 @@ _sym_db.RegisterMessage(SensorData.Waypoint)
 _sym_db.RegisterMessage(SensorData.ClusterPoint)
 
 
-_SENSORDATA.fields_by_name['obstacle_sensors']._options = None
 _SENSORDATA.fields_by_name['target_sensors']._options = None
 # @@protoc_insertion_point(module_scope)

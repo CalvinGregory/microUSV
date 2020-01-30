@@ -675,17 +675,17 @@ class SensorData :
 
   // accessors -------------------------------------------------------
 
-  // repeated int32 obstacle_sensors = 2 [packed = true];
-  int obstacle_sensors_size() const;
-  void clear_obstacle_sensors();
-  static const int kObstacleSensorsFieldNumber = 2;
-  ::google::protobuf::int32 obstacle_sensors(int index) const;
-  void set_obstacle_sensors(int index, ::google::protobuf::int32 value);
-  void add_obstacle_sensors(::google::protobuf::int32 value);
-  const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
-      obstacle_sensors() const;
-  ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
-      mutable_obstacle_sensors();
+  // repeated .mUSV.SensorData.Pose2D nearby_vessel_poses = 2;
+  int nearby_vessel_poses_size() const;
+  void clear_nearby_vessel_poses();
+  static const int kNearbyVesselPosesFieldNumber = 2;
+  ::mUSV::SensorData_Pose2D* mutable_nearby_vessel_poses(int index);
+  ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Pose2D >*
+      mutable_nearby_vessel_poses();
+  const ::mUSV::SensorData_Pose2D& nearby_vessel_poses(int index) const;
+  ::mUSV::SensorData_Pose2D* add_nearby_vessel_poses();
+  const ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Pose2D >&
+      nearby_vessel_poses() const;
 
   // repeated int32 target_sensors = 3 [packed = true];
   int target_sensors_size() const;
@@ -749,8 +749,7 @@ class SensorData :
   class HasBitSetters;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > obstacle_sensors_;
-  mutable std::atomic<int> _obstacle_sensors_cached_byte_size_;
+  ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Pose2D > nearby_vessel_poses_;
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 > target_sensors_;
   mutable std::atomic<int> _target_sensors_cached_byte_size_;
   ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Waypoint > waypoints_;
@@ -993,34 +992,34 @@ inline void SensorData::set_allocated_pose(::mUSV::SensorData_Pose2D* pose) {
   // @@protoc_insertion_point(field_set_allocated:mUSV.SensorData.pose)
 }
 
-// repeated int32 obstacle_sensors = 2 [packed = true];
-inline int SensorData::obstacle_sensors_size() const {
-  return obstacle_sensors_.size();
+// repeated .mUSV.SensorData.Pose2D nearby_vessel_poses = 2;
+inline int SensorData::nearby_vessel_poses_size() const {
+  return nearby_vessel_poses_.size();
 }
-inline void SensorData::clear_obstacle_sensors() {
-  obstacle_sensors_.Clear();
+inline void SensorData::clear_nearby_vessel_poses() {
+  nearby_vessel_poses_.Clear();
 }
-inline ::google::protobuf::int32 SensorData::obstacle_sensors(int index) const {
-  // @@protoc_insertion_point(field_get:mUSV.SensorData.obstacle_sensors)
-  return obstacle_sensors_.Get(index);
+inline ::mUSV::SensorData_Pose2D* SensorData::mutable_nearby_vessel_poses(int index) {
+  // @@protoc_insertion_point(field_mutable:mUSV.SensorData.nearby_vessel_poses)
+  return nearby_vessel_poses_.Mutable(index);
 }
-inline void SensorData::set_obstacle_sensors(int index, ::google::protobuf::int32 value) {
-  obstacle_sensors_.Set(index, value);
-  // @@protoc_insertion_point(field_set:mUSV.SensorData.obstacle_sensors)
+inline ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Pose2D >*
+SensorData::mutable_nearby_vessel_poses() {
+  // @@protoc_insertion_point(field_mutable_list:mUSV.SensorData.nearby_vessel_poses)
+  return &nearby_vessel_poses_;
 }
-inline void SensorData::add_obstacle_sensors(::google::protobuf::int32 value) {
-  obstacle_sensors_.Add(value);
-  // @@protoc_insertion_point(field_add:mUSV.SensorData.obstacle_sensors)
+inline const ::mUSV::SensorData_Pose2D& SensorData::nearby_vessel_poses(int index) const {
+  // @@protoc_insertion_point(field_get:mUSV.SensorData.nearby_vessel_poses)
+  return nearby_vessel_poses_.Get(index);
 }
-inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
-SensorData::obstacle_sensors() const {
-  // @@protoc_insertion_point(field_list:mUSV.SensorData.obstacle_sensors)
-  return obstacle_sensors_;
+inline ::mUSV::SensorData_Pose2D* SensorData::add_nearby_vessel_poses() {
+  // @@protoc_insertion_point(field_add:mUSV.SensorData.nearby_vessel_poses)
+  return nearby_vessel_poses_.Add();
 }
-inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
-SensorData::mutable_obstacle_sensors() {
-  // @@protoc_insertion_point(field_mutable_list:mUSV.SensorData.obstacle_sensors)
-  return &obstacle_sensors_;
+inline const ::google::protobuf::RepeatedPtrField< ::mUSV::SensorData_Pose2D >&
+SensorData::nearby_vessel_poses() const {
+  // @@protoc_insertion_point(field_list:mUSV.SensorData.nearby_vessel_poses)
+  return nearby_vessel_poses_;
 }
 
 // repeated int32 target_sensors = 3 [packed = true];

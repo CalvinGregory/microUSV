@@ -17,7 +17,7 @@ message SensorData {
 		int32 ypx = 5;
 	}
 	Pose2D pose = 1;
-	repeated int32 obstacle_sensors = 2 [packed=true];
+	repeated Pose2D nearby_vessel_poses = 2;
 	repeated int32 target_sensors = 3 [packed=true];
 	google.protobuf.Timestamp timestamp = 4;
 	message Waypoint {
