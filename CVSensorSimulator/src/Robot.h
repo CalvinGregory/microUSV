@@ -63,7 +63,7 @@ typedef struct {
 typedef struct {
 	pose2D pose;
 	std::vector<bool> targetSensors;
-	std::vector<bool> obstacleSensors;
+	std::vector<pose2D> nearbyVesselPoses;
 	bool captureSensor;
 	double cluster_point_range;
 	double cluster_point_heading;
@@ -77,6 +77,7 @@ protected:
 	int x_res;
 	int y_res;
 	double boundingBox[2];
+	double communication_range;
 	std::mutex sensorVal_lock;
 	SensorValues sensorVals_complete;
 	SensorValues sensorVals_incomplete;

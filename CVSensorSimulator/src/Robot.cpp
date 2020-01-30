@@ -17,7 +17,6 @@
  * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  */
 
-
 #include "Robot.h"
 
 using namespace std;
@@ -28,6 +27,8 @@ Robot::Robot(int tagID, string label, int img_width, int img_height) {
 	this->label = label;
 	boundingBox[0] = 89.2;
 	boundingBox[1] = 230.0;
+	this->communication_range = 600;
+
 	this->x_res = img_width;
 	this->y_res = img_height;
 
@@ -154,8 +155,16 @@ void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_i
 		targetSensors.push_back(countNonZero(detections) > 0);
 	}
 	sensorVals_incomplete.targetSensors = targetSensors;
-
-	// TODO add collision sensor
+	
+	sensorVals_incomplete.nearbyVesselPoses.clear();
+	for (int i = 0; i < robot_poses.size(); i++) {
+		if(i != my_index) {
+			double range = getTargetRange(robot_poses.at(my_index), robot_poses.at(i));
+			if(range < communication_range) {
+				sensorVals_incomplete.nearbyVesselPoses.push_back(robot_poses.at(i));
+			}
+		}
+	}
 
 	std::lock_guard<std::mutex> lock(sensorVal_lock);
 	sensorVals_complete = sensorVals_incomplete;
