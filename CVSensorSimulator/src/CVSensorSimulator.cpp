@@ -151,7 +151,7 @@ void target_detector_thread() {
  * @param csv List of CSV file objects recording the pose of each robot.
  * @param output_csv Flag indicating if robot pose data should be recorded to the csv files. 
  */
-void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<Robot>>& robots, vector<CSVWriter>& csv, bool output_csv) {
+void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<Robot>>& robots, vector<CSVWriter>& vessel_pose_csv, vector<CSVWriter>& target_pose_csv, bool output_csv) {
 	auto start_time = chrono::steady_clock::now();
 	Mat targets, displayFrame;
 	Scalar TargetMarkerColor(255, 0 ,255);
@@ -185,41 +185,65 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 			robots.at(i)->updateSensorValues(targets, robot_poses, i, config.cInfo.x_res/x_max_measurement/2);
 		}
 
-		Mat labelImage(targetMask.size(), CV_32S);
-		Mat stats, centroids;
-		int nLabels = connectedComponentsWithStats(targetMask, labelImage, stats, centroids, 4, CV_32S);
-
-		vector<Point> clusterCentroids;
-		
-		for (int i = 2; i <= nLabels; i++) {
-			if (stats.at<int>(i-1, cv::CC_STAT_AREA) > threshold) {
-				int x = cvRound(centroids.at<double>(i-1, 0));
-				int y = cvRound(centroids.at<double>(i-1, 1));
-				clusterCentroids.push_back(Point(x,y));
+		if(visualize || output_csv) {
+			Mat labelImage(targetMask.size(), CV_32S);
+			Mat stats, centroids;
+			int nLabels = connectedComponentsWithStats(targetMask, labelImage, stats, centroids, 4, CV_32S);
+			vector<Point> clusterCentroids;
+			for (int i = 2; i <= nLabels; i++) {
+				if (stats.at<int>(i-1, cv::CC_STAT_AREA) > threshold) {
+					int x = cvRound(centroids.at<double>(i-1, 0));
+					int y = cvRound(centroids.at<double>(i-1, 1));
+					clusterCentroids.push_back(Point(x,y));
+				}
 			}
-		}
-		for(int i = 0; i < clusterCentroids.size(); i++) {
-			circle(displayFrame, clusterCentroids.at(i), 20, TargetMarkerColor, 2);
-		}
 
-		if (visualize) {
-			imshow("CVSensorSimulator", displayFrame);
-		}
-		// ESC key to exit
-		if (waitKey(1) == 27) {
-			running = false;
-		}
+			if (visualize) {
+				for(int i = 0; i < clusterCentroids.size(); i++) {
+					circle(displayFrame, clusterCentroids.at(i), 20, TargetMarkerColor, 2);
+				}
+				imshow("CVSensorSimulator", displayFrame);
+				// ESC key to exit
+				if (waitKey(1) == 27) {
+					running = false;
+				}
+			}
 
-		if (output_csv) {
-			double timestamp = chrono::duration_cast<chrono::nanoseconds>(current_time - start_time).count();
-			for(uint i = 0; i < csv.size() - 1; i++) {
-				csv[i].newRow() << timestamp << robot_poses.at(i).x << robot_poses.at(i).y << robot_poses.at(i).yaw;
+			if (output_csv) {
+				double timestamp = chrono::duration_cast<chrono::nanoseconds>(current_time - start_time).count();
+				for(uint i = 0; i < vessel_pose_csv.size(); i++) {
+					vessel_pose_csv.at(i).newRow() << timestamp << robot_poses.at(i).x << robot_poses.at(i).y << robot_poses.at(i).yaw;
+				}
+				target_pose_csv.at(0).newRow() << timestamp << clusterCentroids.size();
+				for(uint i = 0; i < clusterCentroids.size(); i++) {
+					target_pose_csv.at(0) << "" << clusterCentroids.at(i).x << clusterCentroids.at(i).y;
+				}
+
+				int nRows = targets.rows;
+				int nCols = targets.cols * targets.channels();
+				if (targets.isContinuous()) {
+					nCols *= nRows;
+					nRows = 1;
+				}
+				uint px_count = 0;
+				double px_distance_sum = 0;
+				uchar* px;
+				for(uint i = 0; i < targets.rows; i++) {
+					px = targets.ptr<uchar>(i);
+					for(uint j = 0; j < targets.cols * targets.channels(); j++) {
+						if(px[j] > 0) {
+							px_count++;
+							px_distance_sum += sqrt(pow(config.cInfo.cx - j, 2) + pow(config.cInfo.cy - i, 2));
+						}
+					}
+				}
+				double average_px_distance = 0;
+				if (px_count > 0) {
+					average_px_distance = px_distance_sum/px_count/targets.channels();
+				}
+				target_pose_csv.at(1).newRow() << timestamp << px_count << average_px_distance;
 			}
-			csv[csv.size() - 1].newRow() << timestamp << clusterCentroids.size();
-			for(uint i = 0; i < clusterCentroids.size(); i++) {
-				csv[csv.size() - 1] << "" << clusterCentroids.at(i).x << clusterCentroids.at(i).y;
-			}
-		}
+		}		
 	}
 
 	// Cleanup barrier objects
@@ -262,13 +286,15 @@ int main(int argc, char* argv[]) {
 
 	int size = config.robots.size(); 
 	vector<shared_ptr<Robot>> robots(config.robots);
-	vector<CSVWriter> csv(config.robots.size() + 1);
+	vector<CSVWriter> vessel_pose_csv(config.robots.size());
+	vector<CSVWriter> target_pose_csv(2);
 
 	if (config.output_csv) {
-		for (uint i = 0; i < csv.size() - 1; i++) {
-			csv[i].newRow() << "Timestamp [ns]" << "X [mm]" << "Y [mm]" << "Yaw [rad]";
+		for (uint i = 0; i < vessel_pose_csv.size(); i++) {
+			vessel_pose_csv.at(i).newRow() << "Timestamp [ns]" << "X [mm]" << "Y [mm]" << "Yaw [rad]";
 		}
-		csv[csv.size() - 1].newRow() << "Timestamp [ns]" << "Number of Targets" << "" << "Target Positions X & Y [px]" << "" << "" << "etc.";
+		target_pose_csv.at(0).newRow() << "Timestamp [ns]" << "Number of Targets" << "" << "Target Positions X & Y [px]" << "" << "" << "etc.";
+		target_pose_csv.at(1).newRow() << "Timestamp [ns]" << "Number of Target Pixels" << "Average target pixel distance to cluster point";
 	}
 
 	// Build thread parameter objects.
@@ -281,7 +307,7 @@ int main(int argc, char* argv[]) {
 	threads[0] = thread(video_capture_thread, ref(fb));
 	threads[1] = thread(apriltag_detector_thread, ref(pd), ref(fb));
 	threads[2] = thread(target_detector_thread);
-	threads[3] = thread(detection_processor_thread, ref(config), ref(robots), ref(csv), config.output_csv);
+	threads[3] = thread(detection_processor_thread, ref(config), ref(robots), ref(vessel_pose_csv), ref(target_pose_csv), config.output_csv);
 
 	for (int i = 0; i < 4; i++) {
 		threads[i].detach();
@@ -365,7 +391,14 @@ int main(int argc, char* argv[]) {
 			sensorData.mutable_pose()->set_yaw(sensorValues.pose.yaw);
 			sensorData.mutable_pose()->set_xpx(sensorValues.pose.x_px);
 			sensorData.mutable_pose()->set_ypx(sensorValues.pose.y_px);
-			// sensorData.add_obstacle_sensors(0);
+			for(int i = 0; i < sensorValues.nearbyVesselPoses.size(); i++) {
+				mUSV::SensorData_Pose2D* nearbyVessel = sensorData.add_nearby_vessel_poses();
+				nearbyVessel->set_x(sensorValues.nearbyVesselPoses.at(i).x);
+				nearbyVessel->set_y(sensorValues.nearbyVesselPoses.at(i).y);
+				nearbyVessel->set_yaw(sensorValues.nearbyVesselPoses.at(i).yaw);
+				nearbyVessel->set_xpx(sensorValues.nearbyVesselPoses.at(i).x_px);
+				nearbyVessel->set_ypx(sensorValues.nearbyVesselPoses.at(i).y_px);
+			}
 			for(int i = 0 ; i < sensorValues.targetSensors.size(); i++) {
 				sensorData.add_target_sensors(sensorValues.targetSensors.at(i));
 			}
@@ -403,7 +436,7 @@ int main(int argc, char* argv[]) {
 		dirName << "cvss_data_";
 		dirName << put_time(&tm, "%Y-%m-%d_%H:%M");
 		mkdir(dirName.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		for (uint i = 0; i < csv.size() - 1; i++) {
+		for (uint i = 0; i < vessel_pose_csv.size(); i++) {
 			stringstream fileName;
 			fileName << dirName.str();
 			fileName << "/";
@@ -411,15 +444,26 @@ int main(int argc, char* argv[]) {
 			fileName << "_pose_data_";
 			fileName << put_time(&tm, "%Y-%m-%d_%H:%M");
 			fileName << ".csv";
-			csv[i].writeToFile(fileName.str());
+			vessel_pose_csv[i].writeToFile(fileName.str());
 		}
-		stringstream fileName;
-		fileName << dirName.str();
-		fileName << "/";
-		fileName << "Target_position_data_";
-		fileName << put_time(&tm, "%Y-%m-%d_%H:%M");
-		fileName << ".csv";
-		csv[csv.size() - 1].writeToFile(fileName.str());
+		{
+			stringstream fileName;
+			fileName << dirName.str();
+			fileName << "/";
+			fileName << "Target_position_data_";
+			fileName << put_time(&tm, "%Y-%m-%d_%H:%M");
+			fileName << ".csv";
+			target_pose_csv.at(0).writeToFile(fileName.str());
+		}
+		{
+			stringstream fileName;
+			fileName << dirName.str();
+			fileName << "/";
+			fileName << "Target_pixel_distance_data_";
+			fileName << put_time(&tm, "%Y-%m-%d_%H:%M");
+			fileName << ".csv";
+			target_pose_csv.at(1).writeToFile(fileName.str());
+		}
 	}
 	
 	return 0;
