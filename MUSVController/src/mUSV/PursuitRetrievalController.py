@@ -26,6 +26,13 @@ class PursuitRetrievalController(Controller):
         # If message includes new pose data
         if msg_timestamp > self._last_timestamp and (msg_timestamp - self._reverse_maneuver_start_time) > self._reverse_maneuver_duration:
             pose = pose2D(sensorData.pose.x, sensorData.pose.y, sensorData.pose.yaw)
+
+            evade = False
+            for nearbyVesselPose in sensorData.nearby_vessel_poses:
+                vessel_range = self._getTargetRange(pose, nearbyVesselPose)
+                vessel_heading_offset = super(PursuitRetrievalController, self)._bounded_angle(self._getTargetHeading(pose, nearbyVesselPose) - pose.yaw, math.pi, -math.pi)
+                if vessel_range < 300 and abs(vessel_heading_offset) < 15*math.pi/180:
+                    evade = True
             
             if sensorData.target_sensors[-1]: #if carrying target
                 if sensorData.clusterPoint.range > self._cluster_threshold:
@@ -38,6 +45,10 @@ class PursuitRetrievalController(Controller):
                     starboard = self._speed_limit_lower
                     self._reverse_maneuver_start_time = msg_timestamp
                     self._execute_PID = False
+            elif evade:
+                port = int(round(self._speed_limit_lower * 2/3))
+                starboard = 0
+                self._execute_PID = False
             else:
                 if sensorData.clusterPoint.range > self._orbit_threshold:
                     tangent_line_heading = sensorData.clusterPoint.heading - math.asin(self._orbit_threshold/sensorData.clusterPoint.range)
@@ -132,3 +143,11 @@ class PursuitRetrievalController(Controller):
         angular_error = super(PursuitRetrievalController, self)._bounded_angle(goal_angle - robot_pose.yaw, math.pi, -math.pi)
                 
         return (distance_error, angular_error)
+
+    #TODO test me
+    def _getTargetRange(self, my_pose, target_pose):
+        return math.sqrt((my_pose.x - target_pose.x)**2 + (my_pose.y - target_pose.y)**2)
+
+    #TODO test me
+    def _getTargetHeading(self, my_pose, target_pose):
+        return math.atan2(target_pose.x - my_pose.x, -(target_pose.y - my_pose.y))
