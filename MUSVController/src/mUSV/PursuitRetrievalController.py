@@ -31,7 +31,7 @@ class PursuitRetrievalController(Controller):
             for nearbyVesselPose in sensorData.nearby_vessel_poses:
                 vessel_range = self._getTargetRange(pose, nearbyVesselPose)
                 vessel_heading_offset = super(PursuitRetrievalController, self)._bounded_angle(self._getTargetHeading(pose, nearbyVesselPose) - pose.yaw, math.pi, -math.pi)
-                if vessel_range < 300 and abs(vessel_heading_offset) < 15*math.pi/180:
+                if vessel_range < 500 and abs(vessel_heading_offset) < 20*math.pi/180:
                     evade = True
             
             if sensorData.target_sensors[-1]: #if carrying target
