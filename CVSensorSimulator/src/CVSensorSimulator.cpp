@@ -155,7 +155,7 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 	auto start_time = chrono::steady_clock::now();
 	Mat targets, displayFrame;
 	Scalar TargetMarkerColor(255, 0 ,255);
-	int threshold = 30; //TODO TUNE ME
+	int threshold = 20; //TODO TUNE ME
 	// Estimate range of possible detection values in both axes (mm).
 	double FoV_diag_hyp = config.tag_plane_dist*1000 / 1.298125 / cos(config.cInfo.FoV_deg/2*M_PI/180); // Correction factor determined by trial and error. Unique to camera. ¯\_(ツ)_/¯
 	double FoV_diag_in_plane = FoV_diag_hyp * sin(config.cInfo.FoV_deg/2*M_PI/180);
@@ -188,7 +188,7 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 		if(visualize || output_csv) {
 			Mat labelImage(targetMask.size(), CV_32S);
 			Mat stats, centroids;
-			int nLabels = connectedComponentsWithStats(targetMask, labelImage, stats, centroids, 4, CV_32S);
+			int nLabels = connectedComponentsWithStats(targets, labelImage, stats, centroids, 4, CV_32S);
 			vector<Point> clusterCentroids;
 			for (int i = 2; i <= nLabels; i++) {
 				if (stats.at<int>(i-1, cv::CC_STAT_AREA) > threshold) {
@@ -200,7 +200,7 @@ void detection_processor_thread(ConfigParser::Config& config, vector<shared_ptr<
 
 			if (visualize) {
 				for(int i = 0; i < clusterCentroids.size(); i++) {
-					circle(displayFrame, clusterCentroids.at(i), 20, TargetMarkerColor, 2);
+					circle(displayFrame, clusterCentroids.at(i), 12, TargetMarkerColor, 2);
 				}
 				imshow("CVSensorSimulator", displayFrame);
 				// ESC key to exit
@@ -318,7 +318,7 @@ int main(int argc, char* argv[]) {
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
-	char buffer[128] = {0};
+	char buffer[256] = {0};
 
 	// Creating socket file descriptor
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)

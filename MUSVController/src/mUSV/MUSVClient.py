@@ -108,7 +108,7 @@ if __name__ == '__main__':
                             
                 sensorData = musv_msg_pb2.SensorData() 
             
-                msg = sensorSimulator.recv(128)
+                msg = sensorSimulator.recv(256)
                 sensorSimulator.close()
                 sensorData.ParseFromString(msg)
 
