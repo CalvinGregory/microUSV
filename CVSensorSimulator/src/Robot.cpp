@@ -137,17 +137,17 @@ void Robot::updateSensorValues(Mat targets, vector<pose2D> robot_poses, int my_i
 	vector<Mat> masks = getSensorMasks(sensorVals_incomplete.pose, px_per_mm);
 	
 //DEBUG
-	if (my_index == 3) {
-		Mat combined_masks;
-		bitwise_or(masks.at(0), masks.at(1), combined_masks);
-		for (int i = 2; i < masks.size(); i++) {
-			bitwise_or(combined_masks, masks.at(i), combined_masks);
-		}
-		bitwise_or(combined_masks, targets, combined_masks);
-		char buffer [30];
-		int n = sprintf(buffer, "sensor_mask_%d", my_index);
-		imshow(buffer, combined_masks);
-	}
+	// if (my_index == 3) {
+	// 	Mat combined_masks;
+	// 	bitwise_or(masks.at(0), masks.at(1), combined_masks);
+	// 	for (int i = 2; i < masks.size(); i++) {
+	// 		bitwise_or(combined_masks, masks.at(i), combined_masks);
+	// 	}
+	// 	bitwise_or(combined_masks, targets, combined_masks);
+	// 	char buffer [30];
+	// 	int n = sprintf(buffer, "sensor_mask_%d", my_index);
+	// 	imshow(buffer, combined_masks);
+	// }
 
 	for (int i = 0; i < masks.size(); i++) {
 		Mat detections;
