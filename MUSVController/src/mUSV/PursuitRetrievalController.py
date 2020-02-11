@@ -15,7 +15,7 @@ class PursuitRetrievalController(Controller):
         self._look_ahead_distance = 120.0
         self._lookAheadPoint = pose2D(self._orbit_threshold,0,0)
         self._reverse_maneuver_start_time = -10.0
-        self._reverse_maneuver_duration = 1.5
+        self._reverse_maneuver_duration = 2.0
         self._speed_limit_lower = -127
         self._execute_PID = True
         
@@ -31,7 +31,7 @@ class PursuitRetrievalController(Controller):
             for nearbyVesselPose in sensorData.nearby_vessel_poses:
                 vessel_range = self._getTargetRange(pose, nearbyVesselPose)
                 vessel_heading_offset = super(PursuitRetrievalController, self)._bounded_angle(self._getTargetHeading(pose, nearbyVesselPose) - pose.yaw, math.pi, -math.pi)
-                if vessel_range < 500 and abs(vessel_heading_offset) < 20*math.pi/180:
+                if vessel_range < 250 and abs(vessel_heading_offset) < 85*math.pi/180 or vessel_range < 500 and abs(vessel_heading_offset) < 20*math.pi/180:
                     evade = True
             
             if sensorData.target_sensors[-1]: #if carrying target
